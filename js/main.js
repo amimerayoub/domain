@@ -1300,6 +1300,22 @@ export async function initApp() {
   const loading = $('#loadingOverlay');
   if (loading) loading.classList.add('active');
 
+  // Theme initialization
+  let savedTheme = localStorage.getItem('domainTheme');
+  if (!savedTheme) {
+    savedTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  const html = document.documentElement;
+  html.setAttribute('data-theme', savedTheme);
+  document.body.classList.remove('dark', 'light');
+  document.body.classList.add(savedTheme);
+
+  // Sidebar initialization
+  const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+  if (sidebarCollapsed && window.innerWidth > 768) {
+    $('#sidebar').classList.add('collapsed');
+  }
+
   // Load saved mode from localStorage
   const savedMode = localStorage.getItem('domainMode');
   state.smartMode = savedMode !== 'fast'; // Default to smart
@@ -1347,10 +1363,16 @@ export async function initApp() {
     });
   });
 
-  // Mobile menu
+  // Mobile/Desktop menu toggle
   $('#menuToggle').addEventListener('click', () => {
-    $('#sidebar').classList.toggle('open');
-    $('#sidebarOverlay').classList.toggle('active');
+    const sidebar = $('#sidebar');
+    if (window.innerWidth <= 768) {
+      sidebar.classList.toggle('open');
+      $('#sidebarOverlay').classList.toggle('active');
+    } else {
+      sidebar.classList.toggle('collapsed');
+      localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    }
   });
   $('#sidebarOverlay').addEventListener('click', () => {
     $('#sidebar').classList.remove('open');
@@ -1379,7 +1401,84 @@ export async function initApp() {
     html.setAttribute('data-theme', next);
     document.body.classList.remove('dark', 'light');
     document.body.classList.add(next);
+    localStorage.setItem('domainTheme', next);
   });
+
+  // Home live search functionality
+  const homeSearchInput = $('#homeSearchInput');
+  const btnHomeSearch = $('#btnHomeSearch');
+  const homeLiveResults = $('#homeLiveResults');
+  
+  if (homeSearchInput) {
+    const performHomeSearch = async () => {
+      const query = homeSearchInput.value.trim();
+      if (!query) {
+        if (homeLiveResults) homeLiveResults.style.display = 'none';
+        return;
+      }
+      if (homeLiveResults) {
+        homeLiveResults.style.display = 'block';
+        homeLiveResults.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">Searching...</div>';
+      }
+      
+      const keywords = query.split(' ').filter(k => k);
+      let domains = [];
+      if (query.includes('.')) {
+        domains = [{ name: query, available: 'checking' }];
+      } else {
+        domains = generateKeyword({
+          keywords: [keywords.join('')],
+          category: 'all',
+          usePrefix: false,
+          useSuffix: true,
+          useCategoryKws: false,
+          useCombine: false,
+          limit: 5, 
+          smartMode: false
+        });
+      }
+      
+      state.domains = domains;
+      
+      if (homeLiveResults) {
+        let html = '<div class="results-grid" style="grid-template-columns: 1fr;">';
+        domains.forEach((d, i) => {
+          html += `<div class="domain-card" style="padding: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; animation-delay: ${i*0.03}s" onclick="window.location.href='domain.html?domain='+encodeURIComponent('${d.name}')">
+                     <span style="font-size: 1.1rem; font-weight: 600;">${d.name}</span>
+                     <span class="status-dot" style="background: var(--text-muted)"></span>
+                   </div>`;
+        });
+        html += '</div>';
+        homeLiveResults.innerHTML = html;
+      }
+      
+      // Real check
+      try {
+        const resultsMap = await bulkCheckDomains(domains, { useCache: true });
+        applyResultsToData(domains, resultsMap);
+        if (homeLiveResults && homeSearchInput.value.trim() === query) {
+          let html = '<div class="results-grid" style="grid-template-columns: 1fr;">';
+          domains.forEach((d, i) => {
+             const isAvail = d.available === true;
+             const color = isAvail ? 'var(--success)' : 'var(--danger)';
+             const status = isAvail ? 'Available' : 'Taken';
+             html += `<div class="domain-card" style="padding: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-left: 4px solid ${color};" onclick="window.location.href='domain.html?domain='+encodeURIComponent('${d.name}')">
+                       <span style="font-size: 1.1rem; font-weight: 600;">${d.name}</span>
+                       <span style="font-size: 0.8rem; font-weight: 700; color: ${color}">${status}</span>
+                     </div>`;
+          });
+          html += '</div>';
+          homeLiveResults.innerHTML = html;
+        }
+      } catch (e) {}
+    };
+
+    homeSearchInput.addEventListener('input', debounce(performHomeSearch, 400));
+    homeSearchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') performHomeSearch();
+    });
+    if (btnHomeSearch) btnHomeSearch.addEventListener('click', performHomeSearch);
+  }
 
   // Favorites header button
   const favHeaderBtn = $('#btnFavHeader');
