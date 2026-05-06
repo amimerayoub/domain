@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="icon" href="favicon.ico">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AI Domain Generator - Find your perfect domain name instantly. Search, analyze, and generate premium domain names with advanced AI technology. Check domain availability in real-time." />
+  <meta name="keywords" content="domain generator, AI domains, domain search, domain availability, domain checker, domain name generator, website domains, buy domains, domain finder, SEO domains" />
+  <meta name="author" content="AI Domain Generator" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="AI Domain Generator - Find Your Perfect Domain Name" />
+  <meta property="og:description" content="Instantly search, analyze, and generate premium domain names for your next big idea with AI-powered tools." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="AI Domain Generator" />
+  <meta name="twitter:description" content="Find your perfect domain name with AI-powered generation and real-time availability checking." />
+  <title>AI Domain Generator - Find Your Perfect Domain Name</title>
+  <link rel="stylesheet" href="dark-theme.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* Landing Page Specific Styles */
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-main);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Animated Background */
+    .landing-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(ellipse at top, #1a1a2e 0%, #0f0f1a 50%, #0a0a12 100%);
+      overflow: hidden;
+    }
+
+    .floating-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      animation: float 20s ease-in-out infinite;
+    }
+
+    .floating-orb:nth-child(1) {
+      width: 600px;
+      height: 600px;
+      background: #667eea;
+      top: -200px;
+      left: -200px;
+      animation-delay: 0s;
+    }
+
+    .floating-orb:nth-child(2) {
+      width: 500px;
+      height: 500px;
+      background: #764ba2;
+      bottom: -150px;
+      right: -150px;
+      animation-delay: -7s;
+    }
+
+    .floating-orb:nth-child(3) {
+      width: 400px;
+      height: 400px;
+      background: #4facfe;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: -14s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(50px, -50px) scale(1.1); }
+      50% { transform: translate(-30px, 30px) scale(0.9); }
+      75% { transform: translate(40px, 20px) scale(1.05); }
+    }
+
+    /* Particles */
+    .particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 1px, transparent 1px),
+        radial-gradient(circle at 80% 70%, rgba(255,255,255,0.1) 1px, transparent 1px),
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 200px 200px, 300px 300px, 150px 150px;
+      animation: particles-move 60s linear infinite;
+    }
+
+    @keyframes particles-move {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(-200px) rotate(5deg); }
+    }
+
+    /* Header */
+    .landing-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(20px);
+      background: rgba(15, 15, 26, 0.8);
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+
+    .logo-svg {
+      width: 40px;
+      height: 40px;
+    }
+
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      list-style: none;
+    }
+
+    .nav-menu a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      position: relative;
+      padding: 8px 0;
+    }
+
+    .nav-menu a:hover,
+    .nav-menu a.active {
+      color: var(--text-main);
+    }
+
+    .nav-menu a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary-gradient);
+      transition: width 0.3s ease;
+    }
+
+    .nav-menu a:hover::after,
+    .nav-menu a.active::after {
+      width: 100%;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .btn-nav {
+      padding: 10px 24px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-nav-primary {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-nav-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .btn-nav-secondary {
+      background: transparent;
+      color: var(--text-main);
+      border: 2px solid var(--glass-border);
+    }
+
+    .btn-nav-secondary:hover {
+      border-color: var(--primary);
+      background: var(--glass-bg);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+    }
+
+    .mobile-menu-btn span {
+      width: 25px;
+      height: 2px;
+      background: var(--text-main);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 20px 80px;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 50px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+      animation: fadeInUp 0.8s ease forwards;
+      opacity: 0;
+    }
+
+    .hero-badge svg {
+      width: 16px;
+      height: 16px;
+      color: var(--primary);
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 900;
+      font-family: 'Space Grotesk', sans-serif;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      animation: fadeInUp 0.8s ease 0.1s forwards;
+      opacity: 0;
+    }
+
+    .hero-title .gradient-text {
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+      animation: fadeInUp 0.8s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    /* Search Bar */
+    .search-container {
+      width: 100%;
+      max-width: 700px;
+      position: relative;
+      animation: fadeInUp 0.8s ease 0.3s forwards;
+      opacity: 0;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 2px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      padding: 8px;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .search-box:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 60px rgba(102, 126, 234, 0.4);
+      transform: scale(1.02);
+    }
+
+    .search-icon {
+      width: 24px;
+      height: 24px;
+      color: var(--text-muted);
+      margin: 0 16px;
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 1.1rem;
+      color: var(--text-main);
+      padding: 16px 0;
+      outline: none;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-btn {
+      padding: 16px 32px;
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+    }
+
+    .search-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Search Results */
+    .search-results {
+      width: 100%;
+      max-width: 700px;
+      margin-top: 20px;
+      animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      margin-bottom: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .result-item:hover {
+      border-color: var(--primary);
+      transform: translateX(5px);
+    }
+
+    .result-domain {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .result-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .status-available {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .status-taken {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .status-checking {
+      background: rgba(102, 126, 234, 0.2);
+      color: #667eea;
+      border: 1px solid rgba(102, 126, 234, 0.3);
+    }
+
+    /* Features Section */
+    .features-section {
+      padding: 100px 20px;
+      position: relative;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-label {
+      display: inline-block;
+      padding: 8px 20px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 50px;
+      font-size: 0.85rem;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif;
+      margin-bottom: 15px;
+    }
+
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .feature-card {
+      padding: 40px 30px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary-gradient);
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .feature-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      background: var(--primary-gradient);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+
+    .feature-icon svg {
+      width: 30px;
+      height: 30px;
+      color: white;
+    }
+
+    .feature-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .feature-description {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* About Section */
+    .about-section {
+      padding: 100px 20px;
+      background: linear-gradient(180deg, transparent 0%, rgba(102, 126, 234, 0.05) 50%, transparent 100%);
+    }
+
+    .about-content {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .about-text h2 {
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif;
+      margin-bottom: 20px;
+    }
+
+    .about-text p {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .about-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 25px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    .about-visual {
+      position: relative;
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cube-3d {
+      width: 200px;
+      height: 200px;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: rotate-cube 20s linear infinite;
+    }
+
+    .cube-face {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: var(--glass-bg);
+      border: 2px solid var(--primary);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--primary);
+    }
+
+    .cube-face:nth-child(1) { transform: rotateY(0deg) translateZ(100px); }
+    .cube-face:nth-child(2) { transform: rotateY(90deg) translateZ(100px); }
+    .cube-face:nth-child(3) { transform: rotateY(180deg) translateZ(100px); }
+    .cube-face:nth-child(4) { transform: rotateY(-90deg) translateZ(100px); }
+    .cube-face:nth-child(5) { transform: rotateX(90deg) translateZ(100px); }
+    .cube-face:nth-child(6) { transform: rotateX(-90deg) translateZ(100px); }
+
+    @keyframes rotate-cube {
+      0% { transform: rotateX(0deg) rotateY(0deg); }
+      100% { transform: rotateX(360deg) rotateY(360deg); }
+    }
+
+    /* CTA Section */
+    .cta-section {
+      padding: 100px 20px;
+      text-align: center;
+    }
+
+    .cta-box {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 40px;
+      background: var(--primary-gradient);
+      border-radius: var(--radius-xl);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-box::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: cta-shine 10s linear infinite;
+    }
+
+    @keyframes cta-shine {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900;
+      margin-bottom: 15px;
+      color: white;
+    }
+
+    .cta-subtitle {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 30px;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-cta {
+      padding: 18px 40px;
+      border-radius: var(--radius-lg);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-cta-primary {
+      background: white;
+      color: #667eea;
+      border: none;
+    }
+
+    .btn-cta-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-cta-secondary {
+      background: transparent;
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-cta-secondary:hover {
+      border-color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Footer */
+    .landing-footer {
+      padding: 60px 20px 30px;
+      border-top: 1px solid var(--glass-border);
+      text-align: center;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    .footer-text {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .landing-header {
+        padding: 15px 20px;
+      }
+
+      .nav-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(15, 15, 26, 0.98);
+        flex-direction: column;
+        padding: 20px;
+        gap: 15px;
+        border-bottom: 1px solid var(--glass-border);
+      }
+
+      .nav-menu.active {
+        display: flex;
+      }
+
+      .nav-buttons {
+        display: none;
+      }
+
+      .mobile-menu-btn {
+        display: flex;
+      }
+
+      .about-content {
+        grid-template-columns: 1fr;
+      }
+
+      .about-visual {
+        height: 300px;
+      }
+
+      .cube-3d {
+        width: 150px;
+        height: 150px;
+      }
+
+      .cube-face {
+        width: 150px;
+        height: 150px;
+      }
+
+      .cube-face:nth-child(1) { transform: rotateY(0deg) translateZ(75px); }
+      .cube-face:nth-child(2) { transform: rotateY(90deg) translateZ(75px); }
+      .cube-face:nth-child(3) { transform: rotateY(180deg) translateZ(75px); }
+      .cube-face:nth-child(4) { transform: rotateY(-90deg) translateZ(75px); }
+      .cube-face:nth-child(5) { transform: rotateX(90deg) translateZ(75px); }
+      .cube-face:nth-child(6) { transform: rotateX(-90deg) translateZ(75px); }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="dark">
+  <!-- Animated Background -->
+  <div class="landing-bg">
+    <div class="floating-orb"></div>
+    <div class="floating-orb"></div>
+    <div class="floating-orb"></div>
+    <div class="particles"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="landing-header">
+    <a href="landing.html" class="logo">
+      <svg viewBox="0 0 36 36" fill="none" class="logo-svg">
+        <rect width="36" height="36" rx="10" fill="white" fill-opacity="0.08"/>
+        <path d="M10 13h16M10 18h12M10 23h8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <span class="logo-text">AI Domains</span>
+    </a>
+
+    <nav>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="landing.html" class="active">Home</a></li>
+        <li><a href="index.html?tool=geo">Geo Domains</a></li>
+        <li><a href="index.html?tool=keyword">Keyword Domains</a></li>
+        <li><a href="index.html?tool=brandable">Brandable</a></li>
+        <li><a href="index.html?tool=analyzer">Analyzer</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+    </nav>
+
+    <div class="nav-buttons">
+      <a href="index.html?tool=bulkcheck" class="btn-nav btn-nav-secondary">
+        <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="2"/><path d="M9 14l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Bulk Check
+      </a>
+      <a href="index.html?tool=newsdomain" class="btn-nav btn-nav-primary">
+        <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Generate
+      </a>
+    </div>
+
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-badge">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>AI-Powered Domain Generation</span>
+    </div>
+
+    <h1 class="hero-title">
+      Find Your Perfect<br>
+      <span class="gradient-text">Domain Name</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      Instantly search, analyze, and generate premium domain names for your next big idea. 
+      Powered by advanced AI technology with real-time availability checking.
+    </p>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input 
+          type="text" 
+          class="search-input" 
+          id="domainSearchInput" 
+          placeholder="Enter your domain idea (e.g., mybusiness, techstartup)"
+          autocomplete="off"
+        />
+        <button class="search-btn" id="searchBtn">
+          <span>Check Availability</span>
+          <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="search-results" id="searchResults"></div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="section-header">
+      <span class="section-label">Features</span>
+      <h2 class="section-title">Why Choose AI Domain Generator?</h2>
+      <p class="section-subtitle">Everything you need to find, analyze, and register the perfect domain name</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="feature-title">Instant Generation</h3>
+        <p class="feature-description">Get thousands of creative domain ideas instantly using advanced AI generation modes including Geo, Keyword, Brandable, and Pattern domains.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="feature-title">Real-Time Search</h3>
+        <p class="feature-description">Check domain availability instantly across multiple TLDs. Know immediately if your desired domain is available for registration.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke="currentColor" stroke-width="2"/></svg>
+        </div>
+        <h3 class="feature-title">Smart Analytics</h3>
+        <p class="feature-description">Analyze SEO metrics, domain age, backlinks, and more to find the most valuable available names for your business.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/></svg>
+        </div>
+        <h3 class="feature-title">Geo Targeting</h3>
+        <p class="feature-description">Generate high-value City + Service domain combinations ranked by population for local business dominance.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 7V4h16v3M9 20h6M12 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="feature-title">Bulk Tools</h3>
+        <p class="feature-description">Check hundreds of domains at once, extract domains from text, and manage your domain portfolio efficiently.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="feature-title">Automated Outreach</h3>
+        <p class="feature-description">Send personalized outreach emails and negotiate domain purchases directly from the platform.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="about-section" id="about">
+    <div class="about-content">
+      <div class="about-text">
+        <span class="section-label">About Us</span>
+        <h2>Powerful Domain Discovery Platform</h2>
+        <p>
+          AI Domain Generator is a comprehensive platform designed to help entrepreneurs, marketers, 
+          and businesses find the perfect domain name. Our advanced AI algorithms generate thousands 
+          of creative domain suggestions based on your keywords, industry, and preferences.
+        </p>
+        <p>
+          With real-time availability checking powered by Verisign API, smart analytics, and bulk 
+          management tools, we make domain hunting fast, efficient, and successful. Whether you're 
+          launching a startup, expanding locally, or building a domain portfolio, our tools give 
+          you the competitive edge.
+        </p>
+        
+        <div class="about-stats">
+          <div class="stat-item">
+            <div class="stat-number">10K+</div>
+            <div class="stat-label">Domains Generated Daily</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">95%</div>
+            <div class="stat-label">Success Rate</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">50+</div>
+            <div class="stat-label">TLDs Supported</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Availability Check</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-visual">
+        <div class="cube-3d">
+          <div class="cube-face">AI</div>
+          <div class="cube-face">SEO</div>
+          <div class="cube-face">DNS</div>
+          <div class="cube-face">WEB</div>
+          <div class="cube-face">URL</div>
+          <div class="cube-face">COM</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="cta-box">
+      <div class="cta-content">
+        <h2 class="cta-title">Ready to Find Your Perfect Domain?</h2>
+        <p class="cta-subtitle">Start generating premium domain names with AI power today</p>
+        <div class="cta-buttons">
+          <a href="index.html?tool=geo" class="btn-cta btn-cta-primary">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Start Generating
+          </a>
+          <a href="index.html?tool=bulkcheck" class="btn-cta btn-cta-secondary">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="2"/><path d="M9 14l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Bulk Check Domains
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <div class="footer-links">
+      <a href="index.html?tool=geo">Geo Domains</a>
+      <a href="index.html?tool=keyword">Keyword Domains</a>
+      <a href="index.html?tool=brandable">Brandable Names</a>
+      <a href="index.html?tool=analyzer">Domain Analyzer</a>
+      <a href="index.html?tool=bulkcheck">Bulk Checker</a>
+      <a href="index.html?tool=emailtool">Email Tool</a>
+      <a href="#about">About</a>
+    </div>
+    <p class="footer-text">© 2024 AI Domain Generator. All rights reserved. | Premium Domain Discovery Platform</p>
+  </footer>
+
+  <script type="module">
+    // Mobile Menu Toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const navMenu = document.getElementById('navMenu');
+
+    mobileMenuBtn.addEventListener('click', () => {
+      navMenu.classList.toggle('active');
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!mobileMenuBtn.contains(e.target) && !navMenu.contains(e.target)) {
+        navMenu.classList.remove('active');
+      }
+    });
+
+    // Domain Search Functionality
+    const searchInput = document.getElementById('domainSearchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const searchResults = document.getElementById('searchResults');
+
+    const DEFAULT_TLDS = ['.com', '.net', '.org', '.io', '.co', '.ai'];
+
+    async function checkDomainAvailability(domain) {
+      try {
+        const response = await fetch('/api/bulk-check', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            domains: [domain]
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('API request failed');
+        }
+
+        const data = await response.json();
+        return data.results && data.results[0] ? data.results[0].available === true : false;
+      } catch (error) {
+        console.error('Error checking domain:', error);
+        return null;
+      }
+    }
+
+    async function performSearch() {
+      const query = searchInput.value.trim().toLowerCase();
+      
+      if (!query) {
+        searchResults.innerHTML = '';
+        return;
+      }
+
+      // Show loading state
+      searchBtn.disabled = true;
+      searchBtn.innerHTML = '<div class="spinner"></div>';
+
+      // Clear previous results
+      searchResults.innerHTML = '';
+
+      // Generate domain variations
+      const domainsToCheck = [];
+      
+      // Add base domain without extension
+      if (!query.includes('.')) {
+        DEFAULT_TLDS.forEach(tld => {
+          domainsToCheck.push(query + tld);
+        });
+      } else {
+        domainsToCheck.push(query);
+      }
+
+      // Check each domain
+      for (const domain of domainsToCheck) {
+        const resultItem = document.createElement('div');
+        resultItem.className = 'result-item';
+        resultItem.innerHTML = `
+          <span class="result-domain">${domain}</span>
+          <span class="result-status status-checking">
+            <div class="spinner" style="width: 14px; height: 14px; border-width: 1.5px;"></div>
+            Checking...
+          </span>
+        `;
+        searchResults.appendChild(resultItem);
+
+        // Check availability
+        const isAvailable = await checkDomainAvailability(domain.replace('.', ''));
+        
+        // Update result
+        const statusEl = resultItem.querySelector('.result-status');
+        if (isAvailable === true) {
+          statusEl.className = 'result-status status-available';
+          statusEl.innerHTML = '✓ Available';
+          resultItem.style.borderColor = 'rgba(34, 197, 94, 0.5)';
+        } else if (isAvailable === false) {
+          statusEl.className = 'result-status status-taken';
+          statusEl.innerHTML = '✗ Taken';
+          resultItem.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+        } else {
+          statusEl.className = 'result-status status-taken';
+          statusEl.innerHTML = '? Unknown';
+        }
+      }
+
+      // Reset button
+      searchBtn.disabled = false;
+      searchBtn.innerHTML = `
+        <span>Check Availability</span>
+        <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+          <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      `;
+    }
+
+    // Event listeners
+    searchBtn.addEventListener('click', performSearch);
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        performSearch();
+      }
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Intersection Observer for animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    // Observe feature cards
+    document.querySelectorAll('.feature-card').forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(30px)';
+      card.style.transition = `all 0.6s ease ${index * 0.1}s`;
+      observer.observe(card);
+    });
+
+    // Observe stat items
+    document.querySelectorAll('.stat-item').forEach((stat, index) => {
+      stat.style.opacity = '0';
+      stat.style.transform = 'translateY(20px)';
+      stat.style.transition = `all 0.5s ease ${index * 0.1}s`;
+      observer.observe(stat);
+    });
+  </script>
+</body>
+</html>
