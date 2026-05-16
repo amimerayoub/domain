@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | AI Domains</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Theme Detection -->
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"DM Serif Display"', 'serif'],
+                    },
+                    colors: {
+                        cyan: { 400: '#22d3ee', 500: '#06b6d4', 600: '#0891b2' },
+                        blue: { 500: '#3b82f6', 600: '#2563eb' },
+                        slate: { 800: '#1e293b', 900: '#0f172a' },
+                        dark: { bg: '#050505', card: '#101010', border: '#1F1F1F', hover: '#1A1A1A' }
+                    },
+                    boxShadow: { 'glow': '0 0 25px rgba(6, 182, 212, 0.4)', 'glow-blue': '0 0 25px rgba(59, 130, 246, 0.4)' },
+                    animation: { 'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards', 'pulse-slow': 'pulseSlow 8s infinite alternate' },
+                    keyframes: {
+                        fadeInUp: { '0%': { opacity: '0', transform: 'translateY(30px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        pulseSlow: { '0%': { transform: 'translateX(-50%) scale(1)', opacity: '0.5' }, '100%': { transform: 'translateX(-50%) scale(1.1)', opacity: '0.8' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { overflow-x: hidden; }
+        .blob-1 { position: absolute; top: -10%; left: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%); filter: blur(60px); z-index: -1; animation: pulseSlow 10s infinite alternate; pointer-events: none; }
+        .blob-2 { position: absolute; top: 40%; right: -20%; width: 60vw; height: 60vw; background: radial-gradient(circle, rgba(6,182,212,0.15) 0%, transparent 70%); filter: blur(80px); z-index: -1; animation: pulseSlow 12s infinite alternate-reverse; pointer-events: none; }
+        .dark .blob-1 { background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%); }
+        .dark .blob-2 { background: radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%); }
+        .header-scrolled { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0, 0, 0, 0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        .dark .header-scrolled { background: rgba(5, 5, 5, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .nav-item { position: relative; }
+        .nav-link { position: relative; padding: 0.5rem 0; }
+        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 50%; background-color: #06B6D4; transition: all 0.3s ease; transform: translateX(-50%); }
+        .nav-item:hover .nav-link::after { width: 100%; }
+        .mega-menu { visibility: hidden; opacity: 0; position: absolute; top: 100%; left: 50%; transform: translateX(-50%) translateY(10px); background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(24px); border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 1.25rem; max-width: 95vw; max-height: 85vh; overflow-y: auto; padding: 1.5rem; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); z-index: 50; pointer-events: none; }
+        .dark .mega-menu { background: rgba(21, 21, 21, 0.98); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8); }
+        .nav-item:hover .mega-menu { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+        .mega-item { transition: all 0.2s ease; border: 1px solid transparent; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-dark-bg text-slate-900 dark:text-slate-100 antialiased selection:bg-cyan-500 selection:text-white flex flex-col min-h-screen transition-colors duration-300 relative">
+
+    <div class="blob-1"></div>
+    <div class="blob-2"></div>
+
+    <!-- HEADER (Identical to landing) -->
+    <header id="header" class="fixed top-0 w-full z-40 transition-all duration-300 bg-transparent pt-3 pb-1">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <!-- Logo -->
+                <a href="landing.html" class="flex items-center gap-2 group cursor-pointer shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 shadow-sm transition-transform group-hover:scale-105">
+                        <i data-lucide="infinity" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-slate-900 dark:text-white">AI Domain<span class="text-cyan-500">s</span></span>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <nav class="hidden lg:flex space-x-6 items-center h-full">
+                    <div class="nav-item h-full flex items-center"><a href="landing.html" class="nav-link text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-cyan-500 transition-colors">Home</a></div>
+                    
+                    <div class="nav-item h-full flex items-center">
+                        <button class="nav-link text-sm font-semibold flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-cyan-500 transition-colors cursor-pointer">
+                            Generator <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
+                        </button>
+                        <div class="mega-menu" style="width: 480px;">
+                            <div class="grid grid-cols-2 gap-3">
+                                <a href="landing.html#geo" class="mega-item flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1A1A1A] hover:-translate-y-1 hover:border-cyan-500/50 transition-all duration-300 group">
+                                    <div class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 group-hover:text-cyan-500 group-hover:bg-cyan-500/10"><i data-lucide="map-pin" class="w-4 h-4"></i></div>
+                                    <div><h4 class="font-bold text-sm text-slate-900 dark:text-white mb-0.5">Geo Domains</h4><p class="text-[11px] text-slate-500">City + Service</p></div>
+                                </a>
+                                <a href="landing.html#keyword" class="mega-item flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1A1A1A] hover:-translate-y-1 hover:border-cyan-500/50 transition-all duration-300 group">
+                                    <div class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 group-hover:text-cyan-500 group-hover:bg-cyan-500/10"><i data-lucide="search" class="w-4 h-4"></i></div>
+                                    <div><h4 class="font-bold text-sm text-slate-900 dark:text-white mb-0.5">Keyword Domains</h4><p class="text-[11px] text-slate-500">Prefixes & suffixes</p></div>
+                                </a>
+                                <a href="landing.html#pattern" class="mega-item flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1A1A1A] hover:-translate-y-1 hover:border-cyan-500/50 transition-all duration-300 group">
+                                    <div class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 group-hover:text-cyan-500 group-hover:bg-cyan-500/10"><i data-lucide="grid-3x3" class="w-4 h-4"></i></div>
+                                    <div><h4 class="font-bold text-sm text-slate-900 dark:text-white mb-0.5">Pattern Domains</h4><p class="text-[11px] text-slate-500">CVCV patterns</p></div>
+                                </a>
+                                <a href="landing.html#brandable" class="mega-item flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1A1A1A] hover:-translate-y-1 hover:border-cyan-500/50 transition-all duration-300 group">
+                                    <div class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 group-hover:text-cyan-500 group-hover:bg-cyan-500/10"><i data-lucide="sparkles" class="w-4 h-4"></i></div>
+                                    <div><h4 class="font-bold text-sm text-slate-900 dark:text-white mb-0.5">Brandable Names</h4><p class="text-[11px] text-slate-500">Startup names</p></div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nav-item h-full flex items-center">
+                        <button class="nav-link text-sm font-semibold flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-cyan-500 transition-colors cursor-pointer">
+                            Domain Tools <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
+                        </button>
+                        <div class="mega-menu" style="width: 480px;">
+                            <div class="grid grid-cols-2 gap-3">
+                                <a href="landing.html#bulkcheck" class="mega-item flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1A1A1A] hover:-translate-y-1 hover:border-purple-500/50 transition-all duration-300 group">
+                                    <div class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 group-hover:text-purple-500 group-hover:bg-purple-500/10"><i data-lucide="layers" class="w-4 h-4"></i></div>
+                                    <div><h4 class="font-bold text-sm text-slate-900 dark:text-white mb-0.5">Bulk Checker</h4><p class="text-[11px] text-slate-500">Check thousands</p></div>
+                                </a>
+                                <a href="landing.html#whois" class="mega-item flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1A1A1A] hover:-translate-y-1 hover:border-purple-500/50 transition-all duration-300 group">
+                                    <div class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 group-hover:text-purple-500 group-hover:bg-purple-500/10"><i data-lucide="file-search" class="w-4 h-4"></i></div>
+                                    <div><h4 class="font-bold text-sm text-slate-900 dark:text-white mb-0.5">Whois Lookup</h4><p class="text-[11px] text-slate-500">Ownership info</p></div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nav-item h-full flex items-center">
+                        <button class="nav-link text-sm font-semibold flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-cyan-500 transition-colors cursor-pointer">
+                            Analyzer <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
+                        </button>
+                        <div class="mega-menu" style="width: 480px;">
+                            <div class="grid grid-cols-2 gap-3">
+                                <a href="landing.html#analyzer" class="mega-item flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1A1A1A] hover:-translate-y-1 hover:border-blue-500/50 transition-all duration-300 group">
+                                    <div class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 group-hover:text-blue-500 group-hover:bg-blue-500/10"><i data-lucide="brain-circuit" class="w-4 h-4"></i></div>
+                                    <div><h4 class="font-bold text-sm text-slate-900 dark:text-white mb-0.5">Smart Analyzer</h4><p class="text-[11px] text-slate-500">AI Score & Flip Potential</p></div>
+                                </a>
+                                <a href="landing.html#seo" class="mega-item flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1A1A1A] hover:-translate-y-1 hover:border-blue-500/50 transition-all duration-300 group">
+                                    <div class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 group-hover:text-blue-500 group-hover:bg-blue-500/10"><i data-lucide="bar-chart-2" class="w-4 h-4"></i></div>
+                                    <div><h4 class="font-bold text-sm text-slate-900 dark:text-white mb-0.5">SEO Metrics</h4><p class="text-[11px] text-slate-500">TF, CF, DP analysis</p></div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <div class="flex items-center gap-2 shrink-0">
+                    <button id="theme-toggle" class="p-2 text-slate-500 hover:bg-slate-200/50 dark:hover:bg-[#1A1A1A] rounded-lg transition-colors">
+                        <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+                    </button>
+                    
+                    <div class="hidden sm:block w-px h-5 bg-slate-200 dark:bg-[#2A2A2A] mx-1"></div>
+
+                    <a href="index.html" class="hidden md:flex bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm px-4 py-2 rounded-xl font-bold hover:bg-cyan-500 dark:hover:bg-cyan-400 dark:hover:text-slate-900 hover:text-white transition-all shadow-md ml-1">
+                        Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="pt-32 pb-24 relative px-4 z-10 flex-grow flex flex-col items-center">
+        <div class="max-w-4xl mx-auto w-full animate-fade-in-up">
+            
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-medium text-xs mb-6 border border-cyan-500/20 backdrop-blur-md">
+                    <i data-lucide="info" class="w-3.5 h-3.5"></i> Our Story
+                </div>
+                <h1 class="font-serif text-5xl md:text-6xl tracking-tight leading-tight mb-6 text-slate-900 dark:text-white">
+                    Built for the future of <br class="hidden sm:block"/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Digital Real Estate.</span>
+                </h1>
+                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                    AI Domains is an ICANN-accredited partner dedicated to making premium domain discovery, analysis, and acquisition faster and smarter through artificial intelligence.
+                </p>
+            </div>
+
+            <!-- Glass Content Card -->
+            <div class="bg-white/80 dark:bg-dark-card/80 backdrop-blur-xl border border-slate-200 dark:border-dark-border rounded-3xl p-8 md:p-12 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                    <div class="text-center p-6 bg-slate-50 dark:bg-[#151515] rounded-2xl border border-slate-200 dark:border-dark-border">
+                        <i data-lucide="zap" class="w-8 h-8 text-cyan-500 mx-auto mb-4"></i>
+                        <h3 class="font-bold text-slate-900 dark:text-white mb-2">Speed First</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Zero-latency architecture allows you to search 800+ extensions in milliseconds.</p>
+                    </div>
+                    <div class="text-center p-6 bg-slate-50 dark:bg-[#151515] rounded-2xl border border-slate-200 dark:border-dark-border">
+                        <i data-lucide="brain-circuit" class="w-8 h-8 text-blue-500 mx-auto mb-4"></i>
+                        <h3 class="font-bold text-slate-900 dark:text-white mb-2">AI Intelligence</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Our FastText AI models generate brandable, high-value names instantly.</p>
+                    </div>
+                    <div class="text-center p-6 bg-slate-50 dark:bg-[#151515] rounded-2xl border border-slate-200 dark:border-dark-border">
+                        <i data-lucide="bar-chart-2" class="w-8 h-8 text-purple-500 mx-auto mb-4"></i>
+                        <h3 class="font-bold text-slate-900 dark:text-white mb-2">Data Driven</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Integrated SEO metrics ensure you only invest in domains with real authority.</p>
+                    </div>
+                </div>
+
+                <div class="prose prose-slate dark:prose-invert max-w-none">
+                    <h3 class="text-2xl font-serif font-bold text-slate-900 dark:text-white mb-4">Our Mission</h3>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+                        Finding a good domain name used to be a frustrating process of trial and error. We built AI Domains to solve this. By combining massive linguistic datasets, live registrar APIs, and machine learning, we've created a platform that doesn't just check availability—it invents, analyzes, and scores domains for you.
+                    </p>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Whether you are a startup founder looking for a modern brand name, a local business needing a geo-targeted URL, or a domain investor seeking high-value flips, our suite of tools is designed to give you an unfair advantage in the digital real estate market.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER (Identical to landing) -->
+    <footer class="border-t border-slate-200 dark:border-dark-border bg-white dark:bg-dark-bg py-12 mt-auto relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <h4 class="font-bold text-lg text-slate-900 dark:text-white mb-4">Generators</h4>
+                    <ul class="space-y-3">
+                        <li><a href="landing.html#geo" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Geo Domains</a></li>
+                        <li><a href="landing.html#keyword" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Keyword Domains</a></li>
+                        <li><a href="landing.html#pattern" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Pattern Domains</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg text-slate-900 dark:text-white mb-4">Domain tools</h4>
+                    <ul class="space-y-3">
+                        <li><a href="landing.html#analyzer" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Smart Analyzer</a></li>
+                        <li><a href="landing.html#bulkcheck" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Bulk Checker</a></li>
+                        <li><a href="landing.html#whois" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Whois Lookup</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg text-slate-900 dark:text-white mb-4">Resources</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Blog & News</a></li>
+                        <li><a href="#" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">API Docs</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg text-slate-900 dark:text-white mb-4">Company</h4>
+                    <ul class="space-y-3">
+                        <li><a href="about.html" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">About</a></li>
+                        <li><a href="contact.html" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Contact</a></li>
+                        <li><a href="security.html" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Security</a></li>
+                        <li><a href="terms.html" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Terms</a></li>
+                        <li><a href="privacy.html" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Privacy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-200 dark:border-dark-border pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="infinity" class="w-6 h-6 text-cyan-500"></i>
+                    <span class="font-bold text-xl text-slate-900 dark:text-white">AI Domain<span class="text-cyan-500">s</span></span>
+                    <span class="hidden md:block w-1 h-1 bg-slate-300 dark:bg-slate-600 rounded-full mx-2"></span>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">An ICANN-accredited partner</p>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">© 2026 AI Domains SaaS. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        });
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) { header.classList.add('header-scrolled'); header.classList.remove('pt-3', 'pb-1'); } 
+            else { header.classList.remove('header-scrolled'); header.classList.add('pt-3', 'pb-1'); }
+        });
+    </script>
+</body>
+</html>

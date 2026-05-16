@@ -170,25 +170,123 @@ export function generateKeyword({ keywords, category, usePrefix, useSuffix, useC
   }
 }
 
-// === PATTERN ===
-export function generatePattern({ pattern, tld, limit, smartMode }) {
+// === PATTERN ENGINE ===
+// Supported tokens:
+//   C  = random consonant (from selectedConsonants)
+//   V  = random vowel     (from selectedVowels)
+//   L  = any letter (a-z)
+//   N  = any digit  (0-9)
+//   P  = Chinese-premium consonant (no A,E,I,O,U,V)
+//   W  = Western-premium letter    (no J,K,Q,U,V,W,X,Y,Z)
+//   -  = literal hyphen
+//   *  = any letter OR digit OR hyphen
+//   ^  = starts-with mode (prefix) — special, handled before expansion
+//   A,B,H,K = random letter (same value reused for that placeholder key)
+//   D,E,F,G = random digit  (same value reused for that placeholder key)
+//   M,O     = random vowel  (same value reused for that placeholder key)
+//   U,X     = random consonant (same value reused for that placeholder key)
+//   lowercase letter / digit = literal fixed character
+
+const CONS_ALL  = 'bcdfghjklmnpqrstvwxyz'.split('');
+const VOWELS_ALL = 'aeiou'.split('');
+const PREM_CN   = CONS_ALL.filter(c => !'aeiouv'.includes(c));    // Chinese premium
+const PREM_W    = 'abcdefghilmnoprstyz'.split('');                 // Western premium (no JKQUVWXYZ)
+const DIGITS    = '0123456789'.split('');
+const LETTERS   = 'abcdefghijklmnopqrstuvwxyz'.split('');
+const ALPHANUM  = [...LETTERS, ...DIGITS, '-'];
+// Placeholder token sets
+const PLACEHOLDER_LETTER = new Set(['A','B','H','K']);
+const PLACEHOLDER_DIGIT  = new Set(['D','E','F','G']);
+const PLACEHOLDER_VOWEL  = new Set(['M','O']);
+const PLACEHOLDER_CONS   = new Set(['U','X']);
+// Tokens that need a random pick (not wildcards)
+const WILDCARD_TOKENS = new Set(['C','V','L','N','P','W','*','-',
+  'A','B','H','K','D','E','F','G','M','O','U','X']);
+
+function pickFrom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function expandPattern(rawPattern, cons, vowels) {
+  // Handle ^ prefix: remove it, note it's a "starts-with" marker (ignored in generation itself)
+  let pat = rawPattern.replace(/^\^/, '');
+
+  // Build a resolved name from the token sequence
+  // Placeholder values are memoized per-call
+  const memo = {};
+
+  let name = '';
+  let i = 0;
+  while (i < pat.length) {
+    const ch = pat[i];
+
+    // Uppercase tokens
+    if (ch === 'C') { name += pickFrom(cons.length ? cons : CONS_ALL); i++; continue; }
+    if (ch === 'V') { name += pickFrom(vowels.length ? vowels : VOWELS_ALL); i++; continue; }
+    if (ch === 'L') { name += pickFrom(LETTERS); i++; continue; }
+    if (ch === 'N') { name += pickFrom(DIGITS); i++; continue; }
+    if (ch === 'P') { name += pickFrom(PREM_CN); i++; continue; }
+    if (ch === 'W') { name += pickFrom(PREM_W); i++; continue; }
+    if (ch === '-') { name += '-'; i++; continue; }
+    if (ch === '*') { name += pickFrom(ALPHANUM); i++; continue; }
+
+    // Repetition placeholder — letter
+    if (PLACEHOLDER_LETTER.has(ch)) {
+      if (!memo[ch]) memo[ch] = pickFrom(LETTERS);
+      name += memo[ch]; i++; continue;
+    }
+    // Repetition placeholder — digit
+    if (PLACEHOLDER_DIGIT.has(ch)) {
+      if (!memo[ch]) memo[ch] = pickFrom(DIGITS);
+      name += memo[ch]; i++; continue;
+    }
+    // Repetition placeholder — vowel
+    if (PLACEHOLDER_VOWEL.has(ch)) {
+      if (!memo[ch]) memo[ch] = pickFrom(vowels.length ? vowels : VOWELS_ALL);
+      name += memo[ch]; i++; continue;
+    }
+    // Repetition placeholder — consonant
+    if (PLACEHOLDER_CONS.has(ch)) {
+      if (!memo[ch]) memo[ch] = pickFrom(cons.length ? cons : CONS_ALL);
+      name += memo[ch]; i++; continue;
+    }
+
+    // Lowercase letter or digit → literal
+    if (/[a-z0-9]/.test(ch)) { name += ch; i++; continue; }
+
+    // Unknown character — skip
+    i++;
+  }
+  return name;
+}
+
+export function generatePattern({ pattern, patterns, tld, limit, smartMode }) {
   try {
-    if (!pattern || !/^[CV]+$/.test(pattern)) return generateFallbackDomains('pattern', limit);
-    const C = genState.selectedConsonants;
-    const V = genState.selectedVowels;
-    if (!C.length || !V.length) return generateFallbackDomains('pattern', limit);
+    const cons = genState.selectedConsonants.length ? genState.selectedConsonants : CONS_ALL;
+    const vowels = genState.selectedVowels.length ? genState.selectedVowels : VOWELS_ALL;
+
+    // Support single pattern OR array of patterns
+    const patternList = patterns && patterns.length
+      ? patterns.filter(p => p && p.trim())
+      : pattern ? [pattern.trim()] : ['CVCV'];
+
+    if (!patternList.length) return generateFallbackDomains('pattern', limit);
 
     const domains = [];
     const seen = new Set();
-    const maxAttempts = smartMode ? 300 : 100;
+    const perPattern = Math.ceil(limit / patternList.length);
+    const maxAttempts = Math.max(500, limit * 8);
 
-    for (let i = 0; i < maxAttempts && domains.length < limit * (smartMode ? 2 : 1); i++) {
-      let name = '';
-      for (const ch of pattern) name += ch === 'C' ? pick(C) : pick(V);
-      if (seen.has(name)) continue;
-      seen.add(name);
-      const d = makeDomain(name, '');
-      if (d) { d.name = name + tld; domains.push(d); }
+    for (const pat of patternList) {
+      let attempts = 0;
+      let generated = 0;
+      while (generated < perPattern && attempts < maxAttempts) {
+        attempts++;
+        const name = expandPattern(pat, cons, vowels);
+        if (!name || name.length < 2 || seen.has(name)) continue;
+        seen.add(name);
+        const fullName = name + (tld || '.com');
+        domains.push({ name: fullName, available: 'checking', pattern: pat });
+        generated++;
+      }
     }
 
     return scoreAndLimit(domains, limit, smartMode);
@@ -196,6 +294,38 @@ export function generatePattern({ pattern, tld, limit, smartMode }) {
     console.error('generatePattern error:', e);
     return generateFallbackDomains('pattern', limit);
   }
+}
+
+// Validate a pattern string — returns { valid: bool, error: string }
+export function validatePattern(pat) {
+  if (!pat || !pat.trim()) return { valid: false, error: 'Pattern cannot be empty' };
+  const clean = pat.replace(/^\^/, '');
+  if (clean.length === 0) return { valid: false, error: 'Pattern cannot be only ^' };
+  // All chars must be valid tokens
+  const validChars = /^[CVLNPWABHKDEFGMOUXaeiou0-9bcdfghjklmnpqrstvwxyz\-*]+$/;
+  if (!validChars.test(clean)) {
+    const bad = [...clean].find(c => !/[CVLNPWABHKDEFGMOUXaeiou0-9bcdfghjklmnpqrstvwxyz\-*]/.test(c));
+    return { valid: false, error: `Unknown token "${bad}" — use C,V,L,N,P,W,*,- or a lowercase letter/digit` };
+  }
+  if (clean.length > 20) return { valid: false, error: 'Pattern too long (max 20 chars)' };
+  return { valid: true, error: '' };
+}
+
+// Generate quick preview examples for a given pattern (no TLD)
+export function previewPattern(pat, count = 5) {
+  const cons = CONS_ALL;
+  const vowels = VOWELS_ALL;
+  const examples = [];
+  const seen = new Set();
+  let attempts = 0;
+  while (examples.length < count && attempts < 200) {
+    attempts++;
+    const name = expandPattern(pat, cons, vowels);
+    if (!name || seen.has(name)) continue;
+    seen.add(name);
+    examples.push(name);
+  }
+  return examples;
 }
 
 // === BRANDABLE ===

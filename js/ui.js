@@ -15,7 +15,8 @@ function navigateToDomain(domainName) {
 
 export const uiState = {
   filter: 'all',
-  sort: 'relevance'
+  sort: 'relevance',
+  visibilityFilter: 'all'  // 'all' | 'available'
 };
 
 export function getUiState() { return uiState; }
@@ -88,9 +89,18 @@ export function clearResults() {
   }
   closeAllActionMenus();
   const count = $('#resultsCount'); if (count) count.textContent = '0 domains';
+  const avail = $('#resultsAvailableCount'); if (avail) avail.style.display = 'none';
   const empty = $('#resultsEmpty'); if (empty) empty.style.display = 'block';
   const loading = $('#resultsLoading'); if (loading) loading.classList.remove('active');
   uiState.sort = 'default';
+  uiState.visibilityFilter = 'all';
+  // Reset the filter dropdown UI
+  const filterEl = $('#domainVisibilityFilter');
+  if (filterEl) {
+    filterEl.querySelectorAll('.select-option').forEach(o => o.classList.toggle('active', o.dataset.value === 'all'));
+    const txt = filterEl.querySelector('.selected-text');
+    if (txt) txt.textContent = 'All Domains';
+  }
 }
 
 export function showLoading(show) {
@@ -102,9 +112,30 @@ export function showLoading(show) {
   if (grid && show) { grid.innerHTML = ''; grid.style.opacity = '0'; }
 }
 
+// ── updateDomainCounter: updates both the "X generated" and "Y available" counters ──
+export function updateDomainCounter(allDomains) {
+  const countEl = $('#resultsCount');
+  const availEl = $('#resultsAvailableCount');
+  if (!allDomains || !allDomains.length) {
+    if (countEl) countEl.textContent = '0 domains generated';
+    if (availEl) availEl.style.display = 'none';
+    return;
+  }
+  const total = allDomains.length;
+  const availCount = allDomains.filter(d => d.available === true).length;
+  if (countEl) countEl.textContent = total + ' domain' + (total !== 1 ? 's' : '') + ' generated';
+  if (availEl) {
+    if (availCount > 0) {
+      availEl.textContent = availCount + ' available';
+      availEl.style.display = '';
+    } else {
+      availEl.style.display = 'none';
+    }
+  }
+}
+
 export function renderResults(domains, title, onCopy) {
   const titleEl = $('#resultsTitle');
-  const countEl = $('#resultsCount');
   const emptyEl = $('#resultsEmpty');
   const loadingEl = $('#resultsLoading');
 
@@ -117,22 +148,40 @@ export function renderResults(domains, title, onCopy) {
     if (emptyEl) emptyEl.style.display = 'block';
     const grid = $('#resultsGrid');
     if (grid) { grid.innerHTML = ''; grid.style.opacity = '1'; }
-    if (countEl) countEl.textContent = '0 domains';
+    updateDomainCounter([]);
     return;
   }
 
   if (emptyEl) emptyEl.style.display = 'none';
-  if (countEl) countEl.textContent = domains.length + ' domain' + (domains.length !== 1 ? 's' : '');
+  updateDomainCounter(domains);
 
   applyFilterSort(domains, onCopy);
 }
 
 export function applyFilterSort(domains, onCopy) {
   let d = [...domains];
+
+  // Apply visibility filter
+  if (uiState.visibilityFilter === 'available') {
+    d = d.filter(dom => dom.available === true);
+  }
+
   if (uiState.sort === 'name') d.sort((a, b) => (a.name || a.domain).localeCompare(b.name || b.domain));
 
-  const countEl = $('#resultsCount');
-  if (countEl) countEl.textContent = d.length + ' domain' + (d.length !== 1 ? 's' : '');
+  const emptyEl = $('#resultsEmpty');
+
+  // Show "no available" message if filter is active and result is empty
+  if (d.length === 0 && uiState.visibilityFilter === 'available') {
+    const grid = $('#resultsGrid');
+    if (grid) { grid.innerHTML = ''; grid.style.opacity = '1'; }
+    if (emptyEl) {
+      emptyEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" style="width:40px;height:40px;color:var(--text-tertiary);margin:0 auto 12px;display:block"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><p>No available domains found</p><p style="font-size:.8rem;color:var(--text-tertiary);margin-top:6px">Availability checks may still be running...</p>`;
+      emptyEl.style.display = 'block';
+    }
+    return;
+  }
+
+  if (emptyEl && d.length > 0) emptyEl.style.display = 'none';
 
   closeAllActionMenus();
 
@@ -243,8 +292,10 @@ export function renderExtractedResults(items, type, onCopyAll) {
 export function showFilterControls(show) {
   const sort = $('#resultsSort');
   const limit = $('#resultLimit');
+  const visFilter = $('#domainVisibilityFilter');
   if (sort) sort.style.display = show ? '' : 'none';
   if (limit) limit.style.display = show ? '' : 'none';
+  if (visFilter) visFilter.style.display = show ? '' : 'none';
 }
 
 export function toast(msg) {

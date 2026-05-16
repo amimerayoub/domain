@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | AI Domains</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], serif: ['"DM Serif Display"', 'serif'] },
+                    colors: { cyan: { 400: '#22d3ee', 500: '#06b6d4', 600: '#0891b2' }, dark: { bg: '#050505', card: '#101010', border: '#1F1F1F', hover: '#1A1A1A' } },
+                    boxShadow: { 'glow': '0 0 25px rgba(6, 182, 212, 0.4)' },
+                    animation: { 'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards', 'pulse-slow': 'pulseSlow 8s infinite alternate' },
+                    keyframes: {
+                        fadeInUp: { '0%': { opacity: '0', transform: 'translateY(30px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        pulseSlow: { '0%': { transform: 'translateX(-50%) scale(1)', opacity: '0.5' }, '100%': { transform: 'translateX(-50%) scale(1.1)', opacity: '0.8' } }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { overflow-x: hidden; }
+        .blob-1 { position: absolute; top: -10%; left: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%); filter: blur(60px); z-index: -1; animation: pulseSlow 10s infinite alternate; pointer-events: none; }
+        .blob-2 { position: absolute; top: 40%; right: -20%; width: 60vw; height: 60vw; background: radial-gradient(circle, rgba(6,182,212,0.15) 0%, transparent 70%); filter: blur(80px); z-index: -1; animation: pulseSlow 12s infinite alternate-reverse; pointer-events: none; }
+        .dark .blob-1 { background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%); }
+        .dark .blob-2 { background: radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%); }
+        .header-scrolled { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0, 0, 0, 0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        .dark .header-scrolled { background: rgba(5, 5, 5, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .nav-item { position: relative; }
+        .nav-link { position: relative; padding: 0.5rem 0; }
+        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 50%; background-color: #06B6D4; transition: all 0.3s ease; transform: translateX(-50%); }
+        .nav-item:hover .nav-link::after { width: 100%; }
+        .mega-menu { visibility: hidden; opacity: 0; position: absolute; top: 100%; left: 50%; transform: translateX(-50%) translateY(10px); background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(24px); border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 1.25rem; max-width: 95vw; max-height: 85vh; overflow-y: auto; padding: 1.5rem; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); z-index: 50; pointer-events: none; }
+        .dark .mega-menu { background: rgba(21, 21, 21, 0.98); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8); }
+        .nav-item:hover .mega-menu { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+        .mega-item { transition: all 0.2s ease; border: 1px solid transparent; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-dark-bg text-slate-900 dark:text-slate-100 antialiased flex flex-col min-h-screen relative">
+    <div class="blob-1"></div><div class="blob-2"></div>
+
+    <!-- HEADER -->
+    <header id="header" class="fixed top-0 w-full z-40 transition-all duration-300 bg-transparent pt-3 pb-1">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <a href="landing.html" class="flex items-center gap-2 group cursor-pointer shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 shadow-sm transition-transform group-hover:scale-105">
+                        <i data-lucide="infinity" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-slate-900 dark:text-white">AI Domain<span class="text-cyan-500">s</span></span>
+                </a>
+                <nav class="hidden lg:flex space-x-6 items-center h-full">
+                    <div class="nav-item h-full flex items-center"><a href="landing.html" class="nav-link text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-cyan-500 transition-colors">Home</a></div>
+                    <!-- (Mega Menus Omitted for brevity in sub-pages, linking directly to main page sections) -->
+                    <div class="nav-item h-full flex items-center"><a href="landing.html#geo" class="nav-link text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-cyan-500 transition-colors">Generators</a></div>
+                    <div class="nav-item h-full flex items-center"><a href="landing.html#analyzer" class="nav-link text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-cyan-500 transition-colors">Analyzer</a></div>
+                    <div class="nav-item h-full flex items-center"><a href="landing.html#whois" class="nav-link text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-cyan-500 transition-colors">Tools</a></div>
+                </nav>
+                <div class="flex items-center gap-3 shrink-0">
+                    <button id="theme-toggle" class="p-2 text-slate-500 hover:bg-slate-200/50 dark:hover:bg-[#1A1A1A] rounded-lg transition-colors">
+                        <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+                    </button>
+                    <a href="index.html" class="hidden md:flex bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm px-4 py-2 rounded-xl font-bold hover:bg-cyan-500 dark:hover:bg-cyan-400 dark:hover:text-slate-900 hover:text-white transition-all shadow-md ml-1">
+                        Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-32 pb-24 relative px-4 z-10 flex-grow flex flex-col items-center">
+        <div class="max-w-5xl mx-auto w-full animate-fade-in-up">
+            
+            <div class="text-center mb-12">
+                <h1 class="font-serif text-5xl md:text-6xl tracking-tight leading-tight mb-4 text-slate-900 dark:text-white">
+                    Get in <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Touch.</span>
+                </h1>
+                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+                    Have questions about our API, enterprise plans, or ICANN regulations? Our team is ready to assist.
+                </p>
+            </div>
+
+            <div class="bg-white/80 dark:bg-dark-card/80 backdrop-blur-xl border border-slate-200 dark:border-dark-border rounded-3xl overflow-hidden shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] flex flex-col md:flex-row">
+                
+                <!-- Contact Info -->
+                <div class="w-full md:w-2/5 bg-slate-50 dark:bg-[#151515] p-10 border-r border-slate-200 dark:border-dark-border">
+                    <h3 class="text-2xl font-serif font-bold text-slate-900 dark:text-white mb-6">Contact Information</h3>
+                    
+                    <div class="flex items-start gap-4 mb-8">
+                        <div class="p-3 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl text-cyan-500"><i data-lucide="mail" class="w-5 h-5"></i></div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 dark:text-white text-sm">Email Support</h4>
+                            <p class="text-sm text-slate-500 mt-1">support@aidomains.com</p>
+                            <p class="text-sm text-slate-500">sales@aidomains.com</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 mb-8">
+                        <div class="p-3 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl text-cyan-500"><i data-lucide="map-pin" class="w-5 h-5"></i></div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 dark:text-white text-sm">Headquarters</h4>
+                            <p class="text-sm text-slate-500 mt-1">100 Innovation Drive<br>San Francisco, FL 94105<br>United States</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="p-3 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl text-cyan-500"><i data-lucide="message-square" class="w-5 h-5"></i></div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 dark:text-white text-sm">Live Chat</h4>
+                            <p class="text-sm text-slate-500 mt-1">Available 24/7 for Enterprise customers in the dashboard.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="w-full md:w-3/5 p-10">
+                    <form class="flex flex-col gap-5" onsubmit="event.preventDefault(); alert('Message sent!');">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">First Name</label>
+                                <input type="text" required class="w-full bg-slate-50 dark:bg-[#151515] border border-slate-200 dark:border-dark-border rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Last Name</label>
+                                <input type="text" required class="w-full bg-slate-50 dark:bg-[#151515] border border-slate-200 dark:border-dark-border rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Email Address</label>
+                            <input type="email" required class="w-full bg-slate-50 dark:bg-[#151515] border border-slate-200 dark:border-dark-border rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Subject</label>
+                            <select class="w-full bg-slate-50 dark:bg-[#151515] border border-slate-200 dark:border-dark-border rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                                <option>General Inquiry</option>
+                                <option>Technical Support</option>
+                                <option>Enterprise Sales</option>
+                                <option>API Access</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Message</label>
+                            <textarea rows="4" required class="w-full bg-slate-50 dark:bg-[#151515] border border-slate-200 dark:border-dark-border rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 transition-colors"></textarea>
+                        </div>
+                        <button type="submit" class="mt-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3.5 rounded-xl font-bold text-sm hover:bg-cyan-500 dark:hover:bg-cyan-400 dark:hover:text-white transition-all shadow-md w-full sm:w-auto self-start">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-200 dark:border-dark-border bg-white dark:bg-dark-bg py-8 mt-auto relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-2">
+                <i data-lucide="infinity" class="w-6 h-6 text-cyan-500"></i>
+                <span class="font-bold text-xl text-slate-900 dark:text-white">AI Domain<span class="text-cyan-500">s</span></span>
+            </div>
+            <div class="flex gap-4 text-sm font-medium">
+                <a href="about.html" class="text-slate-500 hover:text-cyan-500">About</a>
+                <a href="contact.html" class="text-slate-500 hover:text-cyan-500">Contact</a>
+                <a href="security.html" class="text-slate-500 hover:text-cyan-500">Security</a>
+                <a href="terms.html" class="text-slate-500 hover:text-cyan-500">Terms</a>
+                <a href="privacy.html" class="text-slate-500 hover:text-cyan-500">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        });
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) { header.classList.add('header-scrolled'); header.classList.remove('pt-3', 'pb-1'); } 
+            else { header.classList.remove('header-scrolled'); header.classList.add('pt-3', 'pb-1'); }
+        });
+    </script>
+</body>
+</html>

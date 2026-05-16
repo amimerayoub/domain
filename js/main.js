@@ -1,8 +1,9 @@
 // main.js — App init + navigation + event wiring
 import { $, $$, cap, sanitizeInput, extractKeywords, debounce } from './utils.js';
 import { loadData } from './dataLoader.js';
-import { genState, generateGeo, generateKeyword, generatePattern, generateBrandable, generateNumeric, generateSuggestor, generateWordlist } from './generators.js';
-import { clearResults, showLoading, renderResults, renderBulkResults, renderExtractedResults, renderAnalyzerResults, showFilterControls, toast, copyText, setButtonState, uiState, applyFilterSort } from './ui.js';
+import { genState, generateGeo, generateKeyword, generatePattern, validatePattern, previewPattern, generateBrandable, generateNumeric, generateSuggestor, generateWordlist } from './generators.js';
+import { clearResults, showLoading, renderResults, renderBulkResults, renderExtractedResults, renderAnalyzerResults, showFilterControls, toast, copyText, setButtonState, uiState, applyFilterSort, updateDomainCounter } from './ui.js';
+import { initExportSystem, syncExportDomains } from './exportSystem.js';
 import { initCustomSelects, getSelectValue } from '../components/dropdown.js';
 import { closeAllActionMenus } from '../components/action-menu.js';
 import { initFavorites, openFavoritesPanel, setFavoritesChangeListener, getFavoritesCount, isFavorite, toggleFavorite } from './favorites.js';
@@ -189,12 +190,22 @@ function handleGenerate(type) {
           break;
         }
         case 'pattern': {
-          const pattern = $('#patternInput').value.trim().toUpperCase();
-          if (!pattern || !/^[CV]+$/.test(pattern)) { toast('Enter a valid pattern (C and V only)'); setButtonState(btn, false); showLoading(false); return; }
+          const rawPat = ($('#patternInput').value || '').trim();
+          // Collect batch patterns
+          const batchRaw = ($('#patternBatch')?.value || '').trim();
+          const patterns = batchRaw
+            ? batchRaw.split('\n').map(p => p.trim()).filter(p => p)
+            : [rawPat];
+          // Validate all patterns
+          for (const p of patterns) {
+            const v = validatePattern(p);
+            if (!v.valid) { toast('Pattern error: ' + v.error); setButtonState(btn, false); showLoading(false); return; }
+          }
+          const patCount = parseInt(getSelectValue('patternCount') || '100');
           domains = generatePattern({
-            pattern,
+            patterns,
             tld: getSelectValue('patternTld') || '.com',
-            limit: state.limit, smartMode: state.smartMode
+            limit: patCount, smartMode: state.smartMode
           });
           break;
         }
@@ -249,6 +260,7 @@ function handleGenerate(type) {
       state.domains = domains;
       localStorage.setItem('domains_geo', JSON.stringify(domains));
       renderResults(domains, titles[type] + ' Results', copyText);
+      syncExportDomains(state.domains, type);
 
       // Run real availability check
       runAvailabilityCheck(state.domains, updateResultsGridUI);
@@ -281,6 +293,14 @@ async function runAvailabilityCheck(domainsArray, updateFn) {
     });
     // Update data
     applyResultsToData(domainsArray, resultsMap);
+    // Update counter (availability data is now on state.domains)
+    updateDomainCounter(state.domains);
+    // Refresh export counter badge with new availability counts
+    syncExportDomains(state.domains, state.activeTool);
+    // Re-apply filter/sort to reflect any newly-available domains
+    if (uiState.visibilityFilter === 'available') {
+      applyFilterSort(state.domains, copyText);
+    }
     // Update UI
     if (updateFn) updateFn(resultsMap);
   } catch (err) {
@@ -334,6 +354,7 @@ async function handleGenDomains() {
     
     localStorage.setItem('generatedDomains', JSON.stringify(domains));
     renderResults(domains, 'Gen Domain News (' + genNewsState.mode + ' / ' + genNewsState.aiProvider.toUpperCase() + ') Results', copyText);
+    syncExportDomains(state.domains, 'newsdomain');
 
     // Automatically check availability with real API
     runAvailabilityCheck(state.domains, updateResultsGridUI);
@@ -392,6 +413,7 @@ async function handleBulkCheck() {
     // Update data + UI
     applyResultsToData(state.domains, resultsMap);
     renderBulkResults(state.domains);
+    syncExportDomains(state.domains, 'bulkcheck');
     toast(`Checked ${domains.length} domains`);
   } catch (e) {
     console.error('Bulk check error:', e);
@@ -610,8 +632,7 @@ function applyAnalyzerFilters() {
   localStorage.setItem('analysisResults', JSON.stringify(filtered));
 
   renderAnalyzerResults(filtered);
-  
-  if (window.updateExportButton) window.updateExportButton();
+  syncExportDomains(state.domains, 'analyzer');
 }
 
 
@@ -1295,6 +1316,108 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// ==================== PATTERN PANEL INIT ====================
+function initPatternPanel() {
+  const input    = $('#patternInput');
+  const validMsg = $('#patValidMsg');
+  const validIcon= $('#patValidIcon');
+  const previewChips = $('#patPreviewChips');
+  const previewStrip = $('#patPreviewStrip');
+
+  // --- Real-time validation + live preview ---
+  function updatePatternUI(raw) {
+    if (!raw) {
+      if (validMsg) { validMsg.style.display = 'none'; }
+      if (validIcon) { validIcon.textContent = ''; validIcon.className = 'pat-valid-icon'; }
+      if (previewStrip) previewStrip.style.display = 'none';
+      return;
+    }
+    const result = validatePattern(raw);
+    if (!result.valid) {
+      if (validMsg) { validMsg.textContent = result.error; validMsg.style.display = ''; validMsg.style.color = 'var(--danger)'; }
+      if (validIcon) { validIcon.textContent = '✕'; validIcon.className = 'pat-valid-icon pat-icon-error'; }
+      if (previewStrip) previewStrip.style.display = 'none';
+    } else {
+      if (validMsg) { validMsg.style.display = 'none'; }
+      if (validIcon) { validIcon.textContent = '✓'; validIcon.className = 'pat-valid-icon pat-icon-ok'; }
+      // Generate live preview chips
+      if (previewChips && previewStrip) {
+        try {
+          const examples = previewPattern(raw, 6);
+          previewChips.innerHTML = examples
+            .map(e => `<span class="pat-preview-chip">${e}</span>`)
+            .join('');
+          previewStrip.style.display = 'flex';
+        } catch(e) { previewStrip.style.display = 'none'; }
+      }
+    }
+  }
+
+  if (input) {
+    input.addEventListener('input', debounce(() => updatePatternUI(input.value.trim()), 180));
+    // Initial state
+    updatePatternUI(input.value.trim());
+  }
+
+  // --- Letter Pool toggle (All / Custom) ---
+  const btnPoolAll    = $('#btnPoolAll');
+  const btnPoolCustom = $('#btnPoolCustom');
+  const letterGrids   = $('#patternLetterGrids');
+
+  [btnPoolAll, btnPoolCustom].forEach(btn => {
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      [btnPoolAll, btnPoolCustom].forEach(b => b?.classList.remove('active'));
+      btn.classList.add('active');
+      const isCustom = btn.dataset.pool === 'custom';
+      if (letterGrids) letterGrids.style.display = isCustom ? '' : 'none';
+      if (!isCustom) {
+        // Reset to all letters
+        genState.selectedConsonants = 'bcdfghjklmnpqrstvwxyz'.split('');
+        genState.selectedVowels = 'aeiou'.split('');
+        document.querySelectorAll('#consonantGrid .letter-btn, #vowelGrid .letter-btn')
+          .forEach(b => b.classList.add('selected'));
+      }
+    });
+  });
+
+  // --- "How To Use" button → scroll & open details ---
+  const btnHelp = $('#btnPatHelp');
+  const howToDetails = $('#patHowTo');
+  if (btnHelp && howToDetails) {
+    btnHelp.addEventListener('click', () => {
+      howToDetails.open = true;
+      howToDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  // --- "Use This" example buttons ---
+  document.querySelectorAll('.pat-ex-use-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.pat-example-card');
+      const pat = card?.dataset.pattern;
+      if (pat && input) {
+        input.value = pat;
+        updatePatternUI(pat);
+        input.focus();
+        input.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Close the details
+        if (howToDetails) howToDetails.open = false;
+      }
+    });
+  });
+
+  // --- Tooltip popup (How To Use button as secondary trigger) ---
+  const tooltipOverlay = $('#patTooltipOverlay');
+  const btnCloseTooltip = $('#btnPatTooltipClose');
+  if (tooltipOverlay && btnCloseTooltip) {
+    btnCloseTooltip.addEventListener('click', () => { tooltipOverlay.style.display = 'none'; });
+    tooltipOverlay.addEventListener('click', e => {
+      if (e.target === tooltipOverlay) tooltipOverlay.style.display = 'none';
+    });
+  }
+}
+
 // ==================== INIT ====================
 export async function initApp() {
   const loading = $('#loadingOverlay');
@@ -1343,6 +1466,9 @@ export async function initApp() {
   const vg = $('#vowelGrid');
   if (cg) buildLetterGrid(cg, 'bcdfghjklmnpqrstvwxyz'.split(''), genState.selectedConsonants, 'C');
   if (vg) buildLetterGrid(vg, 'aeiou'.split(''), genState.selectedVowels, 'V');
+
+  // Pattern Panel advanced wiring
+  initPatternPanel();
 
   // Custom selects
   initCustomSelects();
@@ -1763,6 +1889,34 @@ export async function initApp() {
     });
   }
 
+  // ==================== VISIBILITY FILTER ====================
+  const visFilterEl = $('#domainVisibilityFilter');
+  if (visFilterEl) {
+    visFilterEl.querySelectorAll('.select-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const val = opt.dataset.value; // 'all' | 'available'
+        uiState.visibilityFilter = val;
+
+        // Update active class
+        visFilterEl.querySelectorAll('.select-option').forEach(o => o.classList.toggle('active', o === opt));
+
+        // Update trigger text
+        const triggerText = visFilterEl.querySelector('.selected-text');
+        if (triggerText) triggerText.textContent = val === 'available' ? 'Available Only' : 'All Domains';
+
+        // Add active style to trigger button when filtering
+        const triggerBtn = visFilterEl.querySelector('.custom-select-trigger');
+        if (triggerBtn) triggerBtn.classList.toggle('filter-active', val === 'available');
+
+        // Instant filter — no regeneration
+        applyFilterSort(state.domains, copyText);
+
+        // Close the dropdown
+        visFilterEl.classList.remove('open');
+      });
+    });
+  }
+
   // Brand range
   const range = $('#brandLength'), rangeVal = $('#brandLengthValue');
   if (range) range.addEventListener('input', () => { if (rangeVal) rangeVal.textContent = range.value + ' letters'; });
@@ -1883,116 +2037,14 @@ export async function initApp() {
     });
   }
 
-  // ==================== EXPORT DOMAINS ====================
-  const btnExportToggle = $('#btnExportToggle');
-  const exportMenu = $('#exportMenu');
-  const btnExportAll = $('#btnExportAll');
-  const btnExportAvail = $('#btnExportAvail');
+  // ==================== EXPORT SYSTEM (Advanced) ====================
+  // Rebuild the export UI and attach all events.
+  // syncExportDomains() is called each time state.domains is updated.
+  initExportSystem();
 
-  if (btnExportToggle && exportMenu) {
-    // Toggle dropdown
-    btnExportToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isOpen = exportMenu.style.display === 'block';
-      exportMenu.style.display = isOpen ? 'none' : 'block';
-    });
-
-    // Close on outside click
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('#exportDropdownWrap')) {
-        exportMenu.style.display = 'none';
-      }
-    });
-  }
-
-  function exportDomainsCSV(domains, filename, isAnalyzer = false) {
-    if (!domains || !domains.length) {
-      toast('No domains to export');
-      return;
-    }
-    
-    let headers, rows;
-    
-    if (isAnalyzer) {
-      headers = ['Domain', 'Status', 'Score', 'CPC', 'Age'];
-      rows = domains.map(d => {
-        const status = d.available === true || d.status === 'available' ? 'available' : d.available === false || d.status === 'taken' ? 'taken' : 'unknown';
-        const score = d.scores?.final || d.score || 0;
-        const cpc = d.metrics?.cpc || 0;
-        const currentYear = new Date().getFullYear();
-        const age = d.metrics?.age || (d.metrics?.wby > 1990 ? currentYear - d.metrics.wby : 0);
-        return [d.name || d.domain, status, score, cpc, age].join(',');
-      });
-    } else {
-      headers = ['Domain', 'Status'];
-      rows = domains.map(d => {
-        const status = d.available === true ? 'available' : d.available === false ? 'taken' : 'unknown';
-        return [d.name || d.domain, status].join(',');
-      });
-    }
-    
-    const csv = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename || 'domains-export.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast('Export completed');
-  }
-
-  if (btnExportAll) {
-    btnExportAll.addEventListener('click', () => {
-      exportMenu.style.display = 'none';
-      const isAnalyzer = state.activeTool === 'analyzer';
-      exportDomainsCSV(state.domains || [], isAnalyzer ? 'analysis-results.csv' : 'domains-all-export.csv', isAnalyzer);
-    });
-  }
-
-  if (btnExportAvail) {
-    btnExportAvail.addEventListener('click', () => {
-      exportMenu.style.display = 'none';
-      const isAnalyzer = state.activeTool === 'analyzer';
-      const available = (state.domains || []).filter(d => d.available === true || d.status === 'available');
-      if (!available.length) {
-        toast('No available domains found');
-        return;
-      }
-      exportDomainsCSV(available, isAnalyzer ? 'analysis-results.csv' : 'domains-available-export.csv', isAnalyzer);
-    });
-  }
-
-  window.updateExportButton = function() {
-    if (btnExportToggle) {
-      const count = (state.domains || []).length;
-      
-      if (count === 0) {
-        btnExportToggle.disabled = true;
-        btnExportToggle.style.opacity = '0.5';
-        btnExportToggle.style.cursor = 'not-allowed';
-      } else {
-        btnExportToggle.disabled = false;
-        btnExportToggle.style.opacity = '1';
-        btnExportToggle.style.cursor = 'pointer';
-      }
-
-      btnExportToggle.innerHTML = `<svg viewBox="0 0 24 24" fill="none" style="width:14px;height:14px;margin-right:4px;"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Export${count > 0 ? ' (' + count + ')' : ''}`;
-    }
-  };
-
-  // Update export button state when domains change
-  const origRenderResults = window.__origRenderResults;
-  const exportObserver = new MutationObserver(() => {
-    window.updateExportButton();
-  });
-  
-  const resultsGrid = $('#resultsGrid');
-  if (resultsGrid) {
-    exportObserver.observe(resultsGrid, { childList: true, subtree: true });
-  }
-  
+  // Expose a global update shim so legacy code paths still work.
+  window.updateExportButton = () => syncExportDomains(state.domains, state.activeTool);
 
 }
+
+

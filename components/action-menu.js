@@ -47,35 +47,99 @@ let activeMenu = null;
 
 function positionPanel(panel, trigger) {
   const rect = trigger.getBoundingClientRect();
-  const menuW = 260;
   const vw = window.innerWidth;
   const vh = window.innerHeight;
 
-  // Position below trigger, keep within viewport
-  let left = rect.left;
-  let top = rect.bottom + 6;
+  const isMobile = vw <= 480;
 
-  // Ensure not going off right edge
-  if (left + menuW > vw - 10) left = vw - menuW - 10;
-  if (left < 10) left = 10;
+  // Make it temporarily visible to measure height accurately
+  const prevDisplay = panel.style.display;
+  panel.style.display = 'block';
+  panel.style.visibility = 'hidden';
+  
+  if (isMobile) {
+    panel.style.width = '92vw';
+    panel.style.maxWidth = '320px';
+  } else {
+    panel.style.width = '320px';
+    panel.style.maxWidth = 'none';
+  }
+
+  const menuW = panel.offsetWidth;
+  const menuH = panel.scrollHeight;
+  
+  panel.style.display = prevDisplay;
+  panel.style.visibility = '';
 
   panel.style.position = 'fixed';
-  panel.style.top = top + 'px';
-  panel.style.left = left + 'px';
-  panel.style.width = menuW + 'px';
+  
+  if (isMobile) {
+    const left = (vw - menuW) / 2;
+    let top = rect.bottom + 12;
+    let animDir = 'below';
+    
+    if (top + menuH > vh - 12) {
+      top = rect.top - menuH - 12;
+      animDir = 'above';
+    }
+    if (top < 12) {
+      top = (vh - menuH) / 2;
+      animDir = 'center';
+    }
+    
+    panel.style.left = left + 'px';
+    panel.style.top = top + 'px';
+    panel.style.maxHeight = (vh - 24) + 'px';
+    panel.dataset.anim = animDir;
+    return;
+  }
 
-  // Measure after positioning to constrain max-height
-  requestAnimationFrame(() => {
-    const menuH = panel.scrollHeight;
-    const maxHeight = vh - top - 10;
-    if (menuH > maxHeight) {
-      panel.style.maxHeight = maxHeight + 'px';
+  // Desktop positioning logic
+  const gap = 8;
+  const padding = 12;
+  
+  let left = rect.left;
+  let top = rect.bottom + gap;
+  let animDir = 'below';
+  
+  // Check horizontal space
+  if (left + menuW > vw - padding) {
+    // Open left
+    left = rect.right - menuW;
+    animDir += '-left';
+  } else {
+    animDir += '-right';
+  }
+  
+  // Clamp horizontally
+  if (left < padding) left = padding;
+  if (left + menuW > vw - padding) left = vw - padding - menuW;
+  
+  let maxHeight = vh - top - padding;
+
+  // Check vertical space
+  if (top + menuH > vh - padding && rect.top - menuH - gap > padding) {
+    // Open above
+    top = rect.top - menuH - gap;
+    maxHeight = rect.top - gap - padding;
+    animDir = animDir.replace('below', 'above');
+  } else if (top + menuH > vh - padding) {
+    // Neither above or below fits perfectly, pick side with more space
+    const spaceBelow = vh - rect.bottom - gap - padding;
+    const spaceAbove = rect.top - gap - padding;
+    if (spaceAbove > spaceBelow) {
+      top = padding; // Clamp to top
+      maxHeight = spaceAbove;
+      animDir = animDir.replace('below', 'above');
+    } else {
+      maxHeight = spaceBelow;
     }
-    // If not enough space below, position above
-    if (rect.bottom + menuH > vh - 10 && rect.top - menuH - 6 > 10) {
-      panel.style.top = (rect.top - menuH - 6) + 'px';
-    }
-  });
+  }
+
+  panel.style.left = left + 'px';
+  panel.style.top = top + 'px';
+  panel.style.maxHeight = maxHeight + 'px';
+  panel.dataset.anim = animDir;
 }
 
 export function createActionMenu(card, domain) {
@@ -102,21 +166,21 @@ export function createActionMenu(card, domain) {
   let html = '';
 
   // 1. Analysis Tools
-  html += '<div class="action-section-label">ANALYSIS</div><div class="action-links">';
+  html += '<div class="action-section-label"><span>ANALYSIS</span></div><div class="action-links">';
   ACTION_LINKS.analysis.forEach(a => {
     html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="action-link"><img src="/assets/aidomains/${a.icon}" loading="lazy" class="action-icon" />${a.label}</a>`;
   });
   html += '</div>';
 
   // 2. SEO / Research
-  html += '<div class="action-section-label">SEO &amp; RESEARCH</div><div class="action-links">';
+  html += '<div class="action-section-label"><span>SEO &amp; RESEARCH</span></div><div class="action-links">';
   ACTION_LINKS.seo.forEach(a => {
     html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="action-link"><img src="/assets/aidomains/${a.icon}" loading="lazy" class="action-icon" />${a.label}</a>`;
   });
   html += '</div>';
 
   // 3. Appraisal
-  html += '<div class="action-section-label">APPRAISAL</div><div class="action-links">';
+  html += '<div class="action-section-label"><span>APPRAISAL</span></div><div class="action-links">';
   ACTION_LINKS.appraisal.forEach(a => {
     html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="action-link"><img src="/assets/aidomains/${a.icon}" loading="lazy" class="action-icon" />${a.label}</a>`;
   });
@@ -124,7 +188,7 @@ export function createActionMenu(card, domain) {
 
   // 4. Register (only if available)
   if (isAvailable) {
-    html += '<div class="action-section-label action-register-label">REGISTER</div><div class="action-links">';
+    html += '<div class="action-section-label action-register-label"><span>REGISTER</span></div><div class="action-links">';
     ACTION_LINKS.registrar.forEach(a => {
       html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="action-link action-register"><img src="/assets/aidomains/${a.icon}" loading="lazy" class="action-icon" />${a.label}</a>`;
     });
@@ -155,16 +219,19 @@ export function createActionMenu(card, domain) {
     if (activeMenu && activeMenu !== panel) {
       activeMenu.panelEl.classList.remove('open');
       setTimeout(() => {
-        if (!activeMenu.panelEl.classList.contains('open') && activeMenu.panelEl.parentNode) {
+        if (activeMenu && !activeMenu.panelEl.classList.contains('open') && activeMenu.panelEl.parentNode) {
           activeMenu.panelEl.remove();
         }
-      }, 200);
+      }, 180);
     }
 
     if (!isOpen) {
+      if (!panel.parentNode) {
+        document.body.appendChild(panel);
+      }
       positionPanel(panel, trigger);
       panel.classList.add('open');
-      activeMenu = { panelEl: panel, card };
+      activeMenu = { panelEl: panel, card, trigger };
     } else {
       panel.classList.remove('open');
       activeMenu = null;
@@ -172,7 +239,7 @@ export function createActionMenu(card, domain) {
         if (!panel.classList.contains('open') && panel.parentNode) {
           panel.remove();
         }
-      }, 200);
+      }, 180);
     }
   });
 
@@ -190,11 +257,12 @@ export function createActionMenu(card, domain) {
 export function closeAllActionMenus() {
   if (activeMenu) {
     activeMenu.panelEl.classList.remove('open');
+    const panelToRemove = activeMenu.panelEl;
     setTimeout(() => {
-      if (!activeMenu.panelEl.classList.contains('open') && activeMenu.panelEl.parentNode) {
-        activeMenu.panelEl.remove();
+      if (!panelToRemove.classList.contains('open') && panelToRemove.parentNode) {
+        panelToRemove.remove();
       }
-    }, 200);
+    }, 180);
     activeMenu = null;
   }
 }
@@ -206,6 +274,15 @@ document.addEventListener('click', e => {
   }
 });
 
+// Close menu on ESC key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && activeMenu) {
+    const trigger = activeMenu.trigger;
+    closeAllActionMenus();
+    if (trigger) trigger.focus();
+  }
+});
+
 // Close menu on scroll and resize
 let scrollTimeout;
 window.addEventListener('scroll', () => {
@@ -213,7 +290,7 @@ window.addEventListener('scroll', () => {
     clearTimeout(scrollTimeout);
     scrollTimeout = setTimeout(() => closeAllActionMenus(), 50);
   }
-}, { passive: true });
+}, { passive: true, capture: true });
 
 window.addEventListener('resize', () => {
   if (activeMenu) {

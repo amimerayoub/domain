@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | AI Domains</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) { document.documentElement.classList.add('dark'); } 
+        else { document.documentElement.classList.remove('dark'); }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], serif: ['"DM Serif Display"', 'serif'] }, colors: { cyan: { 500: '#06b6d4' }, dark: { bg: '#050505', card: '#101010', border: '#1F1F1F', hover: '#1A1A1A' } } } } }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>body { overflow-x: hidden; } .header-scrolled { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0, 0, 0, 0.05); } .dark .header-scrolled { background: rgba(5, 5, 5, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }</style>
+</head>
+<body class="bg-slate-50 dark:bg-dark-bg text-slate-900 dark:text-slate-100 antialiased flex flex-col min-h-screen relative">
+    
+    <!-- HEADER -->
+    <header id="header" class="fixed top-0 w-full z-40 transition-all duration-300 bg-transparent pt-3 pb-1">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <a href="landing.html" class="flex items-center gap-2 group cursor-pointer shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 shadow-sm transition-transform group-hover:scale-105">
+                        <i data-lucide="infinity" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-slate-900 dark:text-white">AI Domain<span class="text-cyan-500">s</span></span>
+                </a>
+                <div class="flex items-center gap-3 shrink-0">
+                    <button id="theme-toggle" class="p-2 text-slate-500 hover:bg-slate-200/50 dark:hover:bg-[#1A1A1A] rounded-lg transition-colors"><i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i><i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i></button>
+                    <a href="index.html" class="hidden md:flex bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm px-4 py-2 rounded-xl font-bold hover:bg-cyan-500 dark:hover:bg-cyan-400 transition-all shadow-md ml-1">Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-32 pb-24 relative px-4 z-10 flex-grow flex flex-col items-center">
+        <div class="max-w-3xl mx-auto w-full">
+            <h1 class="font-serif text-4xl md:text-5xl tracking-tight leading-tight mb-8 text-slate-900 dark:text-white">Privacy Policy</h1>
+            
+            <div class="bg-white/80 dark:bg-dark-card/80 backdrop-blur-xl border border-slate-200 dark:border-dark-border rounded-3xl p-8 md:p-12 shadow-sm prose prose-slate dark:prose-invert max-w-none">
+                <p class="text-sm text-slate-500 font-semibold mb-8">Last Updated: May 9, 2026</p>
+                
+                <h3>1. Information We Collect</h3>
+                <p>We collect information you provide directly to us when creating an account (email, name) and when registering domains (WHOIS contact data mandated by ICANN). We do <strong>not</strong> collect or store your search queries.</p>
+
+                <h3>2. How We Use Information</h3>
+                <p>We use the information to provision your domains, communicate with you about your services, and comply with legal requirements (such as ICANN data escrow). We do not sell your personal data to third parties.</p>
+
+                <h3>3. Cookies and Tracking</h3>
+                <p>We use minimal cookies strictly necessary for maintaining your session state (like Dark Mode preferences and authentication). We do not use third-party invasive trackers.</p>
+
+                <h3>4. Data Security</h3>
+                <p>We employ industry-standard encryption (AES-256) to protect your data. Payment data is processed directly by our PCI-compliant providers; we never store your credit card information on our servers.</p>
+
+                <h3>5. Your Rights</h3>
+                <p>If you reside in the EU (GDPR) or California (CCPA), you have the right to access, modify, or delete your personal data. Please contact privacy@aidomains.com to exercise these rights.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-200 dark:border-dark-border bg-white dark:bg-dark-bg py-8 mt-auto relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-2"><i data-lucide="infinity" class="w-6 h-6 text-cyan-500"></i><span class="font-bold text-xl text-slate-900 dark:text-white">AI Domain<span class="text-cyan-500">s</span></span></div>
+            <div class="flex gap-4 text-sm font-medium">
+                <a href="about.html" class="text-slate-500 hover:text-cyan-500">About</a>
+                <a href="contact.html" class="text-slate-500 hover:text-cyan-500">Contact</a>
+                <a href="security.html" class="text-slate-500 hover:text-cyan-500">Security</a>
+                <a href="terms.html" class="text-slate-500 hover:text-cyan-500">Terms</a>
+                <a href="privacy.html" class="text-slate-500 hover:text-cyan-500">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        });
+    </script>
+</body>
+</html>
