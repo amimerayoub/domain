@@ -10,6 +10,8 @@ function navigateToDomain(domainName) {
   // Save in both sessionStorage (tab-isolated, preferred) and localStorage (fallback)
   try { sessionStorage.setItem('aiDomains_selected', domainName); } catch (e) {}
   try { localStorage.setItem('selected_domain', domainName); } catch (e) {}
+  try { sessionStorage.setItem('currentDomain', domainName); } catch (e) {}
+  try { localStorage.setItem('currentDomain', domainName); } catch (e) {}
   window.location.href = 'domain.html?domain=' + encodeURIComponent(domainName);
 }
 

@@ -365,6 +365,53 @@ window.addEventListener('pageshow', (e) => {
   }
 });
 
+function getDomain() {
+  // 1. Try URL param
+  const params = new URLSearchParams(window.location.search);
+  let domain = params.get("domain");
+
+  if (domain) {
+    try {
+      sessionStorage.setItem("currentDomain", domain.trim().toLowerCase());
+      localStorage.setItem("currentDomain", domain.trim().toLowerCase());
+    } catch (e) {}
+  }
+
+  // 2. Try sessionStorage fallback
+  if (!domain) {
+    domain = sessionStorage.getItem("currentDomain");
+  }
+
+  // 3. Try localStorage fallback
+  if (!domain) {
+    domain = localStorage.getItem("currentDomain");
+  }
+
+  // 4. Validate
+  if (!domain || typeof domain !== "string") {
+    console.error("No domain found");
+    return null;
+  }
+
+  return domain.trim().toLowerCase();
+}
+
+function showError(msg) {
+  const main = document.querySelector('.dd-main');
+  if (main) {
+    main.innerHTML = `<div class="dd-page-err">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <h2>${msg}</h2><p>Please check your URL or specify a valid domain.</p>
+      <a href="#" onclick="window.smartBack(event)" class="btn-action-glass" style="margin-top:14px;padding:10px 18px;font-size:.82rem;">Back to Dashboard</a>
+    </div>`;
+  }
+}
+
+function hideLoading() {
+  const bar = $('#progressBar');
+  if (bar) bar.classList.add('done');
+}
+
 // ─── Init ───────────────────────────────────────────────────────
 async function init() {
   initTheme();
@@ -373,12 +420,10 @@ async function init() {
   if (ddBackBtn) ddBackBtn.addEventListener('click', window.smartBack);
 
   const domain = getDomain();
+
   if (!domain) {
-    document.querySelector('.dd-main').innerHTML = `<div class="dd-page-err">
-      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      <h2>No domain specified</h2><p>Add ?domain=example.com to the URL</p>
-      <a href="#" onclick="window.smartBack(event)" class="btn-action-glass" style="margin-top:14px;padding:10px 18px;font-size:.82rem;">Back to Dashboard</a>
-    </div>`;
+    showError("No domain specified");
+    hideLoading();
     return;
   }
 
@@ -636,7 +681,9 @@ function executeRenderFlow(domain, apiData) {
   }, 200);
 }
 
-document.addEventListener('DOMContentLoaded', init);// ─── Models to try in order (most capable → lightest) ────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  init().catch(console.error);
+});// ─── Models to try in order (most capable → lightest) ────────────────────────
 export const GEMINI_MODELS = [
   'gemini-2.5-flash',
   'gemini-2.5-pro',

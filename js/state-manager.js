@@ -110,6 +110,8 @@ export function openDomainDetails(domain) {
   const cleanDomain = domain.trim().toLowerCase();
   if (!cleanDomain) return;
   sessionStorage.setItem(KEYS.SELECTED_DOMAIN, cleanDomain);
+  try { sessionStorage.setItem('currentDomain', cleanDomain); } catch (e) {}
+  try { localStorage.setItem('currentDomain', cleanDomain); } catch (e) {}
   window.location.href = 'domain.html?domain=' + encodeURIComponent(cleanDomain);
 }
 

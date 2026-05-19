@@ -149,6 +149,8 @@ export function createContinueButton(domainName) {
         closeActiveDropdown();
 
         if (action === 'details') {
+          sessionStorage.setItem('currentDomain', domain);
+          localStorage.setItem('currentDomain', domain);
           localStorage.setItem('selected_domain', domain);
           window.location.href = 'domain.html?domain=' + encodeURIComponent(domain);
         } else if (action === 'analyze') {
