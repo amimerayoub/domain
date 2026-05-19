@@ -403,14 +403,18 @@ async function init() {
 }
 
 let currentAbortController = null;
+let apiData = null;
 
 async function loadDomainData(domain, isRetry = false) {
+  console.log("Starting analyzer for domain:", domain);
   setProgress(10, 'Connecting to analysis API...');
   
   if (currentAbortController) currentAbortController.abort();
   currentAbortController = new AbortController();
   
+  // Use relative path for Vercel
   const url = `/api/domain-full?domain=${encodeURIComponent(domain)}`;
+  console.log("Fetching:", url);
   
   try {
     setProgress(20, 'Fetching domain intelligence...');
@@ -423,12 +427,33 @@ async function loadDomainData(domain, isRetry = false) {
     const r = await fetch(url, { signal: currentAbortController.signal });
     clearTimeout(timeoutId);
     
+    console.log("Response status:", r.status, r.ok);
+    
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
 
     setProgress(70, 'Processing results...');
-    apiData = await r.json();
+    
+    // Parse JSON safely
+    let parsedJson;
+    try {
+      parsedJson = await r.json();
+      console.log("JSON:", parsedJson);
+    } catch (err) {
+      console.error("Failed to parse JSON response:", err);
+      throw new Error('Invalid JSON response from API');
+    }
 
-    if (!apiData.success) throw new Error(apiData.error || 'API returned failure');
+    // Normalize response format
+    if (parsedJson.data && typeof parsedJson.data === 'object') {
+      apiData = parsedJson.data;
+      apiData.success = parsedJson.success !== false;
+    } else {
+      apiData = parsedJson;
+    }
+
+    if (apiData.success === false || (!apiData.success && !apiData.domain)) {
+      throw new Error(apiData.error || 'API returned failure');
+    }
 
     setProgress(90, 'Rendering...');
     
@@ -437,10 +462,11 @@ async function loadDomainData(domain, isRetry = false) {
 
     executeRenderFlow(domain, apiData);
     setProgress(100, 'Complete');
+    console.log("Render complete");
 
   } catch (e) {
     setProgress(100, 'Error');
-    console.warn('Domain analysis error:', e);
+    console.error('Domain analysis error clearly caught:', e);
     renderErrorFallback(domain, e);
   }
 }
