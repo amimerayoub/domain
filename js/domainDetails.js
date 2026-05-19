@@ -384,13 +384,45 @@ async function init() {
 
   document.title = `${domain} — Domain Analysis`;
   renderHero(domain, null);
-  setProgress(10, 'Connecting to analysis API...');
-
+  
+  // 1. Try to restore from cache first instantly
   try {
-    const url = `/api/domain-full?domain=${encodeURIComponent(domain)}`;
-    setProgress(20, 'Fetching domain intelligence...');
+    const cached = sessionStorage.getItem(`analyzer_cache_${domain}`);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (parsed && parsed.success) {
+        setProgress(100, 'Restored from cache');
+        executeRenderFlow(domain, parsed);
+        return;
+      }
+    }
+  } catch(e) {}
 
-    const r = await fetch(url, { signal: AbortSignal.timeout(45000) });
+  // 2. Fetch fresh data
+  await loadDomainData(domain);
+}
+
+let currentAbortController = null;
+
+async function loadDomainData(domain, isRetry = false) {
+  setProgress(10, 'Connecting to analysis API...');
+  
+  if (currentAbortController) currentAbortController.abort();
+  currentAbortController = new AbortController();
+  
+  const url = `/api/domain-full?domain=${encodeURIComponent(domain)}`;
+  
+  try {
+    setProgress(20, 'Fetching domain intelligence...');
+    
+    // 8-second timeout wrapper
+    const timeoutId = setTimeout(() => {
+      if (currentAbortController) currentAbortController.abort('timeout');
+    }, 8000);
+
+    const r = await fetch(url, { signal: currentAbortController.signal });
+    clearTimeout(timeoutId);
+    
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
 
     setProgress(70, 'Processing results...');
@@ -399,7 +431,104 @@ async function init() {
     if (!apiData.success) throw new Error(apiData.error || 'API returned failure');
 
     setProgress(90, 'Rendering...');
+    
+    // Save to cache
+    try { sessionStorage.setItem(`analyzer_cache_${domain}`, JSON.stringify(apiData)); } catch(e) {}
 
+    executeRenderFlow(domain, apiData);
+    setProgress(100, 'Complete');
+
+  } catch (e) {
+    setProgress(100, 'Error');
+    console.warn('Domain analysis error:', e);
+    renderErrorFallback(domain, e);
+  }
+}
+
+function renderErrorFallback(domain, error) {
+  const isTimeout = error === 'timeout' || error.name === 'AbortError' || (error.message && error.message.includes('timeout'));
+  const errorMsg = isTimeout ? 'Connection timed out (8s)' : 'Failed to connect to analysis server';
+  
+  // Generate partial fallback data
+  const parts = domain.split('.');
+  const tld = parts.length > 1 ? '.' + parts.pop() : '.com';
+  const base = parts.join('.');
+  
+  apiData = {
+    success: true,
+    isFallback: true,
+    overview: { domain, base_name: base, tld, status: 'unknown' },
+    seo: { dns_records: 0 },
+    info: { status: ['Unknown'] },
+    age: { years: 0, category: 'new' }
+  };
+  
+  // Show error banner at the top of contentGrid
+  const grid = $('#contentGrid');
+  if (grid) {
+    // Ensure skeletons are wiped by running the render flow
+    executeRenderFlow(domain, apiData);
+    
+    // Insert error banner
+    const bannerHtml = `
+      <div class="dd-card dd-card-full" id="secErrorBanner" style="border: 1px solid rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);">
+        <div class="dd-card-content" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px;">
+          <div style="display: flex; align-items: center; gap: 12px; color: #ef4444;">
+            <svg viewBox="0 0 24 24" fill="none" style="width:24px;height:24px"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <div>
+              <div style="font-weight: 600; font-size: 0.95rem;">Unable to analyze domain fully</div>
+              <div style="font-size: 0.8rem; opacity: 0.8;">${errorMsg}. Showing partial data.</div>
+            </div>
+          </div>
+          <button id="btnRetryAnalysis" class="btn-primary-orange" style="padding: 8px 16px; font-size: 0.85rem;">
+            <svg viewBox="0 0 24 24" fill="none" style="width:14px;height:14px;margin-right:6px"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Retry Analysis
+          </button>
+        </div>
+      </div>
+    `;
+    grid.insertAdjacentHTML('afterbegin', bannerHtml);
+    
+    $('#btnRetryAnalysis')?.addEventListener('click', () => {
+      $('#secErrorBanner')?.remove();
+      // Re-add skeletons
+      resetToSkeletons();
+      loadDomainData(domain, true);
+    });
+  }
+}
+
+function resetToSkeletons() {
+  const skeletonHtml = (short) => `<div class="dd-skel"><div class="dd-skel-line"></div>${short?'':'<div class="dd-skel-line short"></div>'}<div class="dd-skel-line"></div></div>`;
+  
+  if ($('#overviewBody')) $('#overviewBody').innerHTML = skeletonHtml(false);
+  if ($('#tldBody')) $('#tldBody').innerHTML = skeletonHtml(true);
+  if ($('#seoBody')) $('#seoBody').innerHTML = skeletonHtml(false);
+  if ($('#infoBody')) $('#infoBody').innerHTML = skeletonHtml(false);
+  if ($('#ageBody')) $('#ageBody').innerHTML = skeletonHtml(true);
+  if ($('#reachBody')) $('#reachBody').innerHTML = skeletonHtml(true);
+  if ($('#dnsBody')) $('#dnsBody').innerHTML = skeletonHtml(false);
+  if ($('#backlinksBody')) $('#backlinksBody').innerHTML = skeletonHtml(true);
+  
+  $('#secSeo').style.display = '';
+  $('#secInfo').style.display = '';
+  $('#secAge').style.display = '';
+  $('#secDns').style.display = '';
+  $('#secBacklinks').style.display = '';
+  $('#secAvailableMsg')?.remove();
+  
+  setProgress(0, 'Retrying...');
+}
+
+function executeRenderFlow(domain, apiData) {
+  const grid = $('#contentGrid');
+  
+  if (grid) {
+    grid.style.transition = 'opacity 0.2s ease-out';
+    grid.style.opacity = '0';
+  }
+
+  setTimeout(() => {
     renderHero(domain, apiData);
     renderOverview(apiData);
     renderTld(apiData);
@@ -413,8 +542,7 @@ async function init() {
       $('#secDns').style.display = 'none';
       $('#secBacklinks').style.display = 'none';
       
-      const grid = $('#contentGrid');
-      if (grid) {
+      if (grid && !$('#secAvailableMsg')) {
         grid.insertAdjacentHTML('beforeend', `
           <div class="dd-card dd-card-full" id="secAvailableMsg">
             <div class="dd-card-content" style="text-align: center; padding: 40px 20px; color: var(--text-secondary);">
@@ -454,20 +582,32 @@ async function init() {
     renderReach(apiData);
     renderModules(apiData);
 
-    setProgress(100, 'Complete');
-
     // Show export
     const exp = $('#exportBar');
     if (exp) exp.style.display = '';
-    $('#btnExportJson')?.addEventListener('click', () => exportJson(domain));
-    $('#btnExportCsv')?.addEventListener('click', () => exportCsv(domain));
-
-  } catch (e) {
-    setProgress(100, 'Error');
-    console.error('Domain analysis error:', e);
-    const grid = $('#contentGrid');
-    if (grid) grid.innerHTML = `<div class="dd-card dd-card-full"><div class="dd-card-content">${errHtml('Failed to load domain data: ' + e.message)}</div></div>`;
-  }
+    
+    // Safe listener binding (remove old first to prevent leaks)
+    const btnJson = $('#btnExportJson');
+    const btnCsv = $('#btnExportCsv');
+    
+    if (btnJson) {
+      const newBtnJson = btnJson.cloneNode(true);
+      btnJson.parentNode.replaceChild(newBtnJson, btnJson);
+      newBtnJson.addEventListener('click', () => exportJson(domain));
+    }
+    
+    if (btnCsv) {
+      const newBtnCsv = btnCsv.cloneNode(true);
+      btnCsv.parentNode.replaceChild(newBtnCsv, btnCsv);
+      newBtnCsv.addEventListener('click', () => exportCsv(domain));
+    }
+    
+    if (grid) {
+      requestAnimationFrame(() => {
+        grid.style.opacity = '1';
+      });
+    }
+  }, 200);
 }
 
 document.addEventListener('DOMContentLoaded', init);// ─── Models to try in order (most capable → lightest) ────────────────────────
