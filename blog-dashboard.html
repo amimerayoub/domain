@@ -691,6 +691,8 @@
       .writer-layout { grid-template-columns: 1fr; }
       .seo-layout { grid-template-columns: 1fr; }
       .analytics-grid { grid-template-columns: 1fr; }
+      .dash-two-col { grid-template-columns: 1fr !important; }
+      .cat-two-col { grid-template-columns: 1fr !important; }
     }
     @media (max-width: 640px) {
       .page-section { padding: 18px; }
@@ -958,7 +960,7 @@
       </div>
 
       <!-- Recent Posts + Quick Actions -->
-      <div style="display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start;">
+      <div style="display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start;" class="dash-two-col">
         <div class="card">
           <div class="card-header">
             <span class="card-title">Recent Posts</span>
@@ -1168,6 +1170,10 @@
           <p class="page-subtitle">Manage and organize all your blog articles.</p>
         </div>
         <div class="page-actions">
+          <button class="btn-secondary" id="exportPostsBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Export JSON
+          </button>
           <button class="btn-primary" onclick="showSection('ai-writer')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             New Post
@@ -1360,7 +1366,7 @@
           </button>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start">
+      <div style="display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start" class="cat-two-col">
         <div class="cat-list" id="catList"></div>
         <div class="card">
           <div class="card-header"><span class="card-title">Add New Category</span></div>
@@ -1656,9 +1662,17 @@ function renderPostCard(post) {
           <div class="seo-bar-track"><div class="seo-bar-fill ${seoClass}" style="width:${post.seo}%"></div></div>
           <span style="font-weight:700">${post.seo}</span>
         </div>
-        <div class="post-views">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          ${post.views.toLocaleString()}
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="post-views">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            ${post.views.toLocaleString()}
+          </div>
+          <button onclick="event.stopPropagation();editPost(${post.id})" class="icon-btn" title="Edit" style="width:24px;height:24px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </button>
+          <button onclick="event.stopPropagation();deletePost(${post.id})" class="icon-btn" title="Delete" style="width:24px;height:24px;color:var(--red)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          </button>
         </div>
       </div>
     </div>`;
@@ -2014,6 +2028,7 @@ document.getElementById('saveDraftBtn').addEventListener('click', () => {
   renderRecentTable();
   renderAllPosts();
   renderDrafts();
+  updateBadgeCounts();
   showToast('Draft saved: "' + title + '"');
 });
 
@@ -2032,6 +2047,9 @@ document.getElementById('publishBtn').addEventListener('click', () => {
   saveState(state);
   renderRecentTable();
   renderAllPosts();
+  renderDrafts();
+  renderScheduled();
+  updateBadgeCounts();
   // Clear editor
   postTitle.value = ''; postBody.value = '';
   document.getElementById('metaTitle').value = '';
@@ -2082,6 +2100,77 @@ document.getElementById('globalSearch').addEventListener('input', e => {
 });
 
 /* ═══════════════════════════════════════════════════════════
+   EXPORT POSTS TO JSON
+═══════════════════════════════════════════════════════════ */
+document.getElementById('exportPostsBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(state.posts, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'blog-posts-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Posts exported as JSON');
+});
+
+/* ═══════════════════════════════════════════════════════════
+   DYNAMIC BADGE COUNT
+═══════════════════════════════════════════════════════════ */
+function updateBadgeCounts() {
+  const draftCount = state.posts.filter(p => p.status === 'draft').length;
+  const draftBadge = document.querySelector('.nav-item[data-section="drafts"] .nav-badge');
+  if (draftBadge) draftBadge.textContent = draftCount;
+  // Update filter counts
+  const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
+  const pubBtn = document.querySelector('.filter-btn[data-filter="published"]');
+  const dftBtn = document.querySelector('.filter-btn[data-filter="draft"]');
+  const schBtn = document.querySelector('.filter-btn[data-filter="scheduled"]');
+  if (allBtn) allBtn.textContent = `All (${state.posts.length})`;
+  if (pubBtn) pubBtn.textContent = `Published (${state.posts.filter(p=>p.status==='published').length})`;
+  if (dftBtn) dftBtn.textContent = `Drafts (${draftCount})`;
+  if (schBtn) schBtn.textContent = `Scheduled (${state.posts.filter(p=>p.status==='scheduled').length})`;
+  // Dashboard stat
+  const totalPostsEl = document.querySelector('.stat-card .stat-value');
+  if (totalPostsEl) totalPostsEl.textContent = state.posts.length;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DELETE POST
+═══════════════════════════════════════════════════════════ */
+window.deletePost = function(id) {
+  if (!confirm('Delete this post?')) return;
+  state.posts = state.posts.filter(p => p.id !== id);
+  saveState(state);
+  renderAllPosts();
+  renderDrafts();
+  renderScheduled();
+  renderRecentTable();
+  renderAnalytics();
+  updateBadgeCounts();
+  showToast('Post deleted');
+};
+
+/* ═══════════════════════════════════════════════════════════
+   EDIT POST (loads into AI Writer)
+═══════════════════════════════════════════════════════════ */
+window.editPost = function(id) {
+  const post = state.posts.find(p => p.id === id);
+  if (!post) return;
+  showSection('ai-writer');
+  document.getElementById('postTitle').value = post.title;
+  document.getElementById('postCategory').value = post.cat;
+  document.getElementById('postStatus').value = post.status.charAt(0).toUpperCase() + post.status.slice(1);
+  if (post.tags && post.tags.length) {
+    state.tags = [...post.tags];
+    renderTags();
+  }
+  updateWriterStats();
+  showToast('Editing: "' + post.title.slice(0,40) + '..."');
+};
+
+/* ═══════════════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════════════ */
 renderRecentTable();
@@ -2094,6 +2183,7 @@ renderMedia();
 renderSeoChecklist();
 renderAnalytics();
 updateWriterStats();
+updateBadgeCounts();
 </script>
 </body>
 </html>
