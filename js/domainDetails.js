@@ -2,8 +2,8 @@
 // Uses unified /api/domain-full endpoint for all data
 import { createContinueButton } from '../components/domain-dropdown.js';
 import { initTheme } from './theme.js';
-
-
+import { $ } from './utils.js';
+import { toast } from './ui.js';
 // ─── Helpers ────────────────────────────────────────────────────
 function errHtml(msg) {
   return `<div class="dd-err"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>${msg}</span></div>`;
