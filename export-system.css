@@ -251,11 +251,51 @@
 }
 
 /* ── Responsive ────────────────────────────────────────────── */
+/* On mobile: make export button full-width inside its container */
+@media (max-width: 768px) {
+  #exportDropdownWrap {
+    display: block;
+    width: 100%;
+  }
+  .export-toggle-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 9px 14px;
+  }
+  .export-dropdown {
+    /* On tablet, open dropdown below and right-align to container */
+    left: 0;
+    right: 0;
+    width: 100%;
+    min-width: 0;
+    max-width: 340px;
+  }
+}
+
+@media (max-width: 480px) {
+  .export-toggle-btn {
+    font-size: .82rem;
+    padding: 10px 14px;
+    min-height: 40px;
+  }
+  .export-dropdown {
+    width: calc(100vw - 24px);
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(-8px) scale(0.97);
+    max-width: none;
+  }
+  .export-dropdown.open {
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  .exp-shortcut { display: none; } /* Save space on phones */
+}
+
 @media (max-width: 400px) {
   .export-dropdown {
-    width: calc(100vw - 32px);
-    right: auto;
+    width: calc(100vw - 20px);
     left: 50%;
+    right: auto;
     transform: translateX(-50%) translateY(-8px) scale(0.97);
   }
   .export-dropdown.open {

@@ -11,13 +11,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Theme Detection -->
+    <!-- Theme Detection (light default, unified key) -->
     <script>
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
+        (function(){
+          var t = localStorage.getItem('theme') || 'light';
+          document.documentElement.setAttribute('data-theme', t);
+          if (t === 'dark') { document.documentElement.classList.add('dark'); }
+          else { document.documentElement.classList.remove('dark'); }
+        })();
     </script>
 
     <!-- Tailwind CSS -->
@@ -1020,8 +1021,9 @@
         // Theme Toggle Logic
         const themeToggleBtn = document.getElementById('theme-toggle');
         themeToggleBtn.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            const t = document.documentElement.classList.toggle('dark') ? 'dark' : 'light';
+            localStorage.setItem('theme', t);
+            document.documentElement.setAttribute('data-theme', t);
         });
 
         // Header Scroll Effect

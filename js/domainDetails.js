@@ -1,37 +1,8 @@
 // domainDetails.js — Domain Analysis Page
 // Uses unified /api/domain-full endpoint for all data
 import { createContinueButton } from '../components/domain-dropdown.js';
+import { initTheme } from './theme.js';
 
-const $ = s => document.querySelector(s);
-let apiData = null;
-
-// ─── URL param ──────────────────────────────────────────────────
-function getDomain() {
-  const p = new URLSearchParams(window.location.search);
-  return (p.get('domain') || p.get('d') || '').trim().toLowerCase();
-}
-
-// ─── Toast ──────────────────────────────────────────────────────
-function toast(msg) {
-  const t = $('#toast'), m = $('#toastMsg');
-  if (!t || !m) return;
-  m.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-// ─── Theme ──────────────────────────────────────────────────────
-function initTheme() {
-  const s = localStorage.getItem('theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', s);
-  document.body.className = s;
-  const btn = $('#themeToggle');
-  if (btn) btn.addEventListener('click', () => {
-    const n = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', n);
-    document.body.className = n;
-    localStorage.setItem('theme', n);
-  });
-}
 
 // ─── Helpers ────────────────────────────────────────────────────
 function errHtml(msg) {
@@ -365,15 +336,48 @@ function exportCsv(domain) {
   toast('CSV exported');
 }
 
+// ─── Smart Back Navigation ──────────────────────────────────────
+window.smartBack = function(e) {
+  if (e) e.preventDefault();
+  
+  // Smooth fade out transition
+  document.body.style.transition = 'opacity 0.2s ease-out';
+  document.body.style.opacity = '0';
+  
+  setTimeout(() => {
+    const ref = document.referrer;
+    // Check if the referrer is from our own site and we have history
+    const isInternal = ref && ref.indexOf(window.location.origin) === 0;
+    
+    if (isInternal && window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = 'index.html';
+    }
+  }, 200);
+};
+
+// Handle BFCache (Back-Forward Cache) to restore visibility
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted || document.body.style.opacity === '0') {
+    document.body.style.transition = 'opacity 0.3s ease-in';
+    document.body.style.opacity = '1';
+  }
+});
+
 // ─── Init ───────────────────────────────────────────────────────
 async function init() {
   initTheme();
+  
+  const ddBackBtn = $('#ddBackBtn');
+  if (ddBackBtn) ddBackBtn.addEventListener('click', window.smartBack);
+
   const domain = getDomain();
   if (!domain) {
     document.querySelector('.dd-main').innerHTML = `<div class="dd-page-err">
       <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       <h2>No domain specified</h2><p>Add ?domain=example.com to the URL</p>
-      <a href="index.html" style="display:inline-block;margin-top:14px;padding:10px 18px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-sm);font-size:.82rem;color:var(--text-primary);text-decoration:none">Back to Dashboard</a>
+      <a href="#" onclick="window.smartBack(event)" class="btn-action-glass" style="margin-top:14px;padding:10px 18px;font-size:.82rem;">Back to Dashboard</a>
     </div>`;
     return;
   }

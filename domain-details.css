@@ -27,8 +27,8 @@
 .dd-topbar-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; }
 
 .dd-back-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
@@ -40,14 +40,20 @@
   flex-shrink: 0;
   text-decoration: none;
   color: inherit;
+  outline: none;
 }
 .dd-back-btn:hover {
   background: var(--glass-bg-hover);
-  border-color: var(--border-hover);
-  box-shadow: 0 0 12px var(--primary-glow);
+  border-color: var(--primary);
+  box-shadow: 0 0 14px var(--primary-glow);
+  color: var(--primary);
 }
-.dd-back-btn:active { transform: scale(0.94); }
-.dd-back-btn svg { width: 15px; height: 15px; color: var(--text-muted); }
+.dd-back-btn:focus-visible {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.3);
+}
+.dd-back-btn:active { transform: scale(0.92); }
+.dd-back-btn svg { width: 18px; height: 18px; color: currentColor; transition: color var(--transition); }
 
 .dd-topbar-brand {
   display: flex;
@@ -673,6 +679,7 @@
   .dd-metrics { grid-template-columns: repeat(2, 1fr); }
   .dd-topbar-brand span { display: none; }
   .dd-topbar-domain { max-width: 150px; }
+  .dd-back-btn { width: 44px; height: 44px; }
 }
 
 @media (max-width: 480px) {

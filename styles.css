@@ -1,108 +1,112 @@
 
 /* ============================================
    AI Domain Generator â€” Clean Light SaaS UI
-   Stripe/Vercel/Namecheap inspired
-   NO glassmorphism, NO blur, NO dark overlays
+   Premium Modern Responsive Redesign
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
 
 :root {
   /* Core Palette */
-  --bg-main: #f8fafc;
+  --bg-main: #f5f7fb;
   --bg-card: #ffffff;
-  --bg-soft: #f1f5f9;
-  --bg-soft2: #e8edf4;
+  --bg-soft: #f8fafc;
+  --bg-soft2: #f1f5f9;
   --bg-input: #ffffff;
   --bg-input-focus: #ffffff;
 
   /* Text */
   --text-main: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
-  --text-faint: #94a3b8;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --text-faint: #cbd5e1;
 
   /* Border */
-  --border: #e2e8f0;
-  --border-hover: #cbd5e1;
-  --border-focus: #94a3b8;
+  --border: rgba(15,23,42,0.06);
+  --border-hover: rgba(15,23,42,0.12);
+  --border-focus: #06b6d4;
 
   /* Brand */
-  --primary: #00c896;
-  --primary-hover: #00a67d;
-  --primary-light: #e6faf5;
-  --primary-border: #b3f0e0;
+  --primary: #06b6d4;
+  --primary-hover: #0891b2;
+  --primary-gradient: linear-gradient(135deg, #06b6d4, #3b82f6);
+  --primary-light: rgba(6,182,212,0.08);
+  --primary-border: rgba(6,182,212,0.2);
+  --primary-glow: rgba(6,182,212,0.15);
 
   /* Status */
-  --success: #16a34a;
-  --success-bg: #f0fdf4;
-  --success-border: #bbf7d0;
-  --danger: #dc2626;
+  --success: #10b981;
+  --success-bg: #ecfdf5;
+  --success-border: #a7f3d0;
+  --danger: #ef4444;
   --danger-bg: #fef2f2;
   --danger-border: #fecaca;
-  --warning: #d97706;
+  --warning: #f59e0b;
   --warning-bg: #fffbeb;
   --warning-border: #fde68a;
-  --info: #2563eb;
+  --info: #3b82f6;
   --info-bg: #eff6ff;
   --info-border: #bfdbfe;
 
   /* Shadow */
-  --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-sm: 0 2px 6px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.10);
+  --shadow-xs: 0 1px 2px rgba(15,23,42,0.04);
+  --shadow-sm: 0 4px 6px -1px rgba(15,23,42,0.06), 0 2px 4px -1px rgba(15,23,42,0.04);
+  --shadow-md: 0 10px 15px -3px rgba(15,23,42,0.08), 0 4px 6px -2px rgba(15,23,42,0.04);
+  --shadow-lg: 0 20px 25px -5px rgba(15,23,42,0.08), 0 10px 10px -5px rgba(15,23,42,0.04);
+  --shadow-cyan: 0 8px 16px -4px var(--primary-glow);
 
   /* Layout */
-  --sidebar-w: 220px;
-  --navbar-h: 56px;
+  --sidebar-w: 240px;
+  --navbar-h: 64px;
   --radius-xs: 6px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
 
   /* Font */
   --font-primary: 'Inter', sans-serif;
+  --font-heading: 'DM Serif Display', serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Transition */
-  --transition: 0.15s ease;
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Dark mode overrides */
 [data-theme="dark"] {
-  --bg-main: #0f172a;
-  --bg-card: #1e293b;
-  --bg-soft: #1e293b;
-  --bg-soft2: #273345;
-  --bg-input: #1e293b;
-  --bg-input-focus: #243048;
+  --bg-main: #0B1121;
+  --bg-card: #131B2F;
+  --bg-soft: #1B2541;
+  --bg-soft2: #253152;
+  --bg-input: #0B1121;
+  --bg-input-focus: #131B2F;
 
-  --text-main: #f1f5f9;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --text-faint: #64748b;
+  --text-main: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-faint: #475569;
 
-  --border: #2d3f55;
-  --border-hover: #3d5068;
-  --border-focus: #4a6080;
+  --border: rgba(255,255,255,0.08);
+  --border-hover: rgba(255,255,255,0.15);
+  --border-focus: #06b6d4;
 
-  --primary-light: #0d2e24;
-  --primary-border: #1a5c44;
+  --primary-light: rgba(6,182,212,0.15);
+  --primary-border: rgba(6,182,212,0.3);
 
-  --success-bg: #052e16;
-  --success-border: #166534;
-  --danger-bg: #1f0707;
-  --danger-border: #7f1d1d;
-  --warning-bg: #1c1005;
-  --warning-border: #78350f;
-  --info-bg: #0a1628;
-  --info-border: #1d3a6b;
+  --success-bg: rgba(16,185,129,0.1);
+  --success-border: rgba(16,185,129,0.2);
+  --danger-bg: rgba(239,68,68,0.1);
+  --danger-border: rgba(239,68,68,0.2);
+  --warning-bg: rgba(245,158,11,0.1);
+  --warning-border: rgba(245,158,11,0.2);
+  --info-bg: rgba(59,130,246,0.1);
+  --info-border: rgba(59,130,246,0.2);
 
-  --shadow-xs: 0 1px 2px rgba(0,0,0,0.3);
-  --shadow-sm: 0 2px 6px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.5);
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.5);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.6);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.7);
 }
 
 /* Reset */
@@ -126,9 +130,11 @@ a { text-decoration: none; color: inherit; }
 button { cursor: pointer; border: none; background: none; font-family: inherit; color: inherit; }
 input, select, textarea { font-family: inherit; color: var(--text-main); background: var(--bg-input); }
 
-/* Background â€” clean, no animation */
-.bg-animation { display: none; }
+/* Background â€” clean, light glass */
+.bg-animation { display: block; position: fixed; inset: 0; z-index: -1; background: var(--bg-main); overflow: hidden; pointer-events: none; }
 .floating-shape { display: none; }
+
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: normal; }
 
 /* ============================================
    SIDEBAR
@@ -197,14 +203,15 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 }
 
 .nav-section-label {
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
+  letter-spacing: 1.5px;
   color: var(--text-faint);
-  padding: 0 8px;
-  margin-bottom: 4px;
-  margin-top: 10px;
+  padding: 0 12px;
+  margin-bottom: 8px;
+  margin-top: 16px;
+  font-family: var(--font-primary);
 }
 
 .nav-item {
@@ -481,15 +488,15 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 
 .panel-container { max-width: 700px; margin: 0 auto; }
 
-.panel-hero { text-align: center; margin-bottom: 24px; }
+.panel-hero { text-align: center; margin-bottom: 32px; padding: 20px 0; }
 .panel-hero h1 {
-  font-size: clamp(1.2rem, 2.5vw, 1.6rem);
-  font-weight: 700;
-  margin-bottom: 6px;
+  font-size: clamp(2rem, 5vw, 56px);
+  margin-bottom: 12px;
   color: var(--text-main);
-  letter-spacing: -.02em;
+  letter-spacing: 0;
+  line-height: 1.1;
 }
-.panel-hero p { color: var(--text-muted); font-size: .88rem; }
+.panel-hero p { color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
 
 /* ============================================
    INPUT CARD
@@ -823,23 +830,23 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 16px;
+  padding: 20px;
   position: relative;
   overflow: visible;
-  animation: cardIn .25s ease-out both;
-  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
-  box-shadow: var(--shadow-xs);
+  animation: cardIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
 }
 
 @keyframes cardIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 .domain-card:hover {
-  border-color: var(--border-hover);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  border-color: var(--primary-border);
+  box-shadow: var(--shadow-cyan);
+  transform: translateY(-4px);
 }
 
 /* Favorite star */
@@ -868,9 +875,10 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 .btn-fav .fav-pop { display: none; }
 
 .domain-name {
-  font-size: .9rem;
+  font-family: var(--font-primary);
+  font-size: 18px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -878,7 +886,7 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   padding-right: 30px;
   cursor: pointer;
   color: var(--text-main);
-  letter-spacing: -.01em;
+  letter-spacing: -0.02em;
   transition: color var(--transition);
 }
 .domain-name:hover { color: var(--primary); }
@@ -1100,14 +1108,14 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   opacity: 0;
   visibility: hidden;
   transform: scale(.96) translateY(-4px);
-  transition: all .18s ease;
+  transition: all var(--transition);
   max-height: 70vh;
-  overflow-y: auto;
+  overflow-y: hidden;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
-  padding: 12px;
+  padding: 8px;
   pointer-events: none;
   z-index: 100000;
 }
@@ -1131,15 +1139,15 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 .action-section-label:first-child { margin-top: 0; }
 .action-register-label { color: #d97706; }
 
-.action-links { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 2px; }
+.action-links { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 4px; }
 
 .action-link, .action-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 8px;
+  padding: 4px 6px;
   border-radius: var(--radius-xs);
-  font-size: .78rem;
+  font-size: .75rem;
   font-weight: 500;
   color: var(--text-secondary);
   background: none;
@@ -1149,9 +1157,9 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   width: 100%;
   text-align: left;
   font-family: var(--font-primary);
-  transition: all .12s ease;
+  transition: all var(--transition);
 }
-.action-icon { width: 15px; height: 15px; object-fit: contain; flex-shrink: 0; }
+.action-icon { width: 14px; height: 14px; object-fit: contain; flex-shrink: 0; }
 .action-link:hover, .action-btn:hover {
   background: var(--bg-soft);
   color: var(--text-main);
@@ -2449,8 +2457,7 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   .tools-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
   .features-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 
-  .action-links { grid-template-columns: 1fr; }
-  .action-panel { max-height: 60vh; width: 270px !important; }
+  /* Action menu is handled adaptively via JS */
 
   #genModeSelector { grid-template-columns: 1fr 1fr; }
   #aiProviderSelector { flex-wrap: wrap; }
@@ -2471,7 +2478,7 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 .email-table-wrap { width: 100%; overflow-x: auto; }
 .email-table { width: 100%; table-layout: auto; }
 
-+++ styles.css (修改后)
+/*+++ styles.css (修改后的 ) */
 /* ============================================
    AI Domain Generator â€” Clean Light SaaS UI
    Stripe/Vercel/Namecheap inspired
@@ -3341,9 +3348,10 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 .btn-fav .fav-pop { display: none; }
 
 .domain-name {
-  font-size: .9rem;
+  font-family: var(--font-primary);
+  font-size: 18px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3351,7 +3359,7 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   padding-right: 30px;
   cursor: pointer;
   color: var(--text-main);
-  letter-spacing: -.01em;
+  letter-spacing: -0.02em;
   transition: color var(--transition);
 }
 .domain-name:hover { color: var(--primary); }

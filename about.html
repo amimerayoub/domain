@@ -12,10 +12,12 @@
     
     <!-- Theme Detection -->
     <script>
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
         } else {
             document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
         }
     </script>
 
@@ -277,8 +279,9 @@
         lucide.createIcons();
         const themeToggleBtn = document.getElementById('theme-toggle');
         themeToggleBtn.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            const t = document.documentElement.classList.toggle('dark') ? 'dark' : 'light';
+            localStorage.setItem('theme', t);
+            document.documentElement.setAttribute('data-theme', t);
         });
         const header = document.getElementById('header');
         window.addEventListener('scroll', () => {

@@ -313,7 +313,32 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   font-weight: 800;
   color: var(--text-main);
   letter-spacing: -.02em;
+  transition: color var(--transition);
 }
+
+/* Logo as a home link */
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  padding: 4px 6px;
+  margin: -4px -6px;
+  transition: background var(--transition), box-shadow var(--transition);
+  cursor: pointer;
+}
+.logo-link:hover {
+  background: var(--glass-bg);
+  box-shadow: 0 0 0 1px var(--glass-border);
+}
+.logo-link:hover .logo-svg {
+  filter: drop-shadow(0 0 12px var(--primary-glow));
+}
+.logo-link:hover .logo-text {
+  color: var(--primary);
+}
+.logo-link:active { opacity: .8; }
 
 .sidebar-nav {
   flex: 1;
@@ -331,6 +356,8 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   margin-bottom: 4px;
   margin-top: 14px;
 }
+/* First section label sits closer to the header */
+.sidebar-nav > .nav-section-label:first-child { margin-top: 6px; }
 
 .nav-item {
   display: flex;
@@ -590,7 +617,8 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 .glass:hover {
   border-color: var(--border-hover);
   box-shadow: var(--shadow-sm);
-  transform: translateY(-2px);
+  /* NOTE: no transform here — transform creates a stacking context
+     that traps absolutely/fixed-positioned children (dropdown panels) */
 }
 
 /* ============================================================
@@ -632,11 +660,16 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 /* ============================================================
    CUSTOM SELECT
    ============================================================ */
-.custom-select { position: relative; width: 100%; }
+.custom-select {
+  position: relative;
+  width: 100%;
+  /* overflow:visible is essential — never clip the dropdown */
+}
 
 .custom-select-trigger {
   width: 100%;
-  padding: 12px 14px;
+  min-height: 44px;              /* comfortable touch target */
+  padding: 11px 14px;
   background: var(--bg-input);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
@@ -645,11 +678,21 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
   font-family: var(--font-primary);
+  white-space: nowrap;
+  overflow: hidden;
 }
-.custom-select-trigger:hover { border-color: var(--border-hover); }
+.custom-select-trigger .selected-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.custom-select-trigger:hover { border-color: var(--border-hover); background: var(--bg-input-focus); }
 .custom-select.open .custom-select-trigger {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-glow);
@@ -664,46 +707,77 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 }
 .custom-select.open .select-arrow { transform: rotate(180deg); }
 
+/* The dropdown panel lives on <body> when open (via JS), so
+   position:fixed is set programmatically. These styles handle
+   the visual appearance only. */
 .custom-select-dropdown {
+  /* Closed state (while still inside .custom-select DOM) */
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
   right: 0;
   background: var(--float-bg);
-  backdrop-filter: blur(30px) saturate(1.3);
-  -webkit-backdrop-filter: blur(30px) saturate(1.3);
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
   border: 1px solid var(--float-border);
   border-radius: var(--float-radius);
-  box-shadow: var(--float-shadow);
+  box-shadow:
+    var(--float-shadow),
+    0 0 0 1px rgba(6,182,212,.05);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-6px) scale(0.98);
-  transition: all 0.25s var(--transition-slow);
-  z-index: 9999;
-  max-height: 200px;
+  pointer-events: none;
+  transform: scale(0.97) translateY(-4px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0.2s;
+  z-index: 99999;           /* high enough for fixed overlay */
+  max-height: 240px;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--glass-border) transparent;
 }
-.custom-select.open .custom-select-dropdown {
+.custom-select-dropdown::-webkit-scrollbar { width: 4px; }
+.custom-select-dropdown::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 4px;
+}
+.custom-select-dropdown.open {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0) scale(1);
+  pointer-events: auto;
+  transform: scale(1) translateY(0);
 }
 
 .select-option {
   padding: 10px 14px;
-  font-size: .82rem;
-  color: var(--text-muted);
+  font-size: .84rem;
+  color: var(--text-secondary);
   cursor: pointer;
   border-radius: var(--radius-xs);
-  transition: all var(--transition);
-  margin-bottom: 1px;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 38px;          /* touch target */
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-.select-option:hover { background: var(--glass-bg-hover); color: var(--text-main); }
-.select-option.active {
+.select-option:hover {
+  background: var(--primary-light);
   color: var(--text-main);
+}
+.select-option.active {
+  color: var(--primary);
   font-weight: 600;
-  background: var(--glass-bg);
+  background: var(--primary-light);
+  border: 1px solid var(--primary-border);
+  box-shadow: 0 0 8px var(--primary-glow);
 }
 
 /* ============================================================
@@ -1086,22 +1160,31 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 /* ============================================================
    RESULTS SECTION
    ============================================================ */
-.results-section { padding: 24px 24px; width: 100%; max-width: calc(100vw - var(--sidebar-w) - 48px); margin: 0 auto; display: none; }
+.results-section {
+  padding: clamp(12px, 2.5vw, 24px);
+  width: 100%;
+  max-width: calc(100vw - var(--sidebar-w) - 48px);
+  margin: 0 auto;
+  display: none;
+  box-sizing: border-box;
+}
 .results-section.visible { display: block; }
 
+/* ── Results Header: Title left, Controls right ── */
 .results-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 18px;
+  gap: 12px;
   flex-wrap: wrap;
-  gap: 10px;
 }
-.results-info h2 { font-size: 1rem; font-weight: 700; color: var(--text-main); }
+.results-info { flex: 1 1 auto; min-width: 0; }
+.results-info h2 { font-size: 1rem; font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Dual counter: "X domains generated" + "Y available" */
-.results-counter-wrap { display: flex; align-items: center; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
-.results-count { font-size: .72rem; color: var(--text-faint); font-weight: 500; transition: color 0.2s; }
+.results-counter-wrap { display: flex; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+.results-count { font-size: .72rem; color: var(--text-faint); font-weight: 500; transition: color 0.2s; white-space: nowrap; }
 .results-available-count {
   font-size: .68rem;
   font-weight: 700;
@@ -1113,9 +1196,25 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   letter-spacing: .2px;
   animation: fadeIn 0.3s ease-out;
   transition: opacity 0.25s;
+  white-space: nowrap;
 }
 
-.results-controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+/* ── Controls Toolbar: Export + Filter + Sort + Limit ── */
+.results-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+/* Export button container */
+#exportDropdownWrap {
+  position: relative;
+  flex-shrink: 0;
+}
 
 .chip {
   padding: 6px 14px;
@@ -1127,23 +1226,54 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   color: var(--text-muted);
   transition: all var(--transition);
   cursor: pointer;
+  white-space: nowrap;
 }
 .chip:hover { background: var(--bg-soft2); color: var(--text-secondary); }
 .chip.active { background: var(--primary-light); border-color: var(--primary-border); color: var(--primary); font-weight: 600; }
 
-.select-sort-wrapper { width: auto; min-width: 130px; }
-.select-sort-wrapper .custom-select-trigger { padding: 6px 10px; font-size: .75rem; }
-.limit-select { width: auto; min-width: 90px; }
-.limit-select .custom-select-trigger { padding: 6px 10px; font-size: .75rem; }
+/* Sort and Limit dropdowns */
+.select-sort-wrapper {
+  width: auto;
+  min-width: 120px;
+  max-width: 160px;
+  flex-shrink: 0;
+}
+.select-sort-wrapper .custom-select-trigger {
+  padding: 6px 10px;
+  font-size: .75rem;
+  min-height: 36px;
+  white-space: nowrap;
+}
+
+.limit-select {
+  width: auto;
+  min-width: 82px;
+  max-width: 110px;
+  flex-shrink: 0;
+}
+.limit-select .custom-select-trigger {
+  padding: 6px 10px;
+  font-size: .75rem;
+  min-height: 36px;
+  white-space: nowrap;
+}
 
 /* Visibility Filter dropdown */
-.select-filter-wrapper { width: auto; min-width: 148px; }
+.select-filter-wrapper {
+  width: auto;
+  min-width: 140px;
+  max-width: 180px;
+  flex-shrink: 0;
+}
 .select-filter-wrapper .custom-select-trigger {
   padding: 6px 10px;
   font-size: .75rem;
+  min-height: 36px;
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 /* Active filter state: highlight with cyan accent */
 .select-filter-wrapper .custom-select-trigger.filter-active {
@@ -1153,8 +1283,7 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   box-shadow: 0 0 8px var(--primary-glow);
 }
 .select-filter-wrapper .custom-select-trigger.filter-active .select-arrow { color: var(--primary); }
-.select-filter-wrapper .custom-select-dropdown { min-width: 160px; }
-.select-filter-wrapper .select-option { display: flex; align-items: center; }
+/* NOTE: min-width on static dropdowns is now handled by JS positionDrop() */
 
 /* ============================================================
    RESULTS GRID
@@ -3046,9 +3175,14 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 @media (max-width: 1024px) {
   .pattern-grids { grid-template-columns: 1fr; }
   .options-grid { grid-template-columns: 1fr; }
+  .results-section { max-width: 100%; }
 }
 
+/* ============================================================
+   RESPONSIVE: TABLET (≤ 768px)
+   ============================================================ */
 @media (max-width: 768px) {
+  /* Sidebar / Nav */
   .sidebar { transform: translateX(-100%); }
   .sidebar.open { transform: translateX(0); }
   .main-content { margin-left: 0; }
@@ -3056,43 +3190,184 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   .menu-toggle { display: flex; }
   .navbar-title { font-size: .78rem; }
 
-  .tool-panel { padding: 18px 14px 0; }
-  .results-section { padding: 18px 14px; }
-  .input-card { padding: 16px 14px; }
+  /* Panels */
+  .tool-panel { padding: 16px 12px 0; }
+  .results-section { padding: 16px 12px; max-width: 100%; }
+  .input-card { padding: 16px 12px; }
 
+  /* Wordlist */
   .wordlist-cols { grid-template-columns: 1fr; }
   .wordlist-separator { transform: rotate(90deg); padding: 0; }
 
-  .results-header { flex-direction: column; align-items: flex-start; }
-  .results-controls { width: 100%; }
-  .select-sort-wrapper, .limit-select, .select-filter-wrapper { min-width: 0; flex: 1; }
+  /* ── RESULTS HEADER: stack title and controls ── */
+  .results-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .results-info { min-width: 0; }
 
+  /* Controls toolbar: Export on top row, dropdowns below */
+  .results-controls {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    grid-template-rows: auto auto;
+    gap: 8px;
+    justify-content: stretch;
+  }
+  /* Export button takes full width on first row */
+  #exportDropdownWrap {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  /* Filter + Sort + Limit share second row proportionally */
+  .select-filter-wrapper {
+    min-width: 0;
+    flex: 2;
+    max-width: none;
+  }
+  .select-sort-wrapper {
+    min-width: 0;
+    flex: 2;
+    max-width: none;
+  }
+  .limit-select {
+    min-width: 72px;
+    flex: 1;
+    max-width: none;
+  }
+  /* Ensure dropdowns don't overflow to left */
+  .select-filter-wrapper .custom-select-dropdown,
+  .select-sort-wrapper .custom-select-dropdown,
+  .limit-select .custom-select-dropdown {
+    left: 0;
+    right: auto;
+    min-width: 100%;
+  }
+
+  /* Domain Cards */
   .domain-card-row { grid-template-columns: 1fr; grid-template-rows: auto; gap: 12px; padding: 12px; }
   .dc-left { flex-direction: column; }
   .dc-metrics { flex-wrap: wrap; }
   .dc-mid { justify-content: flex-start; }
 
+  /* Tool/Feature grids */
   .tools-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
   .features-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 
-  .action-links { grid-template-columns: 1fr; }
-  .action-panel { max-height: 60vh; width: 280px !important; }
+  /* Action menu */
+  .action-links { grid-template-columns: 1fr 1fr; }
+  .action-panel { max-height: 60vh; width: clamp(260px, 85vw, 320px) !important; }
 
+  /* Gen news settings */
   #genModeSelector { grid-template-columns: 1fr 1fr; }
   #aiProviderSelector { flex-wrap: wrap; }
   .settings-keys-grid { grid-template-columns: 1fr; }
 
+  /* Results grid: 2 cols on tablet */
   .results-grid { grid-template-columns: 1fr 1fr; }
 
+  /* News items */
   .gen-news-item { flex-direction: column; gap: 8px; }
   .gen-news-domain { min-width: auto; }
 }
 
+/* ============================================================
+   RESPONSIVE: LARGE MOBILE (≤ 600px)
+   ============================================================ */
+@media (max-width: 600px) {
+  /* Controls toolbar: full single-column on small phones */
+  .results-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+  #exportDropdownWrap {
+    grid-column: 1 / -1;
+  }
+  .select-filter-wrapper {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+  .select-sort-wrapper, .limit-select {
+    min-width: 0;
+    max-width: none;
+  }
+  /* Ensure select trigger text clips cleanly */
+  .custom-select-trigger .selected-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE: MOBILE (≤ 480px)
+   ============================================================ */
 @media (max-width: 480px) {
+  /* Tool Panel */
+  .tool-panel { padding: 12px 10px 0; }
+  .results-section { padding: 12px 10px; }
+  .input-card { padding: 14px 12px; }
+
+  /* Results grid: 1 col on phones */
   .results-grid { grid-template-columns: 1fr; }
   .tools-grid, .features-grid { grid-template-columns: 1fr; }
   .overview-section { padding: 16px; }
   .domain-card { padding: 14px; }
+
+  /* Controls: stack everything vertically */
+  .results-controls {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  #exportDropdownWrap {
+    grid-column: 1;
+    width: 100%;
+  }
+  .select-filter-wrapper,
+  .select-sort-wrapper,
+  .limit-select {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  /* Bigger touch targets */
+  .custom-select-trigger {
+    padding: 9px 12px;
+    min-height: 40px;
+  }
+  .select-sort-wrapper .custom-select-trigger,
+  .limit-select .custom-select-trigger,
+  .select-filter-wrapper .custom-select-trigger {
+    padding: 9px 12px;
+    font-size: .8rem;
+  }
+
+  /* Action menu: always single col on phone */
+  .action-links { grid-template-columns: 1fr; }
+  .action-panel { width: min(300px, 90vw) !important; }
+
+  /* Domain card name: smaller on phone */
+  .domain-name { font-size: .85rem; }
+
+  /* Results header title */
+  .results-info h2 { font-size: .92rem; }
+}
+
+/* ============================================================
+   RESPONSIVE: VERY SMALL (≤ 360px)
+   ============================================================ */
+@media (max-width: 360px) {
+  .results-section { padding: 10px 8px; }
+  .tool-panel { padding: 10px 8px 0; }
+  .input-card { padding: 12px 10px; }
+  .domain-card { padding: 12px; }
+  .results-grid { gap: 8px; }
+  .domain-name { font-size: .8rem; }
+  .results-info h2 { font-size: .85rem; }
 }
 
 /* Email Tool Full Width */

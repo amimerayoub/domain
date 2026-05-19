@@ -59,11 +59,11 @@ export function generateGeo({ keyword, custom, locationType, sortBy, limit, smar
 }
 
 // === KEYWORD ===
-export function generateKeyword({ keywords, category, usePrefix, useSuffix, useCategoryKws, useCombine, limit, smartMode }) {
+export function generateKeyword({ keywords, category, position, sortBy, limit, smartMode }) {
   try {
     if (!keywords || !keywords.length) return generateFallbackDomains('keyword', limit);
     const data = getData(smartMode);
-    const domains = [];
+    let domains = [];
     const seen = new Set();
 
     // Helper: add domain only if unique
@@ -75,14 +75,12 @@ export function generateKeyword({ keywords, category, usePrefix, useSuffix, useC
       if (d) domains.push(d);
     }
 
-    // Find matching category — fuzzy match against data.json emoji-prefixed keys
+    // Find matching category
     let catKws = [];
-    if (useCategoryKws && data.KEYWORD_CATEGORIES && category && category !== 'all') {
-      // Direct match first
+    if (data.KEYWORD_CATEGORIES && category) {
       if (data.KEYWORD_CATEGORIES[category]) {
         catKws = data.KEYWORD_CATEGORIES[category];
       } else {
-        // Fuzzy: find key that contains the category string (ignoring emojis)
         const catLower = category.toLowerCase().replace(/[^\w\s&]/g, '').trim();
         for (const key of Object.keys(data.KEYWORD_CATEGORIES)) {
           const keyClean = key.toLowerCase().replace(/[^\w\s&]/g, '').trim();
@@ -94,76 +92,37 @@ export function generateKeyword({ keywords, category, usePrefix, useSuffix, useC
       }
     }
 
-    // Pick random items from an array
-    function pickN(arr, n) {
-      if (!arr || !arr.length) return [];
-      const shuffled = [...arr].sort(() => Math.random() - 0.5);
-      return shuffled.slice(0, n);
-    }
-
-    // Get smarter prefix/suffix pools — filter by length for better domain names
-    const rawPrefixes = data.BRANDABLE_PREFIX || [];
-    const rawSuffixes = data.BRANDABLE_SUFFIX || [];
-    const shortPrefixes = rawPrefixes.filter(p => p.length >= 2 && p.length <= 6);
-    const longPrefixes = rawPrefixes.filter(p => p.length >= 4 && p.length <= 10);
-    const shortSuffixes = rawSuffixes.filter(s => s.length >= 2 && s.length <= 6);
-    const longSuffixes = rawSuffixes.filter(s => s.length >= 4 && s.length <= 10);
-
-    // How many prefix/suffix to sample
-    const prefixCount = smartMode ? 25 : 12;
-    const suffixCount = smartMode ? 25 : 12;
-    const prefixes = pickN(shortPrefixes.length > 0 ? shortPrefixes : rawPrefixes, prefixCount);
-    const suffixes = pickN(shortSuffixes.length > 0 ? shortSuffixes : rawSuffixes, suffixCount);
-
-    // Merge user keywords with category keywords
     const allKw = [...keywords];
-    const catSample = pickN(catKws, smartMode ? 12 : 6);
-    if (catSample.length) allKw.push(...catSample);
 
-    // Generate combinations
+    // Generate combinations based on position
     allKw.forEach(kw => {
-      // Prefix + keyword
-      if (usePrefix) {
-        prefixes.forEach(p => addUnique(cap(p) + cap(kw), kw));
-        // Also try category words as prefixes
-        pickN(catKws, 5).forEach(c => addUnique(cap(c) + cap(kw), kw));
-      }
-      // Keyword + suffix
-      if (useSuffix) {
-        suffixes.forEach(s => addUnique(cap(kw) + cap(s), kw));
-        // Also try category words as suffixes
-        pickN(catKws, 5).forEach(c => addUnique(cap(kw) + cap(c), kw));
-      }
-      // Keyword + keyword (cross-combine)
-      if (useCombine && keywords.length > 1) {
-        keywords.forEach(kw2 => {
-          if (kw !== kw2) {
-            addUnique(cap(kw) + cap(kw2), kw);
-            addUnique(cap(kw2) + cap(kw), kw);
+      catKws.forEach(catKw => {
+        if (position === 'prefix') {
+          addUnique(cap(catKw) + cap(kw), kw);
+        } else if (position === 'suffix') {
+          addUnique(cap(kw) + cap(catKw), kw);
+        } else {
+          // mix randomly
+          if (Math.random() > 0.5) {
+            addUnique(cap(catKw) + cap(kw), kw);
+          } else {
+            addUnique(cap(kw) + cap(catKw), kw);
           }
-        });
-      }
+        }
+      });
     });
 
-    // Smart mode: bonus combos from long prefixes/suffixes
-    if (smartMode) {
-      const longP = pickN(longPrefixes, 10);
-      const longS = pickN(longSuffixes, 10);
-      keywords.forEach(kw => {
-        longP.forEach(p => addUnique(cap(p) + cap(kw), kw));
-        longS.forEach(s => addUnique(cap(kw) + cap(s), kw));
-      });
-      // Cross-category combos
-      if (catKws.length) {
-        const catA = pickN(catKws, 8);
-        const catB = pickN(catKws, 8);
-        catA.forEach(a => catB.forEach(b => {
-          if (a !== b && (a + b).length <= 18) addUnique(cap(a) + cap(b), a);
-        }));
-      }
+    // Sorting logic
+    if (sortBy === 'length') {
+      domains.sort((a, b) => a.name.length - b.name.length);
+    } else if (sortBy === 'alphabetical') {
+      domains.sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      // random
+      domains.sort(() => Math.random() - 0.5);
     }
 
-    return scoreAndLimit(domains, limit, smartMode);
+    return domains.slice(0, limit);
   } catch (e) {
     console.error('generateKeyword error:', e);
     return generateFallbackDomains('keyword', limit);

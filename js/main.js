@@ -5,6 +5,7 @@ import { genState, generateGeo, generateKeyword, generatePattern, validatePatter
 import { clearResults, showLoading, renderResults, renderBulkResults, renderExtractedResults, renderAnalyzerResults, showFilterControls, toast, copyText, setButtonState, uiState, applyFilterSort, updateDomainCounter } from './ui.js';
 import { initExportSystem, syncExportDomains } from './exportSystem.js';
 import { initCustomSelects, getSelectValue } from '../components/dropdown.js';
+import { initTheme, toggleTheme } from './theme.js';
 import { closeAllActionMenus } from '../components/action-menu.js';
 import { initFavorites, openFavoritesPanel, setFavoritesChangeListener, getFavoritesCount, isFavorite, toggleFavorite } from './favorites.js';
 import { analyzeDomains, filterDomains, detectMode } from './domainAnalyzer.js';
@@ -77,11 +78,159 @@ function buildLetterGrid(container, letters, selected, type) {
   });
 }
 
+// ==================== STATE MANAGEMENT ====================
+function saveToolInputs(tool) {
+  if (!tool || tool === 'home' || tool === 'analyzer') return;
+  const panel = $(`#${tool}-panel`);
+  if (!panel) return;
+  const data = {};
+  panel.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(el => { if (el.id) data[el.id] = el.value; });
+  panel.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => { if (el.id) data[el.id] = el.checked; });
+  panel.querySelectorAll('.custom-select').forEach(el => { if (el.id) data[el.id] = getSelectValue(el.id); });
+  if (tool === 'pattern') {
+    data.patC = genState.selectedConsonants;
+    data.patV = genState.selectedVowels;
+  }
+  if (tool === 'numeric') {
+     const actBtn = panel.querySelector('.len-btn.active');
+     if (actBtn) data.numLen = actBtn.dataset.len;
+  }
+  try { localStorage.setItem(`tool_inputs_${tool}`, JSON.stringify(data)); } catch(e) {}
+}
+
+function restoreToolInputs(tool) {
+  if (!tool || tool === 'home' || tool === 'analyzer') return;
+  const saved = localStorage.getItem(`tool_inputs_${tool}`);
+  if (!saved) return;
+  try {
+    const data = JSON.parse(saved);
+    Object.entries(data).forEach(([id, val]) => {
+      if (id === 'patC') { genState.selectedConsonants = val; return; }
+      if (id === 'patV') { genState.selectedVowels = val; return; }
+      if (id === 'numLen') {
+         $$('.len-btn').forEach(b => b.classList.toggle('active', b.dataset.len === val));
+         return;
+      }
+      const el = $(`#${id}`);
+      if (!el) return;
+      if (el.type === 'checkbox' || el.type === 'radio') el.checked = val;
+      else if (el.classList.contains('custom-select')) {
+         const opt = el.querySelector(`.select-option[data-value="${val}"]`);
+         if (opt) {
+           el.querySelectorAll('.select-option').forEach(o => o.classList.remove('active'));
+           opt.classList.add('active');
+           const trigger = el.querySelector('.selected-text');
+           if (trigger) trigger.textContent = opt.textContent;
+         }
+      } else {
+         el.value = val;
+      }
+    });
+  } catch(e) {}
+}
+
+function saveToolDomains(tool, domains) {
+  if (!tool || tool === 'home') return;
+  try { localStorage.setItem(`tool_domains_${tool}`, JSON.stringify(domains)); } catch(e) {}
+}
+
+function autoCleanupCache() {
+  try {
+    const lastCleanup = localStorage.getItem('lastCacheCleanup');
+    const now = Date.now();
+    // 24 hours = 86400000 ms
+    if (!lastCleanup || now - parseInt(lastCleanup) > 86400000) {
+      // Cleanup all tool domains and inputs
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('tool_domains_') || key.startsWith('tool_inputs_')) {
+          localStorage.removeItem(key);
+        }
+      });
+      localStorage.setItem('lastCacheCleanup', now.toString());
+      console.log('Auto-cleanup: Removed old cache');
+    }
+  } catch(e) {}
+}
+
+function saveGlobalFilters() {
+  try {
+    const filters = {
+      sort: getSelectValue('resultsSort'),
+      visibility: getSelectValue('domainVisibilityFilter')
+    };
+    localStorage.setItem('globalFilters', JSON.stringify(filters));
+  } catch(e) {}
+}
+
+function restoreGlobalFilters() {
+  try {
+    const saved = localStorage.getItem('globalFilters');
+    if (!saved) return;
+    const filters = JSON.parse(saved);
+    if (filters.sort) {
+      const opt = $('#resultsSort')?.querySelector(`.select-option[data-value="${filters.sort}"]`);
+      if (opt) {
+        $('#resultsSort').querySelectorAll('.select-option').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        const trigger = $('#resultsSort').querySelector('.selected-text');
+        if (trigger) trigger.textContent = opt.textContent;
+        uiState.sort = filters.sort;
+      }
+    }
+    if (filters.visibility) {
+      const opt = $('#domainVisibilityFilter')?.querySelector(`.select-option[data-value="${filters.visibility}"]`);
+      if (opt) {
+        $('#domainVisibilityFilter').querySelectorAll('.select-option').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        const trigger = $('#domainVisibilityFilter').querySelector('.selected-text');
+        if (trigger) trigger.textContent = filters.visibility === 'available' ? 'Available Only' : 'All Domains';
+        const triggerBtn = $('#domainVisibilityFilter').querySelector('.custom-select-trigger');
+        if (triggerBtn) triggerBtn.classList.toggle('filter-active', filters.visibility === 'available');
+        uiState.visibilityFilter = filters.visibility;
+      }
+    }
+  } catch(e) {}
+}
+
+function restoreToolDomains(tool) {
+  if (!tool || tool === 'home') return false;
+  const saved = localStorage.getItem(`tool_domains_${tool}`);
+  if (!saved) return false;
+  try {
+    const parsed = JSON.parse(saved);
+    if (parsed && parsed.length) {
+      state.domains = parsed;
+      let title = titles[tool] ? titles[tool] + ' Results' : 'Restored Generated Domains';
+      if (tool === 'analyzer' || tool === 'bulkcheck') {
+         if (tool === 'analyzer') renderAnalyzerResults(parsed);
+         if (tool === 'bulkcheck') renderBulkResults(parsed);
+      } else if (tool === 'extractor' || tool === 'emailextractor') {
+         // handle extractors if needed
+      } else {
+         renderResults(parsed, title, copyText);
+         syncExportDomains(state.domains, tool);
+      }
+      return true;
+    }
+  } catch(e) { }
+  return false;
+}
+
 // ==================== NAVIGATION ====================
 function switchTool(tool, updateHistory = true) {
-  if (state.activeTool !== tool) clearResults();
+  if (state.activeTool && state.activeTool !== tool) {
+     saveToolInputs(state.activeTool);
+  }
+  
+  if (state.activeTool !== tool) {
+    if (!restoreToolDomains(tool)) {
+      clearResults();
+    }
+  }
   state.activeTool = tool;
   localStorage.setItem('activeTool', tool);
+  
+  restoreToolInputs(tool);
   
   if (updateHistory) {
     const url = new URL(window.location);
@@ -101,7 +250,7 @@ function switchTool(tool, updateHistory = true) {
   const resultsSection = $('#resultsSection');
   const resultsTitle = $('#resultsTitle');
   if (resultsSection) {
-    if (tool === 'home' || tool === 'emailtool' || tool === 'texttools') {
+    if (tool === 'emailtool' || tool === 'texttools') {
       resultsSection.classList.remove('visible');
     } else {
       resultsSection.classList.add('visible');
@@ -120,37 +269,12 @@ function switchTool(tool, updateHistory = true) {
     }
   }
   
-  // Update navbar title visibility for home
-  const navbarTitle = $('#navbarTitle');
-  if (navbarTitle) {
-    if (tool === 'home') {
-      navbarTitle.style.display = 'none';
-    } else {
-      navbarTitle.style.display = '';
-    }
-  }
+  // Always show navbar title (home panel no longer exists in sidebar)
   
   showFilterControls(toolsWithFilters.includes(tool));
   
   if (window.updateExportButton) {
     window.updateExportButton();
-  }
-  
-  // Restore generated domains when switching to newsdomain tool
-  if (tool === 'newsdomain') {
-    const savedGeneratedDomains = localStorage.getItem('generatedDomains');
-    if (savedGeneratedDomains) {
-      try {
-        const parsed = JSON.parse(savedGeneratedDomains);
-        if (parsed && parsed.length) {
-          console.log("Restored domains on switch:", parsed);
-          state.domains = parsed;
-          renderResults(parsed, 'Restored Generated Domains', copyText);
-        }
-      } catch (e) {
-        console.error('Error restoring generatedDomains:', e);
-      }
-    }
   }
 }
 
@@ -180,11 +304,9 @@ function handleGenerate(type) {
           if (!input) { toast('Enter at least one keyword'); setButtonState(btn, false); showLoading(false); return; }
           domains = generateKeyword({
             keywords: input.split(',').map(k => k.trim()).filter(k => k),
-            category: getSelectValue('kwCategory') || 'all',
-            usePrefix: $('#kwPrefix').checked,
-            useSuffix: $('#kwSuffix').checked,
-            useCategoryKws: $('#kwCategoryKws').checked,
-            useCombine: $('#kwCombine').checked,
+            category: getSelectValue('kwNicheSelect') || '💻 Tech',
+            position: getSelectValue('kwPositionSelect') || 'suffix',
+            sortBy: getSelectValue('kwSortSelect') || 'length',
             limit: state.limit, smartMode: state.smartMode
           });
           break;
@@ -258,7 +380,8 @@ function handleGenerate(type) {
       }
 
       state.domains = domains;
-      localStorage.setItem('domains_geo', JSON.stringify(domains));
+      saveToolDomains(type, domains);
+      saveToolInputs(type);
       renderResults(domains, titles[type] + ' Results', copyText);
       syncExportDomains(state.domains, type);
 
@@ -352,7 +475,8 @@ async function handleGenDomains() {
     // Set domains to 'checking' status initially if not set
     state.domains.forEach(d => { if (d.available === undefined) d.available = 'checking'; });
     
-    localStorage.setItem('generatedDomains', JSON.stringify(domains));
+    saveToolDomains('newsdomain', domains);
+    saveToolInputs('newsdomain');
     renderResults(domains, 'Gen Domain News (' + genNewsState.mode + ' / ' + genNewsState.aiProvider.toUpperCase() + ') Results', copyText);
     syncExportDomains(state.domains, 'newsdomain');
 
@@ -399,6 +523,8 @@ async function handleBulkCheck() {
       available: 'checking'
     }));
     state.domains = domains;
+    saveToolDomains('bulkcheck', domains);
+    saveToolInputs('bulkcheck');
     renderBulkResults(domains);
 
     // Run real availability check
@@ -629,8 +755,8 @@ function applyAnalyzerFilters() {
 
   state.domains = filtered;
   window.analysisResults = filtered;
-  localStorage.setItem('analysisResults', JSON.stringify(filtered));
-
+  saveToolDomains('analyzer', filtered);
+  saveToolInputs('analyzer');
   renderAnalyzerResults(filtered);
   syncExportDomains(state.domains, 'analyzer');
 }
@@ -1423,15 +1549,10 @@ export async function initApp() {
   const loading = $('#loadingOverlay');
   if (loading) loading.classList.add('active');
 
-  // Theme initialization
-  let savedTheme = localStorage.getItem('domainTheme');
-  if (!savedTheme) {
-    savedTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  const html = document.documentElement;
-  html.setAttribute('data-theme', savedTheme);
-  document.body.classList.remove('dark', 'light');
-  document.body.classList.add(savedTheme);
+  autoCleanupCache();
+
+  // Theme initialization — centralized via theme.js
+  initTheme('#themeToggle');
 
   // Sidebar initialization
   const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
@@ -1448,8 +1569,9 @@ export async function initApp() {
     b.classList.toggle('active', b.dataset.mode === (state.smartMode ? 'smart' : 'fast'));
   });
 
+  let initialData = null;
   try {
-    await loadData(state.smartMode);
+    initialData = await loadData(state.smartMode);
   } catch (err) {
     console.error("Init Data Load Error:", err);
     // If SMART mode fails, fallback to FAST mode on load
@@ -1458,7 +1580,29 @@ export async function initApp() {
     $$('.mode-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.mode === 'fast');
     });
-    await loadData(false);
+    initialData = await loadData(false);
+  }
+
+  // Populate Keyword Niche Dropdown dynamically
+  if (initialData && initialData.KEYWORD_CATEGORIES) {
+    const kwNicheDropdown = $('#kwNicheDropdown');
+    const kwNicheSelect = $('#kwNicheSelect');
+    if (kwNicheDropdown) {
+      kwNicheDropdown.innerHTML = '';
+      Object.keys(initialData.KEYWORD_CATEGORIES).forEach((cat, index) => {
+        const div = document.createElement('div');
+        div.className = 'select-option' + (index === 0 ? ' active' : '');
+        div.dataset.value = cat;
+        div.textContent = cat;
+        kwNicheDropdown.appendChild(div);
+      });
+      // Set the first item as selected in the trigger text
+      const firstCat = Object.keys(initialData.KEYWORD_CATEGORIES)[0];
+      if (kwNicheSelect) {
+        const triggerText = kwNicheSelect.querySelector('.selected-text');
+        if (triggerText) triggerText.textContent = firstCat;
+      }
+    }
   }
 
   // Letter grids
@@ -1520,15 +1664,7 @@ export async function initApp() {
     btn.classList.toggle('active', added);
   });
 
-  // Theme toggle
-  $('#themeToggle').addEventListener('click', () => {
-    const html = document.documentElement;
-    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    document.body.classList.remove('dark', 'light');
-    document.body.classList.add(next);
-    localStorage.setItem('domainTheme', next);
-  });
+  // Theme toggle handled by initTheme() in theme.js
 
   // Home live search functionality
   const homeSearchInput = $('#homeSearchInput');
@@ -1885,6 +2021,7 @@ export async function initApp() {
   if (sortSel) {
     sortSel.addEventListener('change', () => {
       uiState.sort = getSelectValue('resultsSort') || 'default';
+      saveGlobalFilters();
       applyFilterSort(state.domains, copyText);
     });
   }
@@ -1896,6 +2033,7 @@ export async function initApp() {
       opt.addEventListener('click', () => {
         const val = opt.dataset.value; // 'all' | 'available'
         uiState.visibilityFilter = val;
+        saveGlobalFilters();
 
         // Update active class
         visFilterEl.querySelectorAll('.select-option').forEach(o => o.classList.toggle('active', o === opt));
@@ -1931,53 +2069,32 @@ export async function initApp() {
 
   if (loading) loading.classList.remove('active');
   const urlParams = new URLSearchParams(window.location.search);
-  const savedTool = urlParams.get('tool') || localStorage.getItem('activeTool') || 'home';
+  const savedTool = urlParams.get('tool') || localStorage.getItem('activeTool') || 'geo';
+  
+  restoreGlobalFilters();
   switchTool(savedTool, false);
+
+  // Restore scroll position from previous session
+  const savedScroll = sessionStorage.getItem('globalScrollPos');
+  if (savedScroll) {
+    setTimeout(() => window.scrollTo({ top: parseInt(savedScroll), behavior: 'instant' }), 50);
+  }
+  
+  // Track scroll position
+  window.addEventListener('scroll', debounce(() => {
+    sessionStorage.setItem('globalScrollPos', window.scrollY);
+  }, 100));
 
   window.addEventListener('popstate', (e) => {
     if (e.state && e.state.tool) {
       switchTool(e.state.tool, false);
     } else {
-      const tool = new URLSearchParams(window.location.search).get('tool') || localStorage.getItem('activeTool') || 'home';
+      const tool = new URLSearchParams(window.location.search).get('tool') || localStorage.getItem('activeTool') || 'geo';
       switchTool(tool, false);
     }
   });
 
-  // Restore state
-  try {
-    const savedGen = localStorage.getItem('domains_geo');
-    if (savedGen) {
-      const parsed = JSON.parse(savedGen);
-      if (parsed && parsed.length) {
-        state.domains = parsed;
-        if (savedTool !== 'home' && savedTool !== 'analyzer' && savedTool !== 'emailtool') {
-          renderResults(parsed, 'Restored Generated Domains', copyText);
-        }
-      }
-    }
-    // Also restore generatedDomains (from Gen Domain News tool)
-    const savedGeneratedDomains = localStorage.getItem('generatedDomains');
-    if (savedGeneratedDomains) {
-      const parsed = JSON.parse(savedGeneratedDomains);
-      console.log("Restored domains:", parsed);
-      if (parsed && parsed.length) {
-        state.domains = parsed;
-        if (savedTool === 'newsdomain') {
-          renderResults(parsed, 'Restored Generated Domains', copyText);
-        }
-      }
-    }
-    const savedAna = localStorage.getItem('analysisResults');
-    if (savedAna) {
-      window.analysisResults = JSON.parse(savedAna);
-      if (savedTool === 'analyzer' && window.analysisResults && window.analysisResults.length) {
-        state.domains = window.analysisResults;
-        renderAnalyzerResults(window.analysisResults);
-      }
-    }
-  } catch (e) {
-    console.error('Error restoring state:', e);
-  }
+  // Legacy state restore logic removed - now handled natively by switchTool() via restoreToolDomains() and restoreToolInputs()
 
   // Auto-load all saved API keys into all inputs
   const savedKeys = loadAllApiKeys();

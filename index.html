@@ -1,6 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
+  <!-- ⚡ Anti-flash: apply saved theme BEFORE first paint -->
+  <script>
+    (function(){
+      var t = localStorage.getItem('theme');
+      /* Migrate legacy key */
+      if (!t) { var l = localStorage.getItem('domainTheme'); if (l) { t = l; localStorage.setItem('theme', l); localStorage.removeItem('domainTheme'); } }
+      /* Default = light */
+      if (!t) t = 'light';
+      document.documentElement.setAttribute('data-theme', t);
+      if (t === 'dark') document.documentElement.classList.add('dark');
+    })();
+  </script>
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -13,10 +25,9 @@
   <link rel="stylesheet" href="export-system.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet" />
- 
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 </head>
-<body class="dark">
+<body>
    <div class="bg-animation">
     <div class="floating-shape shape-1"></div>
     <div class="floating-shape shape-2"></div>
@@ -26,26 +37,18 @@
 </div>
   <!-- Header -->
  
-  <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="logo">
+      <a href="landing.html" class="logo logo-link" title="Go to Homepage" aria-label="AI Domains Homepage">
         <svg viewBox="0 0 36 36" fill="none" class="logo-svg">
           <rect width="36" height="36" rx="10" fill="white" fill-opacity="0.08"/>
           <path d="M10 13h16M10 18h12M10 23h8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
         </svg>
         <span class="logo-text">AI Domains</span>
-      </div>
+      </a>
     </div>
 
     <nav class="sidebar-nav">
-      <div class="nav-section-label">Main</div>
-      <a href="landing.html" class="nav-item" data-tool="home" data-tooltip="Home">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span>Home</span>
-      </a>
-
-      <div class="nav-divider"></div>
       <div class="nav-section-label">Generators</div>
       <a href="#" class="nav-item" data-tool="geo" data-tooltip="Geo Domains">
         <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.8"/></svg>
@@ -230,12 +233,64 @@
     <!-- ===== KEYWORD PANEL ===== -->
     <div class="tool-panel" id="keyword-panel">
       <div class="panel-container">
-        <div class="panel-hero"><h1>Keyword Domain Generator</h1><p>Combine keywords with smart prefixes and suffixes from curated data</p></div>
+        <div class="panel-hero">
+          <h1>Keyword Domain Generator</h1>
+          <p>Generate highly brandable domains tailored to your startup's niche</p>
+        </div>
         <div class="input-card glass">
-          <div class="form-row"><label class="form-label">Keyword(s)</label><input type="text" class="input-primary" id="kwInput" placeholder="e.g. cloud, data, AI" /></div>
-          <div class="form-row"><label class="form-label">Category</label><div class="custom-select" id="kwCategory"><button class="custom-select-trigger"><span class="selected-text">All Categories</span><svg class="select-arrow" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><div class="custom-select-dropdown"><div class="select-option active" data-value="all">All Categories</div><div class="select-option" data-value="Tech">&#x1F5A5;&#xFE0F; Tech</div><div class="select-option" data-value="Artificial Intelligence">&#x1F916; AI</div><div class="select-option" data-value="Crypto">&#x20BF; Crypto</div><div class="select-option" data-value="Finance">&#x1F4B0; Finance</div><div class="select-option" data-value="RealEstate">&#x1F3E0; Real Estate</div><div class="select-option" data-value="Health & Fitness">&#x1F4AA; Health</div><div class="select-option" data-value="Gaming">&#x1F3AE; Gaming</div><div class="select-option" data-value="Travel">&#x2708;&#xFE0F; Travel</div><div class="select-option" data-value="Prefixes">ðŸ”´ Prefixes</div><div class="select-option" data-value="ðŸ”¡ Suffixes">ðŸ”¡ Suffixes</div><div class="select-option" data-value="Adjectives">ðŸ”µ Adjectives</div></div></div></div>
-          <div class="options-grid"><label class="checkbox-label"><input type="checkbox" id="kwPrefix" checked/><span class="checkmark"></span>Prefix</label><label class="checkbox-label"><input type="checkbox" id="kwSuffix" checked/><span class="checkmark"></span>Suffix</label><label class="checkbox-label"><input type="checkbox" id="kwCategoryKws" checked/><span class="checkmark"></span>Category Keywords</label><label class="checkbox-label"><input type="checkbox" id="kwCombine" checked/><span class="checkmark"></span>Combine Keywords</label></div>
-          <button class="btn-generate" id="btnKwGenerate"><svg viewBox="0 0 24 24" fill="none"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Generate Keyword Domains</button>
+          <div class="form-row">
+            <label class="form-label">Seed Keyword</label>
+            <input type="text" class="input-primary" id="kwInput" placeholder="e.g. cloud, data, AI, shift" />
+          </div>
+          
+          <div class="form-row">
+            <label class="form-label">Niche</label>
+            <div class="custom-select" id="kwNicheSelect">
+              <button class="custom-select-trigger">
+                <span class="selected-text">💻 Tech</span>
+                <svg class="select-arrow" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+              <div class="custom-select-dropdown" id="kwNicheDropdown">
+                <!-- Dynamically populated from data.json -->
+                <div class="select-option active" data-value="💻 Tech">💻 Tech</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Position</label>
+            <div class="custom-select" id="kwPositionSelect">
+              <button class="custom-select-trigger">
+                <span class="selected-text">Suffix (Word + Niche)</span>
+                <svg class="select-arrow" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+              <div class="custom-select-dropdown">
+                <div class="select-option active" data-value="suffix">Suffix (Word + Niche)</div>
+                <div class="select-option" data-value="prefix">Prefix (Niche + Word)</div>
+                <div class="select-option" data-value="random">Mix Randomly</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Sort By</label>
+            <div class="custom-select" id="kwSortSelect">
+              <button class="custom-select-trigger">
+                <span class="selected-text">Length (Shortest)</span>
+                <svg class="select-arrow" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+              <div class="custom-select-dropdown">
+                <div class="select-option active" data-value="length">Length (Shortest)</div>
+                <div class="select-option" data-value="alphabetical">Alphabetical</div>
+                <div class="select-option" data-value="random">Randomize</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-generate" id="btnKwGenerate">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Generate Names
+          </button>
         </div>
       </div>
     </div>
