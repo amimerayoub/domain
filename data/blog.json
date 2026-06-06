@@ -1,0 +1,41 @@
+[
+  {
+    "id": 1,
+    "title": "How To Start Domain Flipping",
+    "slug": "how-to-start-domain-flipping",
+    "category": "domain-flipping",
+    "excerpt": "Learn how to buy and sell domains for profit. A complete beginner's guide to domain flipping strategies, valuation, and marketplace tactics.",
+    "image": "/assets/blog/domain-flipping.webp",
+    "author": "AI Domains",
+    "date": "2026-06-06",
+    "readingTime": "8 min",
+    "featured": true,
+    "keywords": ["domain flipping", "domain investing", "sell domains", "buy domains cheap", "domain profit"]
+  },
+  {
+    "id": 2,
+    "title": "Best AI Domain Names In 2026",
+    "slug": "best-ai-domain-names",
+    "category": "ai-domains",
+    "excerpt": "Discover the latest AI domain naming trends. Learn how artificial intelligence is shaping brandable, memorable domain names for startups.",
+    "image": "/assets/blog/ai-domains.webp",
+    "author": "AI Domains",
+    "date": "2026-06-07",
+    "readingTime": "6 min",
+    "featured": true,
+    "keywords": ["AI domains", "AI startup names", "brandable domains", "AI naming", "tech domains"]
+  },
+  {
+    "id": 3,
+    "title": "How To Find Expired Domains",
+    "slug": "find-expired-domains",
+    "category": "expired-domains",
+    "excerpt": "Learn how to discover expired domains with SEO value. Master the art of finding aged domains with strong backlink profiles and authority.",
+    "image": "/assets/blog/expired-domains.webp",
+    "author": "AI Domains",
+    "date": "2026-06-08",
+    "readingTime": "10 min",
+    "featured": false,
+    "keywords": ["expired domains", "SEO domains", "aged domains", "backlink domains", "domain auction"]
+  }
+]

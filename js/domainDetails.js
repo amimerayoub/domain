@@ -352,7 +352,7 @@ window.smartBack = function(e) {
     if (isInternal && window.history.length > 1) {
       window.history.back();
     } else {
-      window.location.href = 'index.html';
+      window.location.href = '/geo-domains';
     }
   }, 200);
 };

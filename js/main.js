@@ -54,6 +54,53 @@ const titles = {
   newsdomain: 'Gen Domain News'
 };
 
+// Clean URL routing
+const ROUTE_MAP = {
+  geo: '/geo-domains', keyword: '/keyword-domains',
+  pattern: '/pattern-domains', brandable: '/brandable-domains',
+  numeric: '/numeric-domains', suggestor: '/domain-suggestor',
+  wordlist: '/wordlist-combiner', analyzer: '/smart-analyzer',
+  emailtool: '/smart-email', bulkcheck: '/bulk-checker',
+  extractor: '/domain-extractor', texttools: '/text-tools',
+  emailextractor: '/email-extractor', newsdomain: '/domain-news'
+};
+const REVERSE_ROUTE = Object.fromEntries(Object.entries(ROUTE_MAP).map(([k,v]) => [v,k]));
+
+// SEO meta info per tool
+const metaInfo = {
+  home: { title: 'AI Domain Generator', desc: 'Generate premium domain names with AI-powered tools. Analyze, export, and manage domain portfolios.' },
+  geo: { title: 'Geo Domain Generator | AI Domains', desc: 'Generate location-based domains for local businesses and lead generation using city + service combinations.' },
+  keyword: { title: 'Keyword Domain Generator | AI Domains', desc: 'Generate niche-specific domains from keywords and categories with smart prefix and suffix combinations.' },
+  pattern: { title: 'Pattern Domain Generator | AI Domains', desc: 'Generate structured brandable domains using advanced CVC/CVVC naming patterns and letter combinations.' },
+  brandable: { title: 'Brandable Name Generator | AI Domains', desc: 'Create startup-style brandable domain names optimized for resale and brand recognition.' },
+  numeric: { title: 'Numeric Domain Generator | AI Domains', desc: 'Generate valuable numeric domain names for premium investments and brandable number-based brands.' },
+  suggestor: { title: 'Domain Suggestor | AI Domains', desc: 'Get AI-driven domain name suggestions based on your keywords, trends, and market data.' },
+  wordlist: { title: 'WordList Combiner | AI Domains', desc: 'Combine prefix and suffix word lists to generate unique domain name combinations automatically.' },
+  analyzer: { title: 'Smart Domain Analyzer | AI Domains', desc: 'Analyze domains using AI scoring, SEO metrics, CPC data, backlinks, and flip potential evaluation.' },
+  emailtool: { title: 'Smart Email Tool | AI Domains', desc: 'Create professional outreach campaigns to contact domain owners with customizable email templates.' },
+  bulkcheck: { title: 'Bulk Domain Checker | AI Domains', desc: 'Check availability and SEO metrics for large domain lists instantly with bulk processing.' },
+  extractor: { title: 'Domain Extractor | AI Domains', desc: 'Extract domain names from text, URLs, and content for quick domain list building.' },
+  texttools: { title: 'Text Tools | AI Domains', desc: 'Powerful text manipulation tools for domain research, content formatting, and data processing.' },
+  emailextractor: { title: 'Email Extractor | AI Domains', desc: 'Extract email addresses from text and content for outreach campaign building.' },
+  newsdomain: { title: 'Domain News Generator | AI Domains', desc: 'Generate domain market news and insights using AI-powered analysis of trends and sales.' }
+};
+
+function updateSEOMeta(tool) {
+  const info = metaInfo[tool] || metaInfo.home;
+  const url = ROUTE_MAP[tool] || '/';
+  document.title = info.title;
+  let desc = document.querySelector('meta[name="description"]');
+  if (desc) desc.setAttribute('content', info.desc);
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (canonical) canonical.setAttribute('href', location.origin + url);
+  let ogTitle = document.querySelector('meta[property="og:title"]');
+  if (ogTitle) ogTitle.setAttribute('content', info.title);
+  let ogDesc = document.querySelector('meta[property="og:description"]');
+  if (ogDesc) ogDesc.setAttribute('content', info.desc);
+  let ogUrl = document.querySelector('meta[property="og:url"]');
+  if (ogUrl) ogUrl.setAttribute('content', location.origin + url);
+}
+
 // Tools that show filter controls
 const toolsWithFilters = ['geo', 'keyword', 'pattern', 'brandable', 'numeric', 'suggestor', 'wordlist', 'newsdomain'];
 
@@ -233,10 +280,11 @@ function switchTool(tool, updateHistory = true) {
   restoreToolInputs(tool);
   
   if (updateHistory) {
-    const url = new URL(window.location);
-    url.searchParams.set('tool', tool);
-    window.history.pushState({ tool }, "", url);
+    const newUrl = ROUTE_MAP[tool] || '/';
+    window.history.pushState({ tool }, '', newUrl);
   }
+  
+  updateSEOMeta(tool);
   
   $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tool === tool));
   $$('.tool-panel').forEach(p => {
@@ -2068,8 +2116,25 @@ export async function initApp() {
   });
 
   if (loading) loading.classList.remove('active');
+  
+  // Parse legacy search params and path
   const urlParams = new URLSearchParams(window.location.search);
-  const savedTool = urlParams.get('tool') || localStorage.getItem('activeTool') || 'geo';
+  const legacyTool = urlParams.get('tool');
+  const currentPath = window.location.pathname.replace(/\/$/, '');
+  let savedTool = REVERSE_ROUTE[currentPath] || localStorage.getItem('activeTool') || 'geo';
+
+  if (legacyTool && ROUTE_MAP[legacyTool]) {
+    savedTool = legacyTool;
+    const cleanUrl = ROUTE_MAP[legacyTool];
+    window.history.replaceState({ tool: legacyTool }, '', cleanUrl);
+  } else if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+    const cleanUrl = ROUTE_MAP[savedTool] || '/geo-domains';
+    window.history.replaceState({ tool: savedTool }, '', cleanUrl);
+  } else {
+    // Ensure history state is populated for the current clean path
+    const cleanUrl = ROUTE_MAP[savedTool] || '/geo-domains';
+    window.history.replaceState({ tool: savedTool }, '', cleanUrl);
+  }
   
   restoreGlobalFilters();
   switchTool(savedTool, false);
@@ -2089,7 +2154,8 @@ export async function initApp() {
     if (e.state && e.state.tool) {
       switchTool(e.state.tool, false);
     } else {
-      const tool = new URLSearchParams(window.location.search).get('tool') || localStorage.getItem('activeTool') || 'geo';
+      const path = window.location.pathname.replace(/\/$/, '');
+      const tool = REVERSE_ROUTE[path] || localStorage.getItem('activeTool') || 'geo';
       switchTool(tool, false);
     }
   });

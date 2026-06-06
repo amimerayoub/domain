@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: /sitemap.xml
+
+# Disallow API endpoints from crawling
+Disallow: /api/
+
+# Allow blog crawling
+Allow: /blog/
+Allow: /blog
+Allow: /data/blog.json

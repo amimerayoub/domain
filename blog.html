@@ -3,14 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog & Insights | AI Domains</title>
-    <meta name="description" content="Latest insights, trends, and strategies for domain flipping, SEO, and AI generation.">
-    
+    <title>Blog & Insights | AI Domains - Domain Flipping, AI Naming & SEO Strategies</title>
+    <meta name="description" content="Expert insights on domain flipping, AI domain names, expired domains, and SEO strategies. Stay ahead with the latest trends in digital real estate.">
+    <link rel="canonical" href="/blog">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Blog & Insights | AI Domains">
+    <meta property="og:description" content="Expert insights on domain flipping, AI domain names, expired domains, and SEO strategies.">
+    <meta property="og:url" content="/blog">
+    <meta property="og:site_name" content="AI Domains">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Blog & Insights | AI Domains">
+    <meta name="twitter:description" content="Expert insights on domain flipping, AI domain names, expired domains, and SEO strategies.">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- Theme Detection -->
     <script>
         if (localStorage.getItem('theme') === 'dark') {
@@ -62,20 +75,29 @@
     <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Blog",
+        "name": "AI Domains Blog",
+        "description": "Expert insights on domain flipping, AI domain names, expired domains, and SEO strategies.",
+        "url": "/blog",
+        "publisher": {
+            "@type": "Organization",
+            "name": "AI Domains"
+        }
+    }
+    </script>
+
     <style>
         body { overflow-x: hidden; }
-
-        /* Ambient Orbs */
         .blob-1 { position: absolute; top: -10%; left: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%); filter: blur(80px); z-index: -1; animation: pulseSlow 10s infinite alternate; pointer-events: none; }
         .blob-2 { position: absolute; top: 40%; right: -20%; width: 60vw; height: 60vw; background: radial-gradient(circle, rgba(6,182,212,0.15) 0%, transparent 70%); filter: blur(100px); z-index: -1; animation: pulseSlow 12s infinite alternate-reverse; pointer-events: none; }
         .dark .blob-1 { background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%); }
         .dark .blob-2 { background: radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%); }
-
-        /* Header */
         .header-scrolled { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0, 0, 0, 0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
         .dark .header-scrolled { background: rgba(5, 5, 5, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-
-        /* Mega Menu */
         .nav-item { position: relative; }
         .nav-link { position: relative; padding: 0.5rem 0; }
         .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 50%; background-color: #06B6D4; transition: all 0.3s ease; transform: translateX(-50%); }
@@ -86,44 +108,29 @@
         .mega-item { transition: all 0.2s ease; border: 1px solid transparent; }
         .mega-item:hover { background: #f8fafc; border-color: rgba(6, 182, 212, 0.3); transform: translateY(-2px); }
         .dark .mega-item:hover { background: #1A1A1A; border-color: rgba(6, 182, 212, 0.4); }
-
-        /* Enhanced Blog Card Styles */
-        .blog-card { 
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
-            will-change: transform, box-shadow;
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(20px);
-        }
-        .dark .blog-card {
-            background: rgba(16, 16, 16, 0.6);
-        }
-        .blog-card:hover { 
-            transform: translateY(-8px); 
-            box-shadow: 0 30px 60px -20px rgba(6,182,212,0.2); 
-            border-color: rgba(6, 182, 212, 0.5); 
-        }
+        .blog-card { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); will-change: transform, box-shadow; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); }
+        .dark .blog-card { background: rgba(16, 16, 16, 0.6); }
+        .blog-card:hover { transform: translateY(-8px); box-shadow: 0 30px 60px -20px rgba(6,182,212,0.2); border-color: rgba(6, 182, 212, 0.5); }
         .blog-img-placeholder { transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
         .blog-card:hover .blog-img-placeholder { transform: scale(1.08); }
-
-        /* Dynamic Gradients for Placeholders */
         .bg-dynamic-1 { background: linear-gradient(-45deg, #06b6d4, #3b82f6, #8b5cf6); background-size: 400% 400%; }
         .bg-dynamic-2 { background: linear-gradient(-45deg, #10b981, #06b6d4, #3b82f6); background-size: 400% 400%; }
         .bg-dynamic-3 { background: linear-gradient(-45deg, #f59e0b, #ef4444, #ec4899); background-size: 400% 400%; }
         .bg-dynamic-4 { background: linear-gradient(-45deg, #8b5cf6, #d946ef, #f43f5e); background-size: 400% 400%; }
         .bg-dynamic-5 { background: linear-gradient(-45deg, #64748b, #334155, #0f172a); background-size: 400% 400%; }
         .bg-dynamic-6 { background: linear-gradient(-45deg, #0ea5e9, #6366f1, #a855f7); background-size: 400% 400%; }
-
-        /* Hover animations for read more */
         .read-more-arrow { transition: transform 0.3s ease; }
         .blog-card:hover .read-more-arrow { transform: translateX(6px); }
-
-        /* Staggered Animations */
         .stagger-1 { animation-delay: 100ms; opacity: 0; }
         .stagger-2 { animation-delay: 200ms; opacity: 0; }
         .stagger-3 { animation-delay: 300ms; opacity: 0; }
         .stagger-4 { animation-delay: 400ms; opacity: 0; }
         .stagger-5 { animation-delay: 500ms; opacity: 0; }
         .stagger-6 { animation-delay: 600ms; opacity: 0; }
+        .category-btn.active { background-color: #0f172a; color: white; }
+        .dark .category-btn.active { background-color: white; color: #0f172a; }
+        .search-results { display: none; }
+        .search-results.active { display: block; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-dark-bg text-slate-900 dark:text-slate-100 antialiased flex flex-col min-h-screen relative">
@@ -131,69 +138,56 @@
     <div class="blob-1"></div>
     <div class="blob-2"></div>
 
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         HEADER & NAVIGATION
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- HEADER -->
     <header id="header" class="fixed top-0 w-full z-40 transition-all duration-300 bg-transparent pt-3 pb-1">
         <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-14">
-                
-                <!-- Logo -->
-                <a href="landing.html" class="flex items-center gap-2 group cursor-pointer shrink-0">
+                <a href="/" class="flex items-center gap-2 group cursor-pointer shrink-0">
                     <div class="w-8 h-8 rounded-xl bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 shadow-sm transition-transform group-hover:scale-105">
                         <i data-lucide="infinity" class="w-5 h-5"></i>
                     </div>
                     <span class="font-bold text-xl tracking-tight text-slate-900 dark:text-white">AI Domain<span class="text-cyan-500">s</span></span>
                 </a>
-
-                <!-- Desktop Navigation -->
                 <nav class="hidden lg:flex space-x-6 items-center h-full">
-                    <div class="nav-item h-full flex items-center"><a href="landing.html" class="nav-link text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-cyan-500 transition-colors">Home</a></div>
-                    
+                    <div class="nav-item h-full flex items-center"><a href="/" class="nav-link text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-cyan-500 transition-colors">Home</a></div>
                     <div class="nav-item h-full flex items-center">
                         <button class="nav-link text-sm font-semibold flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-cyan-500 transition-colors cursor-pointer">
                             Generator <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
                         </button>
                         <div class="mega-menu" style="width: 480px;">
                             <div class="grid grid-cols-2 gap-3">
-                                <a href="index.html#geo" class="mega-item flex items-start gap-3 p-3 rounded-xl border border-transparent group">
+                                <a href="/geo-domains" class="mega-item flex items-start gap-3 p-3 rounded-xl border border-transparent group">
                                     <div class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 group-hover:text-cyan-500 group-hover:bg-cyan-500/10 shrink-0"><i data-lucide="map-pin" class="w-4 h-4"></i></div>
                                     <div><h4 class="font-bold text-sm text-slate-900 dark:text-white mb-0.5">Geo Domains</h4><p class="text-[11px] text-slate-500">City + Service.</p></div>
                                 </a>
-                                <a href="index.html#keyword" class="mega-item flex items-start gap-3 p-3 rounded-xl border border-transparent group">
+                                <a href="/keyword-domains" class="mega-item flex items-start gap-3 p-3 rounded-xl border border-transparent group">
                                     <div class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 group-hover:text-cyan-500 group-hover:bg-cyan-500/10 shrink-0"><i data-lucide="search" class="w-4 h-4"></i></div>
                                     <div><h4 class="font-bold text-sm text-slate-900 dark:text-white mb-0.5">Keyword Domains</h4><p class="text-[11px] text-slate-500">Smart prefixes & suffixes.</p></div>
                                 </a>
                             </div>
                         </div>
                     </div>
-
                     <div class="nav-item h-full flex items-center">
                         <button class="nav-link text-sm font-semibold flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-cyan-500 transition-colors cursor-pointer">
                             Analyzer <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-70"></i>
                         </button>
                         <div class="mega-menu" style="width: 320px;">
                             <div class="grid grid-cols-1 gap-3">
-                                <a href="index.html#analyzer" class="mega-item flex items-start gap-3 p-3 rounded-xl border border-transparent group">
+                                <a href="/smart-analyzer" class="mega-item flex items-start gap-3 p-3 rounded-xl border border-transparent group">
                                     <div class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 group-hover:text-blue-500 group-hover:bg-blue-500/10 shrink-0"><i data-lucide="brain-circuit" class="w-4 h-4"></i></div>
                                     <div><h4 class="font-bold text-sm text-slate-900 dark:text-white mb-0.5">Smart Analyzer</h4><p class="text-[11px] text-slate-500">AI Score & Flip Potential.</p></div>
                                 </a>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="nav-item h-full flex items-center"><a href="blog.html" class="nav-link text-sm font-semibold text-cyan-500 transition-colors">Blog</a></div>
+                    <div class="nav-item h-full flex items-center"><a href="/blog" class="nav-link text-sm font-semibold text-cyan-500 transition-colors">Blog</a></div>
                 </nav>
-
-                <!-- Right: Actions -->
                 <div class="flex items-center gap-2 shrink-0">
                     <button id="theme-toggle" class="p-2 text-slate-500 hover:bg-slate-200/50 dark:hover:bg-[#1A1A1A] rounded-lg transition-colors">
                         <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i><i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
                     </button>
-                    
                     <div class="hidden sm:block w-px h-5 bg-slate-200 dark:bg-[#2A2A2A] mx-1"></div>
-
-                    <a href="index.html" class="hidden md:flex bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm px-5 py-2 rounded-xl font-bold hover:bg-cyan-500 dark:hover:bg-cyan-400 dark:hover:text-slate-900 hover:text-white transition-all shadow-md ml-1 hover:-translate-y-0.5">
+                    <a href="/geo-domains" class="hidden md:flex bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm px-5 py-2 rounded-xl font-bold hover:bg-cyan-500 dark:hover:bg-cyan-400 dark:hover:text-slate-900 hover:text-white transition-all shadow-md ml-1 hover:-translate-y-0.5">
                         Dashboard
                     </a>
                 </div>
@@ -201,13 +195,12 @@
         </div>
     </header>
 
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         BLOG HERO & FEATURED POST
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- MAIN -->
     <main class="pt-32 pb-16 relative px-4 z-10 flex-grow flex flex-col">
         <div class="max-w-7xl mx-auto w-full animate-fade-in-up">
-            
-            <div class="text-center mb-16">
+
+            <!-- Hero -->
+            <div class="text-center mb-12">
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-medium text-xs mb-6 border border-cyan-500/20 backdrop-blur-md">
                     <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Insights & Resources
                 </div>
@@ -215,202 +208,43 @@
                     The <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Domain</span> Journal
                 </h1>
                 <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Stay ahead of the curve with expert strategies on domain flipping, SEO analysis, and AI-driven naming trends.</p>
-                <div style="margin-top:20px;display:flex;justify-content:center">
-                    <a href="blog-dashboard.html" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#06b6d4,#3b82f6);color:white;border-radius:12px;font-size:.82rem;font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(6,182,212,0.3);transition:all 0.2s ease" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(6,182,212,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(6,182,212,0.3)'">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                        Blog Dashboard
-                    </a>
+            </div>
+
+            <!-- Search Box -->
+            <div class="max-w-xl mx-auto mb-10 relative">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                    <input type="text" id="blogSearch" placeholder="Search articles by title, category, keywords..." class="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/80 dark:bg-[#151515]/80 backdrop-blur-md border border-slate-200 dark:border-dark-border text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all text-sm font-medium shadow-sm">
                 </div>
+                <div id="searchResults" class="search-results absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#151515] border border-slate-200 dark:border-dark-border rounded-2xl shadow-lg overflow-hidden z-50 max-h-80 overflow-y-auto"></div>
             </div>
 
-            <!-- Enhanced Featured Article -->
-            <a href="#" class="group block bg-white/60 dark:bg-dark-card/60 backdrop-blur-xl border border-slate-200 dark:border-dark-border rounded-[2rem] overflow-hidden shadow-glass dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] mb-20 transition-all duration-500 hover:border-cyan-500/50 hover:shadow-glow-blue relative">
-                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-white/20 dark:to-black/20 z-10 pointer-events-none"></div>
-                <div class="flex flex-col lg:flex-row relative z-20">
-                    
-                    <!-- Abstract Image Block with Dynamic Gradient -->
-                    <div class="lg:w-1/2 h-72 lg:h-auto relative overflow-hidden bg-slate-900">
-                        <div class="absolute inset-0 bg-dynamic-1 animate-gradient-xy opacity-90 blog-img-placeholder"></div>
-                        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==')] opacity-40 mix-blend-overlay"></div>
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <i data-lucide="cpu" class="w-32 h-32 text-white opacity-20 transform group-hover:scale-110 transition-transform duration-700"></i>
-                        </div>
-                    </div>
-                    
-                    <!-- Content Block -->
-                    <div class="lg:w-1/2 p-8 lg:p-14 flex flex-col justify-center bg-white/50 dark:bg-black/20 backdrop-blur-sm">
-                        <div class="flex items-center gap-3 mb-6 text-xs font-bold uppercase tracking-widest">
-                            <span class="text-cyan-500 bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-500/20 px-3 py-1 rounded-full flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse"></span> Featured
-                            </span>
-                            <span class="text-slate-500 dark:text-slate-400">Market Trends</span>
-                        </div>
-                        <h2 class="text-3xl lg:text-5xl font-serif font-bold text-slate-900 dark:text-white mb-6 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-500 group-hover:to-cyan-500 transition-all duration-300 leading-tight">How AI is Revolutionizing the Domain Aftermarket in 2026</h2>
-                        <p class="text-slate-600 dark:text-slate-400 mb-8 text-lg line-clamp-3 leading-relaxed">
-                            The landscape of digital real estate is shifting rapidly. With the integration of LLMs and deep learning, investors are no longer relying on intuition. Discover how automated scoring and instant metrics are creating a new generation of highly profitable domain portfolios.
-                        </p>
-                        
-                        <div class="flex items-center justify-between mt-auto pt-6 border-t border-slate-200/50 dark:border-dark-border/50">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-base shadow-inner border-2 border-white dark:border-dark-card">
-                                    SJ
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">Sarah Jenkins</h4>
-                                    <p class="text-xs text-slate-500 font-medium">May 12, 2026</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2 text-sm font-bold text-cyan-600 dark:text-cyan-400 group-hover:translate-x-2 transition-transform duration-300">
-                                Read Full Story <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </a>
+            <!-- Featured Articles (populated by JS) -->
+            <div id="featuredSection" class="mb-16"></div>
 
-            <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                 CATEGORY FILTER
-            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-            <div class="flex flex-wrap items-center justify-center gap-3 mb-12 animate-fade-in-up">
-                <button class="px-6 py-2.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold shadow-lg hover:shadow-glow transition-shadow">All Articles</button>
-                <button class="px-6 py-2.5 rounded-full bg-white/80 dark:bg-[#151515]/80 backdrop-blur-md border border-slate-200 dark:border-dark-border text-slate-600 dark:text-slate-300 hover:border-cyan-500 hover:text-cyan-500 hover:shadow-glow-blue transition-all text-sm font-semibold">AI Insights</button>
-                <button class="px-6 py-2.5 rounded-full bg-white/80 dark:bg-[#151515]/80 backdrop-blur-md border border-slate-200 dark:border-dark-border text-slate-600 dark:text-slate-300 hover:border-cyan-500 hover:text-cyan-500 hover:shadow-glow-blue transition-all text-sm font-semibold">Domain Flipping</button>
-                <button class="px-6 py-2.5 rounded-full bg-white/80 dark:bg-[#151515]/80 backdrop-blur-md border border-slate-200 dark:border-dark-border text-slate-600 dark:text-slate-300 hover:border-cyan-500 hover:text-cyan-500 hover:shadow-glow-blue transition-all text-sm font-semibold">SEO & Metrics</button>
-                <button class="px-6 py-2.5 rounded-full bg-white/80 dark:bg-[#151515]/80 backdrop-blur-md border border-slate-200 dark:border-dark-border text-slate-600 dark:text-slate-300 hover:border-cyan-500 hover:text-cyan-500 hover:shadow-glow-blue transition-all text-sm font-semibold">Platform Updates</button>
+            <!-- Category Filter -->
+            <div class="flex flex-wrap items-center justify-center gap-3 mb-12 animate-fade-in-up" id="categoryFilter">
+                <button class="category-btn active px-6 py-2.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold shadow-lg transition-all cursor-pointer" data-category="all">All Articles</button>
             </div>
 
-            <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                 ARTICLE GRID (With Staggered Animations)
-            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
-                
-                <!-- Article 1 -->
-                <a href="#" class="blog-card border border-slate-200 dark:border-dark-border rounded-3xl overflow-hidden flex flex-col group animate-fade-in-up stagger-1">
-                    <div class="h-52 relative overflow-hidden bg-slate-100 dark:bg-slate-800">
-                        <div class="absolute inset-0 bg-dynamic-2 animate-gradient-xy opacity-80 blog-img-placeholder mix-blend-multiply dark:mix-blend-normal"></div>
-                        <i data-lucide="bar-chart-2" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 text-white opacity-40 drop-shadow-md"></i>
-                    </div>
-                    <div class="p-8 flex flex-col flex-grow bg-white/40 dark:bg-transparent">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-3">SEO & Metrics</span>
-                        <h3 class="text-2xl font-serif font-bold text-slate-900 dark:text-white mb-3 group-hover:text-cyan-500 transition-colors leading-tight">The True Value of Trust Flow in Expired Domains</h3>
-                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-8 line-clamp-3 leading-relaxed">Why relying solely on backlink counts is dangerous. Learn how to analyze TF/CF ratios to uncover hidden gems in drop lists.</p>
-                        <div class="mt-auto flex items-center justify-between pt-5 border-t border-slate-200/60 dark:border-dark-border">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold shadow-inner">MK</div>
-                                <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Mark K.</span>
-                            </div>
-                            <div class="text-cyan-500 read-more-arrow"><i data-lucide="arrow-right" class="w-5 h-5"></i></div>
-                        </div>
-                    </div>
-                </a>
+            <!-- Article Grid -->
+            <div id="articleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24"></div>
 
-                <!-- Article 2 -->
-                <a href="#" class="blog-card border border-slate-200 dark:border-dark-border rounded-3xl overflow-hidden flex flex-col group animate-fade-in-up stagger-2">
-                    <div class="h-52 relative overflow-hidden bg-slate-100 dark:bg-slate-800">
-                        <div class="absolute inset-0 bg-dynamic-4 animate-gradient-xy opacity-80 blog-img-placeholder mix-blend-multiply dark:mix-blend-normal"></div>
-                        <i data-lucide="sparkles" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 text-white opacity-40 drop-shadow-md"></i>
-                    </div>
-                    <div class="p-8 flex flex-col flex-grow bg-white/40 dark:bg-transparent">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400 mb-3">Domain Flipping</span>
-                        <h3 class="text-2xl font-serif font-bold text-slate-900 dark:text-white mb-3 group-hover:text-cyan-500 transition-colors leading-tight">5 Strategies for Flipping CVCV Pattern Domains</h3>
-                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-8 line-clamp-3 leading-relaxed">Brandable patterns are highly sought after by tech startups. Discover the exact letter combinations that sell for premium prices in 2026.</p>
-                        <div class="mt-auto flex items-center justify-between pt-5 border-t border-slate-200/60 dark:border-dark-border">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-bold shadow-inner">AL</div>
-                                <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Alex L.</span>
-                            </div>
-                            <div class="text-cyan-500 read-more-arrow"><i data-lucide="arrow-right" class="w-5 h-5"></i></div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Article 3 -->
-                <a href="#" class="blog-card border border-slate-200 dark:border-dark-border rounded-3xl overflow-hidden flex flex-col group animate-fade-in-up stagger-3">
-                    <div class="h-52 relative overflow-hidden bg-slate-100 dark:bg-slate-800">
-                        <div class="absolute inset-0 bg-dynamic-3 animate-gradient-xy opacity-80 blog-img-placeholder mix-blend-multiply dark:mix-blend-normal"></div>
-                        <i data-lucide="map-pin" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 text-white opacity-40 drop-shadow-md"></i>
-                    </div>
-                    <div class="p-8 flex flex-col flex-grow bg-white/40 dark:bg-transparent">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400 mb-3">Strategy</span>
-                        <h3 class="text-2xl font-serif font-bold text-slate-900 dark:text-white mb-3 group-hover:text-cyan-500 transition-colors leading-tight">The Ultimate Guide to Geo-Service Arbitrage</h3>
-                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-8 line-clamp-3 leading-relaxed">Local service domains (like AustinPlumber.com) are passive income machines. Learn how to generate, rank, and rent them out.</p>
-                        <div class="mt-auto flex items-center justify-between pt-5 border-t border-slate-200/60 dark:border-dark-border">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-bold shadow-inner">SJ</div>
-                                <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Sarah Jenkins</span>
-                            </div>
-                            <div class="text-cyan-500 read-more-arrow"><i data-lucide="arrow-right" class="w-5 h-5"></i></div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Article 4 -->
-                <a href="#" class="blog-card border border-slate-200 dark:border-dark-border rounded-3xl overflow-hidden flex flex-col group animate-fade-in-up stagger-4">
-                    <div class="h-52 relative overflow-hidden bg-slate-100 dark:bg-slate-800">
-                        <div class="absolute inset-0 bg-dynamic-6 animate-gradient-xy opacity-80 blog-img-placeholder mix-blend-multiply dark:mix-blend-normal"></div>
-                        <i data-lucide="mail" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 text-white opacity-40 drop-shadow-md"></i>
-                    </div>
-                    <div class="p-8 flex flex-col flex-grow bg-white/40 dark:bg-transparent">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-3">Outreach</span>
-                        <h3 class="text-2xl font-serif font-bold text-slate-900 dark:text-white mb-3 group-hover:text-cyan-500 transition-colors leading-tight">Writing Cold Emails That Actually Get Replies</h3>
-                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-8 line-clamp-3 leading-relaxed">Stop sending spam. Learn the exact templates and psychological triggers we use in our Smart Email tool to negotiate domain purchases.</p>
-                        <div class="mt-auto flex items-center justify-between pt-5 border-t border-slate-200/60 dark:border-dark-border">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-bold shadow-inner">DK</div>
-                                <span class="text-sm font-bold text-slate-700 dark:text-slate-300">David K.</span>
-                            </div>
-                            <div class="text-cyan-500 read-more-arrow"><i data-lucide="arrow-right" class="w-5 h-5"></i></div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Article 5 -->
-                <a href="#" class="blog-card border border-slate-200 dark:border-dark-border rounded-3xl overflow-hidden flex flex-col group animate-fade-in-up stagger-5">
-                    <div class="h-52 relative overflow-hidden bg-slate-100 dark:bg-slate-800">
-                        <div class="absolute inset-0 bg-gradient-to-br from-rose-400 to-red-600 opacity-80 blog-img-placeholder mix-blend-multiply dark:mix-blend-normal"></div>
-                        <i data-lucide="server" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 text-white opacity-40 drop-shadow-md"></i>
-                    </div>
-                    <div class="p-8 flex flex-col flex-grow bg-white/40 dark:bg-transparent">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-rose-600 dark:text-rose-400 mb-3">Tech Deep Dive</span>
-                        <h3 class="text-2xl font-serif font-bold text-slate-900 dark:text-white mb-3 group-hover:text-cyan-500 transition-colors leading-tight">Decoding DNS Records for Due Diligence</h3>
-                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-8 line-clamp-3 leading-relaxed">How to read historical MX and A records to uncover the past life of a domain and avoid penalizations before you buy.</p>
-                        <div class="mt-auto flex items-center justify-between pt-5 border-t border-slate-200/60 dark:border-dark-border">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs font-bold shadow-inner">AL</div>
-                                <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Alex L.</span>
-                            </div>
-                            <div class="text-cyan-500 read-more-arrow"><i data-lucide="arrow-right" class="w-5 h-5"></i></div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Article 6 -->
-                <a href="#" class="blog-card border border-slate-200 dark:border-dark-border rounded-3xl overflow-hidden flex flex-col group animate-fade-in-up stagger-6">
-                    <div class="h-52 relative overflow-hidden bg-slate-100 dark:bg-slate-800">
-                        <div class="absolute inset-0 bg-dynamic-5 animate-gradient-xy opacity-80 blog-img-placeholder mix-blend-multiply dark:mix-blend-normal"></div>
-                        <i data-lucide="zap" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 text-white opacity-40 drop-shadow-md"></i>
-                    </div>
-                    <div class="p-8 flex flex-col flex-grow bg-white/40 dark:bg-transparent">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-3">Platform Updates</span>
-                        <h3 class="text-2xl font-serif font-bold text-slate-900 dark:text-white mb-3 group-hover:text-cyan-500 transition-colors leading-tight">AI Domains v2.0: Faster Scraping & New APIs</h3>
-                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-8 line-clamp-3 leading-relaxed">We've entirely rewritten our generation engine in Rust and integrated with 3 new registrars for true zero-latency lookups.</p>
-                        <div class="mt-auto flex items-center justify-between pt-5 border-t border-slate-200/60 dark:border-dark-border">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-bold shadow-inner">TM</div>
-                                <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Team</span>
-                            </div>
-                            <div class="text-cyan-500 read-more-arrow"><i data-lucide="arrow-right" class="w-5 h-5"></i></div>
-                        </div>
-                    </div>
-                </a>
-
+            <!-- No Results -->
+            <div id="noResults" class="hidden text-center py-16 mb-24">
+                <i data-lucide="search-x" class="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4"></i>
+                <h3 class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-2">No articles found</h3>
+                <p class="text-slate-400 dark:text-slate-500">Try a different search term or category.</p>
             </div>
 
-            <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                 ENHANCED NEWSLETTER CTA
-            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+            <!-- Categories Section -->
+            <div class="mb-20">
+                <h2 class="font-serif text-3xl md:text-4xl text-center text-slate-900 dark:text-white mb-10">Browse by Category</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="categoryGrid"></div>
+            </div>
+
+            <!-- Newsletter -->
             <div class="bg-gradient-to-br from-blue-600 via-cyan-600 to-purple-600 rounded-[2.5rem] p-10 md:p-16 text-center text-white relative overflow-hidden shadow-2xl mb-10 animate-fade-in-up border border-white/10">
-                <!-- Floating Glass Badge -->
                 <div class="absolute top-8 left-8 hidden lg:flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full">
                     <div class="flex -space-x-2">
                         <div class="w-6 h-6 rounded-full bg-blue-400 border border-blue-600"></div>
@@ -419,20 +253,16 @@
                     </div>
                     <span class="text-xs font-bold tracking-wide">Join 15K+ readers</span>
                 </div>
-
-                <!-- Decorative abstract elements -->
                 <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
                     <div class="absolute -top-32 -right-32 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
                     <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-black/20 rounded-full blur-3xl"></div>
                 </div>
-
                 <div class="relative z-10 max-w-2xl mx-auto">
                     <div class="w-20 h-20 mx-auto bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-8 border border-white/20 shadow-inner">
                         <i data-lucide="mail-open" class="w-10 h-10 text-white"></i>
                     </div>
                     <h2 class="font-serif text-4xl md:text-5xl font-bold mb-6 leading-tight">Never miss a domain drop.</h2>
                     <p class="text-blue-50 text-lg mb-10 leading-relaxed font-medium opacity-90">Get our weekly teardown of the best expired domains, market trends, and insider strategies directly in your inbox.</p>
-                    
                     <form class="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto" onsubmit="event.preventDefault(); alert('Subscribed successfully!');">
                         <input type="email" placeholder="Enter your best email address" required class="flex-grow bg-white/10 border border-white/20 text-white placeholder-blue-100 px-6 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm transition-all font-medium">
                         <button type="submit" class="bg-white text-blue-600 px-8 py-4 rounded-2xl font-bold hover:bg-blue-50 hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all shadow-lg whitespace-nowrap">
@@ -448,35 +278,33 @@
         </div>
     </main>
 
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         FOOTER
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- FOOTER -->
     <footer class="border-t border-slate-200 dark:border-dark-border bg-white dark:bg-dark-bg py-12 mt-auto relative z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
                 <div>
                     <h4 class="font-bold text-lg text-slate-900 dark:text-white mb-4">Generators</h4>
                     <ul class="space-y-3">
-                        <li><a href="landing.html#geo" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Geo Domains</a></li>
-                        <li><a href="landing.html#keyword" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Keyword Domains</a></li>
-                        <li><a href="landing.html#pattern" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Pattern Domains</a></li>
-                        <li><a href="landing.html#brandable" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Brandable Names</a></li>
-                        <li><a href="landing.html#numeric" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Numeric Domains</a></li>
+                        <li><a href="/geo-domains" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Geo Domains</a></li>
+                        <li><a href="/keyword-domains" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Keyword Domains</a></li>
+                        <li><a href="/pattern-domains" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Pattern Domains</a></li>
+                        <li><a href="/brandable-domains" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Brandable Names</a></li>
+                        <li><a href="/numeric-domains" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Numeric Domains</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-bold text-lg text-slate-900 dark:text-white mb-4">Domain tools</h4>
                     <ul class="space-y-3">
-                        <li><a href="landing.html#analyzer" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Smart Analyzer</a></li>
-                        <li><a href="landing.html#bulkcheck" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Bulk Checker</a></li>
-                        <li><a href="landing.html#whois" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Whois Lookup</a></li>
-                        <li><a href="landing.html#emailtool" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Smart Email</a></li>
+                        <li><a href="/smart-analyzer" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Smart Analyzer</a></li>
+                        <li><a href="/bulk-checker" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Bulk Checker</a></li>
+                        <li><a href="/smart-analyzer" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Whois Lookup</a></li>
+                        <li><a href="/smart-email" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Smart Email</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-bold text-lg text-slate-900 dark:text-white mb-4">Resources</h4>
                     <ul class="space-y-3">
-                        <li><a href="blog.html" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Blog & News</a></li>
+                        <li><a href="/blog" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Blog & News</a></li>
                         <li><a href="#" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Glossary</a></li>
                         <li><a href="#" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">API Docs</a></li>
                     </ul>
@@ -484,15 +312,14 @@
                 <div>
                     <h4 class="font-bold text-lg text-slate-900 dark:text-white mb-4">Company</h4>
                     <ul class="space-y-3">
-                        <li><a href="about.html" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">About</a></li>
-                        <li><a href="contact.html" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Contact</a></li>
-                        <li><a href="security.html" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Security</a></li>
-                        <li><a href="terms.html" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Terms</a></li>
-                        <li><a href="privacy.html" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Privacy</a></li>
+                        <li><a href="/about" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">About</a></li>
+                        <li><a href="/contact" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Contact</a></li>
+                        <li><a href="/security" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Security</a></li>
+                        <li><a href="/terms" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Terms</a></li>
+                        <li><a href="/privacy" class="text-slate-500 dark:text-slate-400 hover:text-cyan-500 transition-colors text-sm">Privacy</a></li>
                     </ul>
                 </div>
             </div>
-
             <div class="border-t border-slate-200 dark:border-dark-border pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="flex items-center gap-2">
                     <i data-lucide="infinity" class="w-6 h-6 text-cyan-500"></i>
@@ -500,35 +327,206 @@
                     <span class="hidden md:block w-1 h-1 bg-slate-300 dark:bg-slate-600 rounded-full mx-2"></span>
                     <p class="text-slate-500 dark:text-slate-400 text-sm">An ICANN-accredited partner</p>
                 </div>
-
                 <div class="flex items-center gap-4">
-                    <a href="#" class="p-2 text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:bg-dark-hover rounded-lg transition-all" aria-label="Twitter">
-                        <i data-lucide="twitter" class="w-5 h-5"></i>
-                    </a>
-                    <a href="#" class="p-2 text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:bg-dark-hover rounded-lg transition-all" aria-label="GitHub">
-                        <i data-lucide="github" class="w-5 h-5"></i>
-                    </a>
-                    <a href="#" class="p-2 text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:bg-dark-hover rounded-lg transition-all" aria-label="LinkedIn">
-                        <i data-lucide="linkedin" class="w-5 h-5"></i>
-                    </a>
+                    <a href="#" class="p-2 text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:bg-dark-hover rounded-lg transition-all" aria-label="Twitter"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                    <a href="#" class="p-2 text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:bg-dark-hover rounded-lg transition-all" aria-label="GitHub"><i data-lucide="github" class="w-5 h-5"></i></a>
+                    <a href="#" class="p-2 text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:bg-dark-hover rounded-lg transition-all" aria-label="LinkedIn"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
                 </div>
             </div>
         </div>
     </footer>
 
     <script>
+    // Blog Data & Rendering
+    let blogPosts = [];
+    const gradients = ['bg-dynamic-1','bg-dynamic-2','bg-dynamic-3','bg-dynamic-4','bg-dynamic-5','bg-dynamic-6'];
+    const categoryIcons = {
+        'domain-flipping': 'repeat', 'ai-domains': 'cpu', 'expired-domains': 'clock',
+        'brandable-domains': 'sparkles', 'geo-domains': 'map-pin', 'domain-seo': 'bar-chart-2',
+        'domain-investing': 'trending-up', 'domain-news': 'newspaper'
+    };
+    const categoryColors = {
+        'domain-flipping': 'text-emerald-600 dark:text-emerald-400',
+        'ai-domains': 'text-cyan-600 dark:text-cyan-400',
+        'expired-domains': 'text-orange-600 dark:text-orange-400',
+        'brandable-domains': 'text-purple-600 dark:text-purple-400',
+        'geo-domains': 'text-blue-600 dark:text-blue-400',
+        'domain-seo': 'text-rose-600 dark:text-rose-400',
+        'domain-investing': 'text-amber-600 dark:text-amber-400',
+        'domain-news': 'text-slate-600 dark:text-slate-400'
+    };
+
+    // Load blog data
+    fetch('/data/blog.json')
+        .then(r => r.json())
+        .then(data => {
+            blogPosts = data;
+            renderFeatured();
+            renderCategoryFilter();
+            renderArticles('all');
+            renderCategoryGrid();
+            lucide.createIcons();
+        })
+        .catch(() => { lucide.createIcons(); });
+
+    function renderFeatured() {
+        const featured = blogPosts.filter(p => p.featured);
+        if (!featured.length) return;
+        const post = featured[0];
+        const section = document.getElementById('featuredSection');
+        section.innerHTML = `
+            <a href="/blog/${post.slug}/" class="group block bg-white/60 dark:bg-dark-card/60 backdrop-blur-xl border border-slate-200 dark:border-dark-border rounded-[2rem] overflow-hidden shadow-glass dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] mb-20 transition-all duration-500 hover:border-cyan-500/50 hover:shadow-glow-blue relative">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-white/20 dark:to-black/20 z-10 pointer-events-none"></div>
+                <div class="flex flex-col lg:flex-row relative z-20">
+                    <div class="lg:w-1/2 h-72 lg:h-auto relative overflow-hidden bg-slate-900">
+                        <div class="absolute inset-0 bg-dynamic-1 animate-gradient-xy opacity-90 blog-img-placeholder"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i data-lucide="${categoryIcons[post.category] || 'file-text'}" class="w-32 h-32 text-white opacity-20 transform group-hover:scale-110 transition-transform duration-700"></i>
+                        </div>
+                    </div>
+                    <div class="lg:w-1/2 p-8 lg:p-14 flex flex-col justify-center bg-white/50 dark:bg-black/20 backdrop-blur-sm">
+                        <div class="flex items-center gap-3 mb-6 text-xs font-bold uppercase tracking-widest">
+                            <span class="text-cyan-500 bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-500/20 px-3 py-1 rounded-full flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse"></span> Featured
+                            </span>
+                            <span class="text-slate-500 dark:text-slate-400">${post.category.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}</span>
+                        </div>
+                        <h2 class="text-3xl lg:text-5xl font-serif font-bold text-slate-900 dark:text-white mb-6 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-500 group-hover:to-cyan-500 transition-all duration-300 leading-tight">${post.title}</h2>
+                        <p class="text-slate-600 dark:text-slate-400 mb-8 text-lg line-clamp-3 leading-relaxed">${post.excerpt}</p>
+                        <div class="flex items-center justify-between mt-auto pt-6 border-t border-slate-200/50 dark:border-dark-border/50">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-base shadow-inner border-2 border-white dark:border-dark-card">AD</div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">${post.author}</h4>
+                                    <p class="text-xs text-slate-500 font-medium">${formatDate(post.date)} &middot; ${post.readingTime}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 text-sm font-bold text-cyan-600 dark:text-cyan-400 group-hover:translate-x-2 transition-transform duration-300">
+                                Read Full Story <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>`;
         lucide.createIcons();
-        const themeToggleBtn = document.getElementById('theme-toggle');
-        themeToggleBtn.addEventListener('click', () => {
-            const t = document.documentElement.classList.toggle('dark') ? 'dark' : 'light';
-            localStorage.setItem('theme', t);
-            document.documentElement.setAttribute('data-theme', t);
+    }
+
+    const inactiveBtnClass = 'category-btn px-6 py-2.5 rounded-full bg-white/80 dark:bg-[#151515]/80 backdrop-blur-md border border-slate-200 dark:border-dark-border text-slate-600 dark:text-slate-300 hover:border-cyan-500 hover:text-cyan-500 hover:shadow-glow-blue transition-all text-sm font-semibold cursor-pointer';
+    const activeBtnClass = 'category-btn active px-6 py-2.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold shadow-lg transition-all cursor-pointer';
+
+    function renderCategoryFilter() {
+        const cats = [...new Set(blogPosts.map(p => p.category))];
+        const container = document.getElementById('categoryFilter');
+        cats.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = inactiveBtnClass;
+            btn.dataset.category = cat;
+            btn.textContent = cat.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+            container.appendChild(btn);
         });
-        const header = document.getElementById('header');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 20) { header.classList.add('header-scrolled'); header.classList.remove('pt-3', 'pb-1'); } 
-            else { header.classList.remove('header-scrolled'); header.classList.add('pt-3', 'pb-1'); }
+        container.addEventListener('click', e => {
+            const btn = e.target.closest('.category-btn');
+            if (!btn) return;
+            container.querySelectorAll('.category-btn').forEach(b => {
+                b.className = inactiveBtnClass;
+            });
+            btn.className = activeBtnClass;
+            renderArticles(btn.dataset.category);
         });
+    }
+
+    function renderArticles(category) {
+        const grid = document.getElementById('articleGrid');
+        const noResults = document.getElementById('noResults');
+        let posts = category === 'all' ? blogPosts : blogPosts.filter(p => p.category === category);
+        if (!posts.length) { grid.innerHTML = ''; noResults.classList.remove('hidden'); return; }
+        noResults.classList.add('hidden');
+        grid.innerHTML = posts.map((post, i) => `
+            <a href="/blog/${post.slug}/" class="blog-card border border-slate-200 dark:border-dark-border rounded-3xl overflow-hidden flex flex-col group animate-fade-in-up stagger-${Math.min(i+1,6)}">
+                <div class="h-52 relative overflow-hidden bg-slate-100 dark:bg-slate-800">
+                    <div class="absolute inset-0 ${gradients[i % gradients.length]} animate-gradient-xy opacity-80 blog-img-placeholder mix-blend-multiply dark:mix-blend-normal"></div>
+                    <i data-lucide="${categoryIcons[post.category] || 'file-text'}" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 text-white opacity-40 drop-shadow-md"></i>
+                </div>
+                <div class="p-8 flex flex-col flex-grow bg-white/40 dark:bg-transparent">
+                    <span class="text-[10px] font-bold uppercase tracking-widest ${categoryColors[post.category] || 'text-slate-500'} mb-3">${post.category.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}</span>
+                    <h3 class="text-2xl font-serif font-bold text-slate-900 dark:text-white mb-3 group-hover:text-cyan-500 transition-colors leading-tight">${post.title}</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 mb-8 line-clamp-3 leading-relaxed">${post.excerpt}</p>
+                    <div class="mt-auto flex items-center justify-between pt-5 border-t border-slate-200/60 dark:border-dark-border">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-cyan-500 text-white flex items-center justify-center text-xs font-bold shadow-inner">AD</div>
+                            <span class="text-sm font-bold text-slate-700 dark:text-slate-300">${post.author}</span>
+                        </div>
+                        <div class="text-cyan-500 read-more-arrow"><i data-lucide="arrow-right" class="w-5 h-5"></i></div>
+                    </div>
+                </div>
+            </a>`).join('');
+        lucide.createIcons();
+    }
+
+    function renderCategoryGrid() {
+        const allCats = ['domain-flipping','ai-domains','expired-domains','brandable-domains','geo-domains','domain-seo','domain-investing','domain-news'];
+        const container = document.getElementById('categoryGrid');
+        container.innerHTML = allCats.map(cat => {
+            const count = blogPosts.filter(p => p.category === cat).length;
+            const hasCat = count > 0;
+            return `<a href="/blog/category/${cat}/" class="group p-6 bg-white/60 dark:bg-dark-card/60 backdrop-blur-xl border border-slate-200 dark:border-dark-border rounded-2xl hover:border-cyan-500/50 hover:shadow-glow transition-all text-center ${!hasCat ? 'opacity-50' : ''}">
+                <i data-lucide="${categoryIcons[cat] || 'folder'}" class="w-8 h-8 ${categoryColors[cat] || 'text-slate-500'} mx-auto mb-3"></i>
+                <h3 class="font-bold text-slate-900 dark:text-white text-sm mb-1">${cat.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}</h3>
+                <p class="text-xs text-slate-500">${count} article${count !== 1 ? 's' : ''}</p>
+            </a>`;
+        }).join('');
+        lucide.createIcons();
+    }
+
+    // Search
+    const searchInput = document.getElementById('blogSearch');
+    const searchResults = document.getElementById('searchResults');
+    searchInput.addEventListener('input', e => {
+        const q = e.target.value.toLowerCase().trim();
+        if (!q) { searchResults.classList.remove('active'); searchResults.innerHTML = ''; return; }
+        const matches = blogPosts.filter(p =>
+            p.title.toLowerCase().includes(q) ||
+            p.category.toLowerCase().includes(q) ||
+            p.excerpt.toLowerCase().includes(q) ||
+            p.keywords.some(k => k.toLowerCase().includes(q))
+        );
+        if (!matches.length) {
+            searchResults.innerHTML = '<div class="p-4 text-center text-sm text-slate-500">No results found</div>';
+        } else {
+            searchResults.innerHTML = matches.map(p => `
+                <a href="/blog/${p.slug}/" class="flex items-center gap-4 p-4 hover:bg-slate-50 dark:hover:bg-[#1A1A1A] transition-colors border-b border-slate-100 dark:border-dark-border last:border-0">
+                    <div class="w-10 h-10 rounded-xl ${gradients[p.id % gradients.length]} flex items-center justify-center shrink-0">
+                        <i data-lucide="${categoryIcons[p.category] || 'file-text'}" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="font-bold text-sm text-slate-900 dark:text-white truncate">${p.title}</h4>
+                        <p class="text-xs text-slate-500">${p.category.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase())} &middot; ${p.readingTime}</p>
+                    </div>
+                </a>`).join('');
+        }
+        searchResults.classList.add('active');
+        lucide.createIcons();
+    });
+    document.addEventListener('click', e => {
+        if (!e.target.closest('#blogSearch') && !e.target.closest('#searchResults')) searchResults.classList.remove('active');
+    });
+
+    function formatDate(d) {
+        return new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+    }
+
+    // Theme & Header
+    lucide.createIcons();
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+        const t = document.documentElement.classList.toggle('dark') ? 'dark' : 'light';
+        localStorage.setItem('theme', t);
+        document.documentElement.setAttribute('data-theme', t);
+    });
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 20) { header.classList.add('header-scrolled'); header.classList.remove('pt-3', 'pb-1'); }
+        else { header.classList.remove('header-scrolled'); header.classList.add('pt-3', 'pb-1'); }
+    });
     </script>
 </body>
 </html>
