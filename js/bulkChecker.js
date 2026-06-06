@@ -200,31 +200,36 @@ export async function bulkCheckDomains(domainsArray, options = {}) {
     for (const batch of batches) {
       try {
         const batchResults = await callBulkCheckAPI(batch, [tld]);
+        const batchResultsMap = {};
 
-        // Store results + cache
+        // Store results without caching them immediately
         for (const name of batch) {
           const fullDomain = name + '.' + tld;
           const isAvailable = batchResults[fullDomain];
           if (isAvailable !== undefined) {
             resultsMap[fullDomain] = isAvailable;
-            setCached(fullDomain, isAvailable);
+            batchResultsMap[fullDomain] = isAvailable;
           } else {
             // API didn't return this domain — mark as unknown (null)
             resultsMap[fullDomain] = null;
+            batchResultsMap[fullDomain] = null;
           }
         }
 
         checked += batch.length;
-        if (onProgress) onProgress(checked, total);
+        if (onProgress) onProgress(checked, total, batchResultsMap);
 
       } catch (err) {
         console.error('Bulk check batch error:', err);
+        const batchResultsMap = {};
         // Mark failed domains as null
         for (const name of batch) {
-          resultsMap[name + '.' + tld] = null;
+          const fullDomain = name + '.' + tld;
+          resultsMap[fullDomain] = null;
+          batchResultsMap[fullDomain] = null;
         }
         checked += batch.length;
-        if (onProgress) onProgress(checked, total);
+        if (onProgress) onProgress(checked, total, batchResultsMap);
       }
     }
   }

@@ -34,9 +34,12 @@ function createDomainCard(domain, index = 0) {
 
   let sc = 'status-checking';
   let st = 'Checking...';
+  let isUnknown = false;
   if (domain.available === true) { sc = 'status-available'; st = 'Available'; }
   else if (domain.available === false) { sc = 'status-taken'; st = 'Taken'; }
-  else if (domain.available === 'error') { sc = 'status-taken'; st = 'Check Failed'; }
+  else if (domain.available === 'error' || domain.available === 'unknown' || domain.available === null) {
+    sc = 'status-unknown'; st = 'Unknown'; isUnknown = true;
+  }
   const favActive = isFavorite(domainName);
   const isAvail = domain.available === true;
 
@@ -47,7 +50,11 @@ function createDomainCard(domain, index = 0) {
     </button>
     <div class="domain-name" style="cursor:pointer" data-nav-domain="${domainName}">${domainName}</div>
     <div class="domain-tlds" id="tlds-${domainName.replace(/\./g,'-')}"></div>
-    <div class="domain-status ${sc}"><span class="status-dot"></span><span>${st}</span></div>
+    <div class="domain-status ${sc}">
+      <span class="status-dot"></span>
+      <span>${st}</span>
+      ${isUnknown ? `<button class="btn-retry-status" data-domain="${domainName}" style="margin-left: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: var(--text-primary); font-size: 0.65rem; padding: 2px 6px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='var(--primary)'; this.style.borderColor='var(--primary)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='rgba(255,255,255,0.15)'">Retry</button>` : ''}
+    </div>
     <div class="card-actions"></div>`;
 
   const actionsEl = card.querySelector('.card-actions');
@@ -71,8 +78,21 @@ function createDomainCard(domain, index = 0) {
     favBtn.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
+      if (window.state && window.state.isChecking) {
+        toast('Favorites are disabled while checking availability.');
+        return;
+      }
       const added = toggleFavorite(domain);
       favBtn.classList.toggle('active', added);
+    });
+  }
+
+  const retryBtn = card.querySelector('.btn-retry-status');
+  if (retryBtn) {
+    retryBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      document.dispatchEvent(new CustomEvent('retry-domain-check', { detail: { domain: domainName } }));
     });
   }
 
@@ -430,8 +450,9 @@ function renderAnalyzerTable(container, domains) {
       <div class="dc-panel-left">
         <div class="dc-main-top">
           <p class="dc-name" data-domain='${JSON.stringify(d).replace(/'/g, "&#39;")}'>${d.name}</p>
-          <span class="dc-badge ${d.available === true ? 'dc-avail' : d.available === 'checking' ? 'dc-checking' : 'dc-taken'}">
-            <span class="dc-badge-dot"></span>${d.available === true ? 'Available' : d.available === 'checking' ? 'Checking...' : 'Registered'}
+          <span class="dc-badge ${d.available === true ? 'dc-avail' : d.available === 'checking' ? 'dc-checking' : (d.available === null || d.available === 'unknown' || d.available === 'error') ? 'dc-unknown' : 'dc-taken'}">
+            <span class="dc-badge-dot"></span>${d.available === true ? 'Available' : d.available === 'checking' ? 'Checking...' : (d.available === null || d.available === 'unknown' || d.available === 'error') ? 'Unknown' : 'Registered'}
+            ${(d.available === null || d.available === 'unknown' || d.available === 'error') ? `<button class="btn-retry-status" data-domain="${d.name}" style="margin-left: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: var(--text-primary); font-size: 0.65rem; padding: 2px 6px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='var(--primary)'; this.style.borderColor='var(--primary)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='rgba(255,255,255,0.15)'">Retry</button>` : ''}
           </span>
         </div>
         
@@ -538,10 +559,25 @@ function renderAnalyzerTable(container, domains) {
   container.querySelectorAll('.dc-fav').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
+      if (window.state && window.state.isChecking) {
+        toast('Favorites are disabled while checking availability.');
+        return;
+      }
       const domain = domains.find(d => d.name === btn.dataset.domain);
       if (domain) {
         const added = toggleFavorite(domain);
         btn.classList.toggle('active', added);
+      }
+    });
+  });
+
+  container.querySelectorAll('.btn-retry-status').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      const domainName = btn.dataset.domain;
+      if (domainName) {
+        document.dispatchEvent(new CustomEvent('retry-domain-check', { detail: { domain: domainName } }));
       }
     });
   });
@@ -583,8 +619,12 @@ function renderAnalyzerCards(container, domains) {
 
     let sc = 'status-checking';
     let st = 'Checking...';
+    let isUnknown = false;
     if (d.available === true) { sc = 'status-available'; st = 'Available'; }
     else if (d.available === false) { sc = 'status-taken'; st = 'Taken'; }
+    else if (d.available === null || d.available === 'unknown' || d.available === 'error') {
+      sc = 'status-unknown'; st = 'Unknown'; isUnknown = true;
+    }
     const favActive = isFavorite(d.name);
     const isAvail = d.available === true;
 
@@ -593,7 +633,11 @@ function renderAnalyzerCards(container, domains) {
         ${STAR_SVG_SM}<span class="fav-pop"></span>
       </button>
       <div class="domain-name" style="cursor:pointer">${d.name}</div>
-      <div class="domain-status ${sc}"><span class="status-dot"></span><span>${st}</span></div>
+      <div class="domain-status ${sc}">
+        <span class="status-dot"></span>
+        <span>${st}</span>
+        ${isUnknown ? `<button class="btn-retry-status" data-domain="${d.name}" style="margin-left: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: var(--text-primary); font-size: 0.65rem; padding: 2px 6px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='var(--primary)'; this.style.borderColor='var(--primary)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='rgba(255,255,255,0.15)'">Retry</button>` : ''}
+      </div>
       <div class="card-actions"></div>`;
 
     const actionsEl = card.querySelector('.card-actions');
@@ -610,8 +654,21 @@ function renderAnalyzerCards(container, domains) {
       favBtn.addEventListener('click', e => {
         e.preventDefault();
         e.stopPropagation();
+        if (window.state && window.state.isChecking) {
+          toast('Favorites are disabled while checking availability.');
+          return;
+        }
         const added = toggleFavorite(d);
         favBtn.classList.toggle('active', added);
+      });
+    }
+
+    const retryBtn = card.querySelector('.btn-retry-status');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        e.preventDefault();
+        document.dispatchEvent(new CustomEvent('retry-domain-check', { detail: { domain: d.name } }));
       });
     }
 
@@ -624,4 +681,127 @@ function renderAnalyzerCards(container, domains) {
 
   grid.appendChild(fragment);
   requestAnimationFrame(() => { grid.style.opacity = '1'; });
+}
+
+// Style injection for checking state styling
+(function injectCheckingStyles() {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById('availability-checking-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'availability-checking-styles';
+  style.textContent = `
+    .checking-in-progress .btn-fav,
+    .checking-in-progress .dc-fav {
+      opacity: 0.5 !important;
+      cursor: not-allowed !important;
+    }
+    .status-unknown span {
+      color: var(--text-secondary, #94a3b8) !important;
+    }
+    .status-unknown .status-dot {
+      background-color: var(--text-secondary, #94a3b8) !important;
+      box-shadow: 0 0 8px var(--text-secondary, #94a3b8) !important;
+    }
+    .dc-unknown {
+      background: rgba(148, 163, 184, 0.1) !important;
+      color: #94a3b8 !important;
+      border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    }
+    .dc-unknown .dc-badge-dot {
+      background: #94a3b8 !important;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+function ensureProgressBar() {
+  let barWrap = document.getElementById('availabilityProgressBarWrap');
+  if (barWrap) return barWrap;
+
+  const resultsHeader = document.querySelector('.results-header');
+  if (!resultsHeader) return null;
+
+  barWrap = document.createElement('div');
+  barWrap.id = 'availabilityProgressBarWrap';
+  barWrap.className = 'progress-bar-wrap';
+  barWrap.style.cssText = `
+    display: none;
+    margin: 15px 0;
+    padding: 12px 16px;
+    background: var(--bg-secondary, rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+    border-radius: var(--radius-md, 12px);
+    box-shadow: var(--shadow-sm);
+  `;
+  barWrap.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <span style="font-size:0.85rem; font-weight:600; color:var(--text-primary);">Checking Availability...</span>
+      <span id="progressCountText" style="font-size:0.8rem; font-weight:600; color:var(--primary);">0 / 0 Domains</span>
+    </div>
+    <div style="width:100%; height:6px; background:rgba(255, 255, 255, 0.1); border-radius:3px; overflow:hidden;">
+      <div id="progressFillBar" style="width:0%; height:100%; background:linear-gradient(90deg, var(--primary) 0%, var(--primary-hover, #6366f1) 100%); transition: width 0.3s ease;"></div>
+    </div>
+  `;
+  resultsHeader.after(barWrap);
+  return barWrap;
+}
+
+function ensureErrorBanner() {
+  let errWrap = document.getElementById('availabilityErrorWrap');
+  if (errWrap) return errWrap;
+
+  const resultsHeader = document.querySelector('.results-header');
+  if (!resultsHeader) return null;
+
+  errWrap = document.createElement('div');
+  errWrap.id = 'availabilityErrorWrap';
+  errWrap.style.cssText = `
+    display: none;
+    margin: 15px 0;
+    padding: 12px 16px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--radius-md, 12px);
+  `;
+  errWrap.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-size:0.82rem; font-weight:600; color:#ef4444;">Some availability checks failed.</span>
+      <button id="btnRetryAllFailed" class="btn-action-sm" style="background:#ef4444; color:#fff; border:none; padding:4px 10px; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.75rem;">Retry Available</button>
+    </div>
+  `;
+  resultsHeader.after(errWrap);
+  return errWrap;
+}
+
+export function showAvailabilityProgress(checked, total, isChecking = true) {
+  const barWrap = ensureProgressBar();
+  const grid = document.getElementById('resultsGrid');
+  
+  if (grid) {
+    grid.classList.toggle('checking-in-progress', isChecking);
+  }
+
+  if (isChecking) {
+    const errWrap = document.getElementById('availabilityErrorWrap');
+    if (errWrap) errWrap.style.display = 'none';
+  }
+
+  if (!isChecking || checked >= total) {
+    if (barWrap) barWrap.style.display = 'none';
+  } else {
+    if (barWrap) {
+      barWrap.style.display = 'block';
+      const textEl = document.getElementById('progressCountText');
+      const fillEl = document.getElementById('progressFillBar');
+      if (textEl) textEl.textContent = `Checking ${checked} / ${total} Domains`;
+      if (fillEl) fillEl.style.width = `${(checked / total) * 100}%`;
+    }
+  }
+}
+
+export function showAvailabilityErrorBanner(show = true) {
+  const errWrap = ensureErrorBanner();
+  if (errWrap) {
+    errWrap.style.display = show ? 'block' : 'none';
+  }
 }

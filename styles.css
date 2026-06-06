@@ -5216,11 +5216,13 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 /* ============================================
    SEO REUSABLE CONTENT SECTION
    ============================================ */
+
+/* ── Outer wrapper ── */
 .seo-content-section {
   display: none;
-  margin: 3rem auto 2rem auto;
-  max-width: 1200px;
-  padding: 0 16px;
+  margin: 24px auto 48px auto;
+  max-width: 1000px;
+  padding: 0 20px;
   font-family: var(--font-primary);
   width: 100%;
   box-sizing: border-box;
@@ -5238,154 +5240,246 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   display: block;
 }
 
-.seo-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 24px;
-  align-items: start;
-}
-
+/* ── Single card wrapper ── */
 .seo-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: border-color var(--transition), box-shadow var(--transition);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
 }
 
-.seo-card:hover {
-  border-color: var(--border-hover);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+.seo-inner {
+  padding: 0;
 }
 
-.seo-title-h2 {
+/* ── Section blocks inside the card ── */
+.seo-block {
+  padding: 32px;
+}
+
+/* ── Visual divider between sections ── */
+.seo-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0;
+}
+
+/* ── Section headings (H2) ── */
+.seo-h2 {
   font-family: var(--font-heading);
   font-size: 1.35rem;
   font-weight: 700;
   color: var(--text-main);
-  margin-bottom: 16px;
+  margin: 0 0 16px 0;
   line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
-.seo-title-h3 {
-  font-family: var(--font-heading);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-main);
-  margin-bottom: 8px;
-  line-height: 1.4;
-}
-
+/* ── Body text ── */
 .seo-paragraph {
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 12px;
+  line-height: 1.8;
+  margin: 0 0 12px 0;
 }
 
 .seo-paragraph:last-child {
   margin-bottom: 0;
 }
 
-/* Feature List Styling */
+/* ── Legacy aliases (keep so static-rendered pages still work) ── */
+.seo-title-h2 {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 16px 0;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+/* ── Feature card grid ── */
 .seo-feature-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
 }
 
 .seo-feature-item {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  margin-bottom: 12px;
+  gap: 12px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: all var(--transition);
 }
 
-.seo-feature-item:last-child {
-  margin-bottom: 0;
+.seo-feature-item:hover {
+  border-color: var(--primary);
+  background: var(--bg-card);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
 }
 
 .seo-feature-icon {
-  flex-shrink: 0;
-  color: var(--success);
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1;
-  margin-top: 2px;
-}
-
-/* FAQ Item Styling */
-.seo-faq-item {
-  border-bottom: 1px solid var(--border);
-  padding: 16px 0;
-}
-
-.seo-faq-item:first-child {
-  padding-top: 0;
-}
-
-.seo-faq-item:last-child {
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-.seo-faq-question {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-main);
-  margin-bottom: 6px;
-}
-
-.seo-faq-answer {
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-/* Related Tools Link Grid */
-.seo-related-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.seo-related-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  padding: 10px 8px;
-  font-size: 0.76rem;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  background: var(--success-bg);
+  color: var(--success);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.seo-feature-text {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+/* ── FAQ Accordion ── */
+.seo-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.seo-faq-accordion {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-soft);
+  overflow: hidden;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.seo-faq-accordion[open] {
+  border-color: var(--primary);
+  background: var(--bg-card);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.seo-faq-question {
+  padding: 15px 18px;
+  font-size: 0.93rem;
   font-weight: 600;
   color: var(--text-main);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+  user-select: none;
+  transition: background var(--transition);
+}
+
+.seo-faq-question::-webkit-details-marker {
+  display: none;
+}
+
+.seo-faq-question:hover {
+  background: var(--bg-soft2);
+}
+
+.faq-icon {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px;
+  min-height: 16px;
+  max-width: 16px;
+  max-height: 16px;
+  color: var(--text-muted);
+  transition: transform var(--transition);
+  flex-shrink: 0;
+}
+
+.seo-faq-accordion[open] .faq-icon {
+  transform: rotate(180deg);
+  color: var(--primary);
+}
+
+.seo-faq-answer {
+  padding: 0 18px 16px 18px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.seo-faq-accordion[open] .seo-faq-answer {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+/* ── Related Tools Pills ── */
+.seo-related-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.seo-related-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--text-secondary);
   background: var(--bg-soft);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: 24px;
   text-decoration: none;
-  transition: all var(--transition);
+  transition: all 0.18s ease;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .seo-related-link:hover {
   background: var(--primary-light);
   border-color: var(--primary);
   color: var(--primary);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-@media (max-width: 992px) {
-  .seo-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+/* ── Responsive ── */
+@media (max-width: 1040px) {
+  .seo-content-section {
+    max-width: 90%;
+    padding: 0;
   }
-  .seo-card {
+}
+
+@media (max-width: 768px) {
+  .seo-content-section {
+    margin: 16px auto 32px auto;
+    max-width: 100%;
+    padding: 0 12px;
+  }
+  .seo-block {
     padding: 20px;
-    margin-bottom: 16px;
+  }
+  .seo-feature-list {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
+@media (max-width: 480px) {
+  .seo-feature-list {
+    grid-template-columns: 1fr;
+  }
+}

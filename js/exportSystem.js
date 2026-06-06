@@ -186,6 +186,10 @@ function _attachEvents() {
       // Ctrl+E opens export when results exist
       if ((e.ctrlKey || e.metaKey) && e.key === 'e' && _domains.length) {
         e.preventDefault();
+        if (window.state && window.state.isChecking) {
+          _toastExport('Export is disabled while checking availability', false);
+          return;
+        }
         _setMenuOpen(true);
       }
       return;
@@ -283,7 +287,8 @@ function _refreshCounter() {
 function _refreshExportToggleBtn() {
   const btn = document.getElementById('btnExportToggle');
   if (!btn) return;
-  const hasData = _domains.length > 0;
+  const isChecking = window.state && window.state.isChecking;
+  const hasData = _domains.length > 0 && !isChecking;
   btn.disabled = !hasData;
   btn.style.opacity = hasData ? '1' : '0.45';
 }
@@ -314,6 +319,10 @@ function _download(content, filename, mimeType) {
 // ─── Export functions ─────────────────────────────────────────
 
 function _doExport(format) {
+  if (window.state && window.state.isChecking) {
+    _toastExport('Export is disabled while checking availability', false);
+    return;
+  }
   const list = _getExportList();
   if (!list.length) {
     _toastExport('No domains to export', false);
@@ -404,6 +413,10 @@ function _csvCell(val) {
 // ─── Copy available ───────────────────────────────────────────
 
 function _copyAvailable() {
+  if (window.state && window.state.isChecking) {
+    _toastExport('Export is disabled while checking availability', false);
+    return;
+  }
   const avail = _domains.filter(d => d.available === true);
   if (!avail.length) {
     _toastExport('No available domains to copy', false);

@@ -2,8 +2,9 @@
 import { $, $$, cap, sanitizeInput, extractKeywords, debounce } from './utils.js';
 import { loadData } from './dataLoader.js';
 import { genState, generateGeo, generateKeyword, generatePattern, validatePattern, previewPattern, generateBrandable, generateNumeric, generateSuggestor, generateWordlist } from './generators.js';
-import { clearResults, showLoading, renderResults, renderBulkResults, renderExtractedResults, renderAnalyzerResults, showFilterControls, toast, copyText, setButtonState, uiState, applyFilterSort, updateDomainCounter } from './ui.js';
+import { clearResults, showLoading, renderResults, renderBulkResults, renderExtractedResults, renderAnalyzerResults, showFilterControls, toast, copyText, setButtonState, uiState, applyFilterSort, updateDomainCounter, showAvailabilityProgress, showAvailabilityErrorBanner } from './ui.js';
 import { initExportSystem, syncExportDomains } from './exportSystem.js';
+import { setCachedAvailability } from './state-manager.js';
 import { initCustomSelects, getSelectValue } from '../components/dropdown.js';
 import { initTheme, toggleTheme } from './theme.js';
 import { closeAllActionMenus } from '../components/action-menu.js';
@@ -263,6 +264,129 @@ function restoreToolDomains(tool) {
   return false;
 }
 
+// ==================== SEO CONTENT LAZY LOADING & RENDER ====================
+let seoConfigsCache = null;
+
+async function fetchSeoConfigs() {
+  if (seoConfigsCache) return seoConfigsCache;
+  try {
+    const res = await fetch('/data/seo-configs.json');
+    if (!res.ok) throw new Error('Failed to load SEO configs');
+    seoConfigsCache = await res.json();
+    return seoConfigsCache;
+  } catch (e) {
+    console.error('Error fetching SEO configurations:', e);
+    return null;
+  }
+}
+
+function generateClientSeoHtml(toolKey, config, allConfigs) {
+  const aboutHtml = config.about.map(p => `<p class="seo-paragraph">${p}</p>`).join('');
+  const featuresHtml = config.features.map(f => `
+    <li class="seo-feature-item">
+      <span class="seo-feature-icon">✓</span>
+      <span class="seo-feature-text">${f}</span>
+    </li>
+  `).join('');
+  const faqsHtml = config.faqs.map(faq => `
+    <details class="seo-faq-accordion">
+      <summary class="seo-faq-question">
+        <span>${faq.q}</span>
+        <svg class="faq-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="seo-faq-answer">
+        <p class="seo-paragraph">${faq.a}</p>
+      </div>
+    </details>
+  `).join('');
+
+  const relatedDisplayNames = {
+    geo: 'Geo Generator',
+    keyword: 'Keyword Generator',
+    pattern: 'Pattern Generator',
+    brandable: 'Brandable Names',
+    numeric: 'Numeric Generator',
+    suggestor: 'AI Suggestor',
+    wordlist: 'WordList Combiner',
+    analyzer: 'Smart Analyzer',
+    emailtool: 'Email Outreach',
+    bulkcheck: 'Bulk Checker',
+    extractor: 'Domain Extractor',
+    texttools: 'Text Tools',
+    emailextractor: 'Email Extractor',
+    newsdomain: 'Domain News'
+  };
+
+  const relatedHtml = config.related.map(key => {
+    const rConfig = allConfigs[key];
+    if (!rConfig) return '';
+    return `<a href="${rConfig.path}" class="seo-related-link">${relatedDisplayNames[key]}</a>`;
+  }).join('');
+
+  return `
+    <div class="seo-card">
+      <div class="seo-inner">
+        <section class="seo-block seo-about-section">
+          <h2 class="seo-h2">About ${config.h1}</h2>
+          <div class="seo-about-content">
+            ${aboutHtml}
+          </div>
+        </section>
+
+        <div class="seo-divider"></div>
+
+        <section class="seo-block seo-features-section">
+          <h2 class="seo-h2">Key Tool Features</h2>
+          <ul class="seo-feature-list">
+            ${featuresHtml}
+          </ul>
+        </section>
+
+        <div class="seo-divider"></div>
+
+        <section class="seo-block seo-faq-section">
+          <h2 class="seo-h2">Frequently Asked Questions</h2>
+          <div class="seo-faq-list">
+            ${faqsHtml}
+          </div>
+        </section>
+
+        <div class="seo-divider"></div>
+
+        <section class="seo-block seo-related-section">
+          <h2 class="seo-h2">Related Domain Tools</h2>
+          <div class="seo-related-grid">
+            ${relatedHtml}
+          </div>
+        </section>
+      </div>
+    </div>
+  `;
+}
+
+async function renderSeoContent(toolKey) {
+  const seoContainer = $('#seoContentSection');
+  if (!seoContainer) return;
+
+  // Unload previous content
+  seoContainer.innerHTML = '';
+  seoContainer.classList.remove('active');
+
+  // Do not render SEO if we are on 'home' panel
+  if (toolKey === 'home') return;
+
+  const configs = await fetchSeoConfigs();
+  if (!configs || !configs[toolKey]) return;
+
+  const html = generateClientSeoHtml(toolKey, configs[toolKey], configs);
+  seoContainer.innerHTML = `
+    <div id="seo-content-${toolKey}" class="seo-tool-content active">
+      ${html}
+    </div>
+  `;
+  seoContainer.classList.add('active');
+}
+
 // ==================== NAVIGATION ====================
 function switchTool(tool, updateHistory = true) {
   if (state.activeTool && state.activeTool !== tool) {
@@ -286,14 +410,8 @@ function switchTool(tool, updateHistory = true) {
   
   updateSEOMeta(tool);
   
-  // Update active SEO content block
-  const seoContainer = $('#seoContentSection');
-  if (seoContainer) {
-    seoContainer.classList.add('active');
-    $$('.seo-tool-content').forEach(el => {
-      el.classList.toggle('active', el.id === `seo-content-${tool}`);
-    });
-  }
+  // Update active SEO content block (lazy-loads and overwrites)
+  renderSeoContent(tool);
   
   $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tool === tool));
   $$('.tool-panel').forEach(p => {
@@ -437,10 +555,9 @@ function handleGenerate(type) {
       }
 
       state.domains = domains;
-      saveToolDomains(type, domains);
+      state.domains.forEach(d => { if (d.available === undefined) d.available = 'checking'; });
       saveToolInputs(type);
       renderResults(domains, titles[type] + ' Results', copyText);
-      syncExportDomains(state.domains, type);
 
       // Run real availability check
       runAvailabilityCheck(state.domains, updateResultsGridUI);
@@ -462,31 +579,178 @@ function handleGenerate(type) {
 }
 
 // ==================== REAL AVAILABILITY CHECK (after generation) ====================
+function updateExportState() {
+  if (window.updateExportButton) {
+    window.updateExportButton();
+  }
+}
+
+function toggleGenerateButtons(disabled) {
+  const buttons = document.querySelectorAll('.btn-generate, #btnKwGenerate, #btnPatternGenerate, #btnGenDomains, #btnBulkCheck, #btnAnalyze, #btnExtract, #btnExtractEmail');
+  buttons.forEach(btn => {
+    btn.disabled = disabled;
+    btn.style.opacity = disabled ? '0.5' : '1';
+    btn.style.pointerEvents = disabled ? 'none' : '';
+  });
+}
+
 async function runAvailabilityCheck(domainsArray, updateFn) {
-  if (!domainsArray || !domainsArray.length) return;
+  if (!domainsArray || !domainsArray.length) {
+    state.isChecking = false;
+    updateExportState();
+    return;
+  }
+
+  state.isChecking = true;
+  updateExportState();
+  toggleGenerateButtons(true);
+  showAvailabilityProgress(0, domainsArray.length, true);
+
   try {
     const resultsMap = await bulkCheckDomains(domainsArray, {
       useCache: true,
-      onProgress: (checked, total) => {
-        console.log(`Availability: ${checked}/${total}`);
+      onProgress: (checked, total, batchResults) => {
+        showAvailabilityProgress(checked, total, true);
+        if (batchResults) {
+          applyResultsToData(domainsArray, batchResults);
+          if (updateFn) {
+            updateFn(batchResults);
+          } else {
+            applyFilterSort(state.domains, copyText);
+          }
+          updateDomainCounter(state.domains);
+        }
       }
     });
-    // Update data
+
+    state.isChecking = false;
+    showAvailabilityProgress(domainsArray.length, domainsArray.length, false);
     applyResultsToData(domainsArray, resultsMap);
-    // Update counter (availability data is now on state.domains)
-    updateDomainCounter(state.domains);
-    // Refresh export counter badge with new availability counts
-    syncExportDomains(state.domains, state.activeTool);
-    // Re-apply filter/sort to reflect any newly-available domains
-    if (uiState.visibilityFilter === 'available') {
+
+    if (state.activeTool === 'analyzer') {
+      renderAnalyzerResults(state.domains);
+    } else if (state.activeTool === 'bulkcheck') {
+      renderBulkResults(state.domains);
+    } else {
       applyFilterSort(state.domains, copyText);
     }
-    // Update UI
-    if (updateFn) updateFn(resultsMap);
+    updateDomainCounter(state.domains);
+
+    const hasIncomplete = domainsArray.some(d =>
+      d.available === 'checking' ||
+      d.available === 'error' ||
+      d.available === 'unknown' ||
+      d.available === null
+    );
+
+    if (hasIncomplete) {
+      const failedCount = domainsArray.filter(d =>
+        d.available === 'error' ||
+        d.available === 'unknown' ||
+        d.available === null
+      ).length;
+      showAvailabilityErrorBanner(true);
+      toast(`Availability check incomplete: ${failedCount} checks failed.`);
+    } else {
+      showAvailabilityErrorBanner(false);
+      saveToolDomains(state.activeTool, state.domains);
+      domainsArray.forEach(d => {
+        const dName = d.name || d.domain;
+        if (dName && d.available !== undefined) {
+          setCachedAvailability(dName, d.available);
+        }
+      });
+      toast('Availability checks completed and saved.');
+    }
+
+    updateExportState();
+
   } catch (err) {
     console.error('Availability check error:', err);
+    state.isChecking = false;
+    showAvailabilityProgress(0, domainsArray.length, false);
+    showAvailabilityErrorBanner(true);
+    updateExportState();
+  } finally {
+    toggleGenerateButtons(false);
   }
 }
+
+async function retryFailedChecks() {
+  if (state.isChecking) return;
+  
+  const domainsToRetry = state.domains.filter(d =>
+    d.available === 'checking' ||
+    d.available === 'error' ||
+    d.available === 'unknown' ||
+    d.available === null
+  );
+
+  if (!domainsToRetry.length) return;
+
+  toast(`Retrying ${domainsToRetry.length} failed availability checks...`);
+  domainsToRetry.forEach(d => d.available = 'checking');
+  
+  if (state.activeTool === 'analyzer') {
+    renderAnalyzerResults(state.domains);
+  } else if (state.activeTool === 'bulkcheck') {
+    renderBulkResults(state.domains);
+  } else {
+    applyFilterSort(state.domains, copyText);
+  }
+
+  await runAvailabilityCheck(domainsToRetry, (resultsMap) => {
+    if (state.activeTool === 'analyzer') {
+      updateAnalyzerUI(resultsMap);
+    } else if (state.activeTool === 'bulkcheck') {
+      updateBulkResultsUI(resultsMap);
+    } else {
+      updateResultsGridUI(resultsMap);
+    }
+  });
+}
+
+async function retrySingleCheck(domainName) {
+  if (state.isChecking) return;
+
+  const domainObj = state.domains.find(d => (d.name || d.domain) === domainName);
+  if (!domainObj) return;
+
+  toast(`Retrying check for ${domainName}...`);
+  domainObj.available = 'checking';
+  
+  if (state.activeTool === 'analyzer') {
+    renderAnalyzerResults(state.domains);
+  } else if (state.activeTool === 'bulkcheck') {
+    renderBulkResults(state.domains);
+  } else {
+    applyFilterSort(state.domains, copyText);
+  }
+
+  await runAvailabilityCheck([domainObj], (resultsMap) => {
+    if (state.activeTool === 'analyzer') {
+      updateAnalyzerUI(resultsMap);
+    } else if (state.activeTool === 'bulkcheck') {
+      updateBulkResultsUI(resultsMap);
+    } else {
+      updateResultsGridUI(resultsMap);
+    }
+  });
+}
+
+// Global retry event listeners
+document.addEventListener('click', e => {
+  if (e.target && e.target.id === 'btnRetryAllFailed') {
+    retryFailedChecks();
+  }
+});
+
+document.addEventListener('retry-domain-check', e => {
+  const { domain } = e.detail;
+  if (domain) {
+    retrySingleCheck(domain);
+  }
+});
 
 // ==================== GEN DOMAIN NEWS HANDLER ====================
 async function handleGenDomains() {
@@ -495,7 +759,6 @@ async function handleGenDomains() {
   showLoading(true);
 
   try {
-    // Always read from localStorage (centralized — set via Settings panel)
     const apiKeys = loadAllApiKeys();
 
     if (!apiKeys.gemini && !apiKeys.grok) {
@@ -529,15 +792,11 @@ async function handleGenDomains() {
     }
 
     state.domains = domains;
-    // Set domains to 'checking' status initially if not set
     state.domains.forEach(d => { if (d.available === undefined) d.available = 'checking'; });
     
-    saveToolDomains('newsdomain', domains);
     saveToolInputs('newsdomain');
     renderResults(domains, 'Gen Domain News (' + genNewsState.mode + ' / ' + genNewsState.aiProvider.toUpperCase() + ') Results', copyText);
-    syncExportDomains(state.domains, 'newsdomain');
 
-    // Automatically check availability with real API
     runAvailabilityCheck(state.domains, updateResultsGridUI);
 
   } catch (err) {
@@ -574,30 +833,15 @@ async function handleBulkCheck() {
   showLoading(true);
 
   try {
-    // Build domain objects with 'checking' status
     const domains = lines.map(d => ({
       name: d.includes('.') ? d : d + '.com',
       available: 'checking'
     }));
     state.domains = domains;
-    saveToolDomains('bulkcheck', domains);
     saveToolInputs('bulkcheck');
     renderBulkResults(domains);
 
-    // Run real availability check
-    const resultsMap = await bulkCheckDomains(domains, {
-      useCache: true,
-      onProgress: (checked, total) => {
-        const countEl = $('#resultsCount');
-        if (countEl) countEl.textContent = `Checking... ${checked}/${total}`;
-      }
-    });
-
-    // Update data + UI
-    applyResultsToData(state.domains, resultsMap);
-    renderBulkResults(state.domains);
-    syncExportDomains(state.domains, 'bulkcheck');
-    toast(`Checked ${domains.length} domains`);
+    await runAvailabilityCheck(state.domains, updateBulkResultsUI);
   } catch (e) {
     console.error('Bulk check error:', e);
     toast('Check failed — some results may be unavailable');
@@ -760,11 +1004,11 @@ function handleAnalyze() {
       // Run real availability check for domains without pre-existing status
       const domainsToCheck = analyzerData.domains.filter(d => d.available === 'checking' || d.available === null);
       if (domainsToCheck.length > 0) {
-        runAvailabilityCheck(domainsToCheck, (resultsMap) => {
+        runAvailabilityCheck(domainsToCheck, (batchResults) => {
           // Apply to full data set too
-          applyResultsToData(analyzerData.domains, resultsMap);
-          if (window.analysisResults) applyResultsToData(window.analysisResults, resultsMap);
-          updateAnalyzerUI(resultsMap);
+          applyResultsToData(analyzerData.domains, batchResults);
+          if (window.analysisResults) applyResultsToData(window.analysisResults, batchResults);
+          updateAnalyzerUI(batchResults);
         });
       }
     } catch (e) {
@@ -812,7 +1056,18 @@ function applyAnalyzerFilters() {
 
   state.domains = filtered;
   window.analysisResults = filtered;
-  saveToolDomains('analyzer', filtered);
+  
+  const isCheckingOrUnknown = state.isChecking || filtered.some(d => 
+    d.available === 'checking' || 
+    d.available === 'error' || 
+    d.available === 'unknown' || 
+    d.available === null
+  );
+  
+  if (!isCheckingOrUnknown) {
+    saveToolDomains('analyzer', filtered);
+  }
+  
   saveToolInputs('analyzer');
   renderAnalyzerResults(filtered);
   syncExportDomains(state.domains, 'analyzer');
@@ -2236,6 +2491,23 @@ export async function initApp() {
 
   // Expose a global update shim so legacy code paths still work.
   window.updateExportButton = () => syncExportDomains(state.domains, state.activeTool);
+
+  // Intercept click on related tools inside SEO section for SPA switches
+  const seoContainer = $('#seoContentSection');
+  if (seoContainer) {
+    seoContainer.addEventListener('click', e => {
+      const link = e.target.closest('.seo-related-link');
+      if (link) {
+        e.preventDefault();
+        const href = link.getAttribute('href');
+        const toolKey = REVERSE_ROUTE[href];
+        if (toolKey) {
+          switchTool(toolKey);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+    });
+  }
 
 }
 
