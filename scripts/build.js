@@ -15,18 +15,28 @@ const toolConfigs = {
     title: 'Geo Domain Generator | AI Domains',
     desc: 'Generate location-based domains for local businesses and lead generation using city + service combinations.',
     h1: 'Geo Domain Generator',
-    intro: 'Instantly find available location-specific domains for local service niches and lead generation sites.',
+    about: [
+      'Generate location-based domains for local businesses, contractors, service providers, and lead generation sites. Perfect for local SEO campaigns targeting specific geographical areas.',
+      'Combine city, state, or regional names with business keywords to target local search intent. Search engines rank local-intent keywords higher when matching domains are registered.',
+      'Whether you are building a site for a local service or running a lead generation business, geo domains are a proven way to gain fast organic search traffic.'
+    ],
     features: [
-      'Generate location-based domains using actual census populations',
-      'Select customized target locations including US Cities, UK Cities, and Canada Cities',
-      'Filter and sort results by population, CPC potential, or shortest character length',
-      'Check WHOIS registration availability in real-time'
+      'Generate location-based domains using actual census databases',
+      'Select from US, UK, Canada, and Australia cities and regions',
+      'Filter and sort domains by city population size',
+      'Analyze CPC potential and search intent for keywords',
+      'Input custom cities or service keywords easily',
+      'Discover high-converting local service domains',
+      'Export domain lists to CSV or JSON formats',
+      'Check domain registration status in real-time'
     ],
     faqs: [
-      { q: 'What is a geo domain?', a: 'A geo domain is a domain name that combines a city or location with a service keyword, such as BostonPlumber.com or MiamiRoofing.com.' },
-      { q: 'Why are geo domains valuable for SEO?', a: 'Geo domains target highly localized search intent. Search engines recognize the semantic relevance of the location + service, helping websites rank faster in local map and search results.' },
-      { q: 'Can I use custom locations?', a: 'Yes! The tool allows you to input custom city or state names alongside the pre-loaded databases.' }
-    ]
+      { q: 'What is a geo domain?', a: 'A geo domain is a domain name that combines a geographic location with a service keyword, such as DallasPlumbing.com or DenverDentist.com.' },
+      { q: 'Why are geo domains valuable for SEO?', a: 'Geo domains target specific local intent. Search engines recognize the semantic relevance of the location + service keyword, helping sites rank faster in local map and organic search results.' },
+      { q: 'Can I use custom locations?', a: 'Yes, the generator supports inputting custom location lists, which can be combined with custom service niches.' },
+      { q: 'Are geo domains good for lead generation?', a: 'Absolutely. Many local directories and lead capture websites use geo domains to rank quickly and redirect targeted leads to local service providers.' }
+    ],
+    related: ['keyword', 'brandable', 'suggestor', 'analyzer', 'bulkcheck', 'wordlist']
   },
   keyword: {
     filename: 'keyword-domains.html',
@@ -34,17 +44,28 @@ const toolConfigs = {
     title: 'Keyword Domain Generator | AI Domains',
     desc: 'Generate niche-specific domains from seed keywords with premium prefix and suffix combinations.',
     h1: 'Keyword Domain Generator',
-    intro: 'Find search-friendly domain names by blending your target seed keywords with premium prefix and suffix naming lists.',
+    about: [
+      'Create keyword-rich domain names for your project or startup. Combine seed keywords with premium prefixes, suffixes, and industry terms to find search-friendly name ideas.',
+      'Integrating relevant industry terms into your domain name provides search engines and users with immediate semantic context about what your business does.',
+      'Ideal for blogs, niche affiliate sites, digital agencies, and e-commerce stores looking to rank for specific terms.'
+    ],
     features: [
-      'Blend seed keywords with hand-curated premium suffixes and prefixes',
-      'Target specific business niches like Tech, Finance, Health, and Real Estate',
-      'Perform real-time bulk check availability',
-      'Keep search results stored locally in your active favorites list'
+      'Combine seed keywords with curated lists of prefixes and suffixes',
+      'Select from specialized industry lists like Tech, Finance, Health, and Real Estate',
+      'Build custom suffix and prefix lists for tailored generation',
+      'Search results are sorted by character length and flow',
+      'Filter by character limits to keep names concise',
+      'Easily store favorites in your active local session list',
+      'Bulk check WHOIS availability instantly',
+      'One-click export to standard formats (CSV, JSON)'
     ],
     faqs: [
-      { q: 'How do keyword domains help branding?', a: 'Keyword domains contain terms that describe what your company does, making it instantly clear to customers and search engines.' },
-      { q: 'Are prefix/suffix domains expensive to register?', a: 'No, prefix/suffix domains are typically standard-rate hand registrations, costing as little as $10-$15.' }
-    ]
+      { q: 'How do keyword domains help branding?', a: 'Keyword domains clearly communicate your business niche to visitors. For example, "DataFlow" or "CloudSync" immediately signal the software\'s purpose.' },
+      { q: 'Are prefix/suffix domains expensive to register?', a: 'No. Most generated names are standard hand-registrations, costing standard rates ($10-$15 per year) rather than premium aftermarket prices.' },
+      { q: 'Can I target specific industries?', a: 'Yes, our tool provides hand-curated word categories for industries including Technology, Finance, Health, and Real Estate.' },
+      { q: 'Is it better to have keywords in the domain?', a: 'Yes, having a relevant keyword helps with click-through rates (CTR) in search results and establishes immediate domain trust.' }
+    ],
+    related: ['geo', 'brandable', 'suggestor', 'analyzer', 'bulkcheck', 'wordlist']
   },
   pattern: {
     filename: 'pattern-domains.html',
@@ -52,17 +73,28 @@ const toolConfigs = {
     title: 'Pattern Domain Generator | AI Domains',
     desc: 'Create short, highly brandable domains using custom CVC, CVVC, or CVCC pattern combinations.',
     h1: 'Pattern Domain Generator',
-    intro: 'Generate structured brandable domains optimized for startups using custom consonant and vowel formulas.',
+    about: [
+      'Generate structured brandable domains optimized for startups, SaaS products, AI tools, mobile apps, and modern online businesses using custom consonant and vowel formulas.',
+      'Create short, memorable, and highly brandable domain names using proven naming structures such as CVC, CVVC, CVCV, and CVCC patterns. These patterns are widely used for startup branding because they are easy to pronounce, easy to remember, and often available for registration.',
+      'Pattern domains are especially popular among founders, marketers, and domain investors looking for premium brand opportunities.'
+    ],
     features: [
-      'Generate domains using structured formulas like CVC, CVVC, CVCV, and more',
-      'Apply custom letter constraints (include or exclude specific vowels or consonants)',
-      'Find premium short pronounceable names',
-      'Bulk export results directly to CSV or JSON formats'
+      'Generate domains using structured patterns including CVC, CVVC, CVCV, VCVC, CVCC, and more',
+      'Apply custom vowel and consonant restrictions',
+      'Include or exclude specific letters',
+      'Generate startup-friendly brand names',
+      'Discover short pronounceable domains',
+      'Find premium naming opportunities',
+      'Export results to CSV or JSON',
+      'Check domain availability instantly'
     ],
     faqs: [
-      { q: 'What does CVC mean in domaining?', a: 'CVC stands for Consonant-Vowel-Consonant. These represent highly brandable, short letter combinations that are easy to remember.' },
-      { q: 'Why are short pattern domains highly valued?', a: 'Short domains are scarce. Startups prize pronounceable, short names for branding, and investors flip them for high margins.' }
-    ]
+      { q: 'What does CVC mean?', a: 'CVC stands for Consonant-Vowel-Consonant. Examples include Bex, Lom, or Tav. These combinations are easy to pronounce and highly valuable for branding.' },
+      { q: 'Why are pattern domains valuable?', a: 'Pattern domains are short, memorable, and easy to pronounce. Many successful startups use similar naming structures because they work well across multiple languages and branding campaigns.' },
+      { q: 'Which patterns are best for startups?', a: 'Popular startup patterns include CVC, CVVC, CVCV, and VCVC. These patterns often produce strong brandable names.' },
+      { q: 'Are generated domains guaranteed to be available?', a: 'No. Availability changes constantly. Always verify registration status before purchasing a domain.' }
+    ],
+    related: ['geo', 'keyword', 'brandable', 'analyzer', 'suggestor', 'wordlist']
   },
   brandable: {
     filename: 'brandable-domains.html',
@@ -70,17 +102,28 @@ const toolConfigs = {
     title: 'Brandable Name Generator | AI Domains',
     desc: 'Create memorable startup names optimized for brand protection and domain flipping.',
     h1: 'Brandable Name Generator',
-    intro: 'Generate abstract, catchy startup-style names with clean brand potential and instant trademark suitability.',
+    about: [
+      'Generate catchy, abstract, and brandable domain names tailored for modern startups, SaaS products, and digital agencies. Create a unique brand identity that stands out.',
+      'Unlike keyword-stuffed domains, brandable names are distinct, empty-vessel trademarks that you can define. Think of names like Google, Shopify, or Figma.',
+      'Our generator uses semantic associations and phonetic structures to deliver pronounceable, short, and highly brandable domain concepts.'
+    ],
     features: [
-      'Generate abstract names based on semantic associations',
-      'Filter names by character length and syllable count',
-      'Instantly check .com and popular tech TLD availability',
-      'Perfect for product launches and new startup ventures'
+      'Generate abstract names based on semantic associations and syllables',
+      'Filter names by exact character count and syllable length',
+      'Perfect for modern tech startups, creative agencies, and consumer brands',
+      'Check availability for popular TLDs (.com, .io, .ai, .co)',
+      'Clean, professional naming suggestions ready for trademark registration',
+      'Store and export lists to CSV or JSON formats',
+      'Responsive mobile layout for on-the-go brainstorming',
+      'Save favorite names across browser sessions'
     ],
     faqs: [
       { q: 'What is a brandable domain name?', a: 'A brandable domain is a made-up or abstract word (like Google, Shopify, or Zoom) that doesn\'t directly describe a service but creates a distinct brand identity.' },
-      { q: 'How do I choose between a keyword and a brandable domain?', a: 'Keyword domains are great for instant SEO signals and local services. Brandable domains are ideal for scaling startups and building unique intellectual property.' }
-    ]
+      { q: 'How do I choose between a keyword and a brandable domain?', a: 'Keyword domains are great for instant SEO signals and local services. Brandable domains are ideal for scaling startups, building unique intellectual property, and acquiring trademarks.' },
+      { q: 'Are brandable domains easier to register?', a: 'Abstract words are often unregistered, meaning you can register them at standard registration prices instead of paying thousands of dollars for premium aftermarket domains.' },
+      { q: 'Can I register these names?', a: 'Yes. All generated names can be checked instantly for registration availability.' }
+    ],
+    related: ['pattern', 'keyword', 'suggestor', 'analyzer', 'wordlist', 'geo']
   },
   numeric: {
     filename: 'numeric-domains.html',
@@ -88,17 +131,28 @@ const toolConfigs = {
     title: 'Numeric Domain Generator | AI Domains',
     desc: 'Generate premium numeric domain names (NNN, NNNN, NNNNN) for liquid digital assets.',
     h1: 'Numeric Domain Generator',
-    intro: 'Discover available number-based domains in popular formats including NNN, NNNN, and NNNNN.',
+    about: [
+      'Generate structured numeric domain names (such as NNN, NNNN, and NNNNN patterns) for liquid digital assets, investment portfolios, and global brands.',
+      'Numeric domains are highly sought after by domain investors, particularly in Asian markets, where numbers hold symbolic meaning and represent status.',
+      'Because numbers are universal, these domains face no language barriers, making them highly liquid assets that retain and appreciate in value.'
+    ],
     features: [
-      'Generate structured numeric domains using specific formats',
-      'Exclude historically unpopular numbers like 0 or 4',
-      'Find liquid digital assets popular in global markets',
-      'Export and check availability in bulk'
+      'Generate structured numeric domains (3-digit, 4-digit, 5-digit combinations)',
+      'Exclude historically unpopular numbers like 0 or 4 (e.g. Chinese market preferences)',
+      'Create repeating digit patterns (e.g. AAAA, ABAB, AABB)',
+      'Verify domain availability in bulk using WHOIS lookups',
+      'Export numeric lists directly to CSV or JSON formats',
+      'Monitor liquid digital asset opportunities across popular TLDs',
+      'Responsive mobile layout for digital asset managers',
+      'Fast, lightweight generation with no performance lag'
     ],
     faqs: [
       { q: 'Why are numeric domains valuable?', a: 'Numbers are universal and carry no language barriers. Short numeric domains (like 3-digit and 4-digit .com names) are highly liquid and act as premium stores of value.' },
-      { q: 'What do NNNN and NNNNN mean?', a: 'N stands for Number. NNNN represents a 4-digit domain (e.g., 8888.com), and NNNNN represents a 5-digit domain.' }
-    ]
+      { q: 'What do NNNN and NNNNN mean?', a: 'N stands for Number. NNNN represents a 4-digit domain (e.g., 8888.com), and NNNNN represents a 5-digit domain.' },
+      { q: 'Why filter out numbers like 0 or 4?', a: 'In Chinese culture, the number 4 sounds like "death" (unlucky) and 0 represents "nothingness". Excluding them increases the asset\'s resale value in those markets.' },
+      { q: 'Are numeric domains a good investment?', a: 'Short numeric .com domains (3-digit and 4-digit) have historically held and increased their value due to extreme scarcity.' }
+    ],
+    related: ['pattern', 'brandable', 'analyzer', 'bulkcheck', 'wordlist', 'geo']
   },
   suggestor: {
     filename: 'domain-suggestor.html',
@@ -106,16 +160,28 @@ const toolConfigs = {
     title: 'AI Domain Suggestor | AI Domains',
     desc: 'Get smart, AI-powered domain name suggestions based on your business description or keywords.',
     h1: 'Domain Suggestor',
-    intro: 'Describe your business or project idea and let our AI suggest creative, available domain names.',
+    about: [
+      'Get smart, context-rich domain suggestions based on your business description or keywords.',
+      'Describe your business or project idea and let our semantic suggestor recommend creative, available domain names.',
+      'Instead of simple keyword stitching, the tool analyzes the semantic meaning of your business description to generate names that are contextually relevant and highly brandable.'
+    ],
     features: [
-      'Uses advanced semantic search technology to recommend contextual domains',
-      'Input plain English descriptions of your product or idea',
-      'Filters suggestions by category, extensions, and character length',
-      'Checks domain registration availability on the fly'
+      'Semantic domain recommendations based on project descriptions',
+      'Input plain English description of your business or app',
+      'Filter suggestions by extensions, categories, and length',
+      'Perform real-time bulk check availability',
+      'Clean, professional suggestions ready for registration',
+      'Store and export lists to CSV or JSON formats',
+      'Responsive layout for mobile brainstorming',
+      'Save favorite names across browser sessions'
     ],
     faqs: [
-      { q: 'How does the domain suggestor use AI?', a: 'It analyzes the semantic meaning of your business description to generate names that are contextually relevant, rather than just doing simple keyword combinations.' }
-    ]
+      { q: 'How does the domain suggestor use AI?', a: 'It analyzes the semantic meaning of your business description to generate names that are contextually relevant, rather than just doing simple keyword combinations.' },
+      { q: 'Can I type full sentences?', a: 'Yes, you can describe your project in full sentences, like "A platform for renting surfboards in California." The suggestor will extract the key concepts and generate relevant domains.' },
+      { q: 'What domain extensions (TLDs) are supported?', a: 'It supports .com, .net, .org, .co, .io, .ai, and many other popular extensions.' },
+      { q: 'Is the suggestor free to use?', a: 'Yes, the AI domain suggestor is completely free for all users.' }
+    ],
+    related: ['keyword', 'brandable', 'analyzer', 'wordlist', 'geo', 'bulkcheck']
   },
   wordlist: {
     filename: 'wordlist-combiner.html',
@@ -123,16 +189,28 @@ const toolConfigs = {
     title: 'WordList Combiner | AI Domains',
     desc: 'Combine custom prefix and suffix word lists to generate bulk domain name combinations.',
     h1: 'WordList Combiner',
-    intro: 'Combine two custom lists of words to create massive sets of domain name variations instantly.',
+    about: [
+      'Combine two custom lists of words to create massive sets of domain name variations instantly. Paste or upload your own prefix and suffix lists and combine them with a single click.',
+      'Perfect for domain investors, founders, and agencies looking to generate thousands of combinations of brand names and check their availability in bulk.',
+      'Get instant results and filter your list to keep only the best matches.'
+    ],
     features: [
-      'Paste or upload your own prefix and suffix lists',
-      'Combine thousands of combinations with a single click',
-      'Instantly check availability for the entire combined set',
-      'Filter output by TLD and character length'
+      'Combine two custom lists of prefixes and suffixes',
+      'Create massive variations with a single click',
+      'Filter combinations by character length and extension',
+      'Verify domain availability in bulk using WHOIS lookups',
+      'Export combined lists to CSV or JSON formats',
+      'Save favorites across browser sessions',
+      'Clean interface optimized for large lists',
+      'Dark and light mode compatible'
     ],
     faqs: [
-      { q: 'How many combinations can I check?', a: 'You can check up to thousands of combinations. Results are batched and checked asynchronously to ensure fast load times.' }
-    ]
+      { q: 'How many combinations can I check?', a: 'You can check up to thousands of combinations. Results are batched and checked asynchronously to ensure fast load times.' },
+      { q: 'What is a wordlist combiner?', a: 'A wordlist combiner takes list A (e.g. prefixes like "get", "go", "my") and list B (e.g. niches like "app", "site", "hub") and multiplies them to create "getapp.com", "getsite.com", etc.' },
+      { q: 'Can I add custom suffixes?', a: 'Yes, you can input any list of custom words in the suffix column.' },
+      { q: 'Is there a limit to list sizes?', a: 'While there is no strict limit, list sizes under 500 words per column are recommended for optimal browser performance.' }
+    ],
+    related: ['keyword', 'geo', 'suggestor', 'analyzer', 'bulkcheck', 'texttools']
   },
   analyzer: {
     filename: 'smart-analyzer.html',
@@ -140,17 +218,28 @@ const toolConfigs = {
     title: 'Smart Domain Analyzer | AI Domains',
     desc: 'Analyze domain SEO metrics, age, backlinks, and flip potential instantly.',
     h1: 'Smart Domain Analyzer',
-    intro: 'Input any domain list to evaluate domain authority, backlink metrics, CPC keywords, and overall investment quality.',
+    about: [
+      'Analyze domain SEO metrics, age, backlinks, and flip potential instantly. Input any domain list to evaluate domain authority, backlink metrics, CPC keywords, and overall investment quality.',
+      'Calculate an instant AI-powered Domain Score (0-100) to understand the resale and SEO value of a domain name.',
+      'Perfect for evaluating domains before purchase, negotiating prices, or auditing your own domain portfolio.'
+    ],
     features: [
-      'Calculate an instant AI-powered Domain Score (0-100)',
-      'Analyze backlinks, domain age, and authority metrics',
+      'Calculate instant Domain Score (0-100) based on multiple metrics',
+      'Analyze backlinks, domain age, and authority parameters',
       'Evaluate estimated CPC values for commercial keywords',
-      'Determine flip potential and estimated resale value'
+      'Determine flip potential and estimated resale value',
+      'Filter domain lists by age, authority score, or length',
+      'Export bulk checker tables as CSV or JSON',
+      'Check WHOIS registration status in real-time',
+      'Compare multiple domains side by side'
     ],
     faqs: [
       { q: 'How is the Domain Score calculated?', a: 'Our algorithm scores domains based on keyword search volume, TLD authority, length, pronunciation ease, and SEO metrics like backlink strength.' },
-      { q: 'What makes a domain good for flipping?', a: 'Domains with short lengths, commercial keywords, .com extensions, and clean registration history have the highest flip potential.' }
-    ]
+      { q: 'What makes a domain good for flipping?', a: 'Domains with short lengths, commercial keywords, .com extensions, and clean registration history have the highest flip potential.' },
+      { q: 'Why is domain age important?', a: 'Search engines tend to trust older domains that have a history of clean backlinks and content, which can help new websites rank faster.' },
+      { q: 'Can I analyze domains in bulk?', a: 'Yes, you can analyze lists of domains at once to find the most valuable assets.' }
+    ],
+    related: ['bulkcheck', 'extractor', 'suggestor', 'keyword', 'geo', 'emailtool']
   },
   emailtool: {
     filename: 'smart-email.html',
@@ -158,16 +247,28 @@ const toolConfigs = {
     title: 'Smart Email Outreach | AI Domains',
     desc: 'Generate cold outreach emails to contact domain owners and negotiate acquisitions.',
     h1: 'Smart Email Outreach',
-    intro: 'Create high-converting, professional emails to negotiate purchase deals with domain owners.',
+    about: [
+      'Generate cold outreach emails to contact domain owners and negotiate acquisitions. Create high-converting, professional emails to negotiate purchase deals with domain owners.',
+      'Choose from premium high-converting negotiation templates and automatically personalize fields like domain name, price, and author details.',
+      'Streamline your acquisition workflow and increase your reply rates with domain-focused pitch templates.'
+    ],
     features: [
-      'Choose from premium high-converting negotiation templates',
-      'Automatically personalize fields like domain name, price, and author details',
-      'Copy to clipboard or open in your default mail client instantly',
-      'Track outreach campaigns and templates locally'
+      'Generate cold outreach emails optimized for domain acquisition',
+      'Choose from multiple high-converting negotiation templates',
+      'Automatically personalize domain, price, and contact fields',
+      'Copy email body and subject line to clipboard instantly',
+      'Open templates directly in your default mail client',
+      'Track outreach status and templates locally',
+      'Professional email formatting suitable for business negotiations',
+      'Mobile responsive layout for negotiators on the go'
     ],
     faqs: [
-      { q: 'How do I contact a domain owner?', a: 'You can look up the WHOIS registry details of the domain. If masked, you can use the registrar\'s contact form or standard contact channels.' }
-    ]
+      { q: 'How do I contact a domain owner?', a: 'You can look up the WHOIS registry details of the domain. If masked, you can use the registrar\'s contact form or standard contact channels.' },
+      { q: 'What is a good starting offer?', a: 'Starting offers depend on the domain\'s value, but typically offer a reasonable base (e.g. $100-$500) to spark a response without insulting the owner.' },
+      { q: 'How can I improve my outreach response rates?', a: 'Keep emails short, professional, and clear. State your budget or ask if they are open to offers, and send from a professional email address.' },
+      { q: 'Is my email template secure?', a: 'Yes. All email generations and inputs are processed locally on your device and are never sent to our servers.' }
+    ],
+    related: ['emailextractor', 'analyzer', 'bulkcheck', 'extractor', 'keyword', 'geo']
   },
   bulkcheck: {
     filename: 'bulk-checker.html',
@@ -175,16 +276,28 @@ const toolConfigs = {
     title: 'Bulk Domain Checker | AI Domains',
     desc: 'Verify WHOIS availability and check SEO metrics for lists of domains in bulk.',
     h1: 'Bulk Domain Checker',
-    intro: 'Paste your domain lists to perform bulk check availability and verify SEO parameters instantly.',
+    about: [
+      'Verify WHOIS availability and check SEO metrics for lists of domains in bulk. Paste your domain lists to perform bulk check availability and verify SEO parameters instantly.',
+      'Ideal for domainers, developers, and agencies who need to verify the availability of large domain portfolios quickly.',
+      'Save time and automate your domain checking process with our fast local checker.'
+    ],
     features: [
       'Verify availability for hundreds of domains simultaneously',
       'Check TLD variants (.com, .net, .org, .io, .ai)',
       'Extract WHOIS registry data instantly',
-      'Export bulk checker tables as CSV or JSON'
+      'Export bulk checker tables as CSV or JSON',
+      'Filter results by availability or extension type',
+      'Safe, rate-limited checks to prevent upstream API blocking',
+      'Clean, tabbed user interface for easy navigation',
+      'Local storage support to prevent loss of results'
     ],
     faqs: [
-      { q: 'Is there a limit on bulk checks?', a: 'No, but very large lists are checked in batches to respect upstream API rate limits.' }
-    ]
+      { q: 'Is there a limit on bulk checks?', a: 'No, but very large lists are checked in batches to respect upstream API rate limits.' },
+      { q: 'What TLDs are supported?', a: 'All major generic TLDs (.com, .net, .org) and popular country-code or niche TLDs (.io, .ai, .co).' },
+      { q: 'Can I export my results?', a: 'Yes, you can export all checked domains as CSV or JSON.' },
+      { q: 'Are these checks anonymous?', a: 'Yes. The WHOIS lookups are executed through proxy queries, so the domains are not tracked or registered by third parties.' }
+    ],
+    related: ['analyzer', 'extractor', 'suggestor', 'wordlist', 'keyword', 'geo']
   },
   extractor: {
     filename: 'domain-extractor.html',
@@ -192,16 +305,28 @@ const toolConfigs = {
     title: 'Domain Extractor | AI Domains',
     desc: 'Extract domain names from text, blocks, URLs, and source code lists.',
     h1: 'Domain Extractor',
-    intro: 'Clean up text, logs, and URLs to extract only valid domain names.',
+    about: [
+      'Extract domain names from text, blocks, URLs, and source code lists. Clean up text, logs, and URLs to extract only valid domain names.',
+      'The parser uses advanced regular expressions to strip out protocols, query parameters, and plain text, leaving only valid domain structures.',
+      'Perfect for cleaning up analytics logs, list scrapes, or raw markdown links.'
+    ],
     features: [
       'Parse domain names from raw unformatted text blocks',
       'Extract domains from lists of full URLs',
       'De-duplicate and sort extracted domain lists',
-      'Export lists directly to the Bulk Checker or Smart Analyzer'
+      'Export lists directly to the Bulk Checker or Smart Analyzer',
+      'Support parsing emails and cleaning trailing characters',
+      'Copy extracted results to clipboard instantly',
+      'Fast, client-side regex processing',
+      'Complete privacy: all data processed in-browser'
     ],
     faqs: [
-      { q: 'What text formats are supported?', a: 'Any format. The parser uses advanced regular expressions to strip out protocols, query parameters, and plain text, leaving only valid domain structures.' }
-    ]
+      { q: 'What text formats are supported?', a: 'Any format. The parser uses advanced regular expressions to strip out protocols, query parameters, and plain text, leaving only valid domain structures.' },
+      { q: 'Can I extract domains from HTML source code?', a: 'Yes, you can paste raw HTML source and the extractor will extract all domain names from href attributes, text, or script tags.' },
+      { q: 'Is there a size limit to the text I can paste?', a: 'The tool runs entirely in your browser, so it can handle text blocks up to several megabytes depending on your device\'s memory.' },
+      { q: 'Is my data private?', a: 'Yes. All extraction is done locally in your browser. None of your text is sent to our servers.' }
+    ],
+    related: ['texttools', 'emailextractor', 'bulkcheck', 'analyzer', 'keyword', 'geo']
   },
   texttools: {
     filename: 'text-tools.html',
@@ -209,16 +334,28 @@ const toolConfigs = {
     title: 'Text Processing Tools | AI Domains',
     desc: 'Clean, format, and filter word lists for domain generation and keyword research.',
     h1: 'Text Processing Tools',
-    intro: 'Process, filter, and clean lists of words to build premium domain generation inputs.',
+    about: [
+      'Clean, format, and filter word lists for domain generation and keyword research. Process, filter, and clean lists of words to build premium domain generation inputs.',
+      'Remove special characters, numbers, and spaces from lists, convert to lowercase, and filter words by character length.',
+      'Optimize your inputs for our domain generators and improve the quality of your brand ideas.'
+    ],
     features: [
-      'Remove special characters, numbers, and spaces from lists',
+      'Remove special characters, numbers, and spaces from word lists',
       'Convert word lists to lowercase instantly',
-      'Filter words by character length',
-      'Remove duplicate words to prepare clean input lists'
+      'Filter words by specific character length ranges',
+      'Remove duplicate words to prepare clean input lists',
+      'Add custom prefixes or suffixes to entire lists',
+      'Sort lists alphabetically or by length',
+      'Copy cleaned lists to clipboard with one click',
+      'Clean interface optimized for large lists'
     ],
     faqs: [
-      { q: 'How do text tools help domaining?', a: 'They allow you to quickly clean dirty word lists scraped from the web before combining them or loading them into our generators.' }
-    ]
+      { q: 'How do text tools help domaining?', a: 'They allow you to quickly clean dirty word lists scraped from the web before combining them or loading them into our generators.' },
+      { q: 'Can I remove duplicates?', a: 'Yes, the duplicate remover is built-in and processes lists instantly.' },
+      { q: 'What character filters are available?', a: 'You can filter out words that are too short or too long, as well as words containing non-alphabetic characters.' },
+      { q: 'Does it support CSV input?', a: 'Yes, you can paste comma-separated or line-separated word lists.' }
+    ],
+    related: ['extractor', 'wordlist', 'emailextractor', 'keyword', 'geo', 'suggestor']
   },
   emailextractor: {
     filename: 'email-extractor.html',
@@ -226,16 +363,28 @@ const toolConfigs = {
     title: 'Email Extractor | AI Domains',
     desc: 'Extract email addresses from text, contact logs, and outreach directories.',
     h1: 'Email Extractor',
-    intro: 'Extract and clean lists of email addresses from unformatted raw text.',
+    about: [
+      'Extract email addresses from text, contact logs, and outreach directories. Extract and clean lists of email addresses from unformatted raw text.',
+      'The tool checks syntax structure to ensure only syntactically valid email formats are returned.',
+      'Perfect for building outreach lists for domain sales, content promotion, or marketing campaigns.'
+    ],
     features: [
       'Parse email addresses from large text blocks',
       'Filter out duplicates and invalid email structures',
       'Prepare outreach lists for cold domain emailing',
-      'Export parsed lists to CSV format'
+      'Export parsed lists to CSV format',
+      'Clean results by domain name filter',
+      'Copy extracted emails to clipboard instantly',
+      'Fast, client-side regex processing',
+      'Complete privacy: all data processed in-browser'
     ],
     faqs: [
-      { q: 'How are email lists validated?', a: 'The tool checks syntax structure to ensure only syntactically valid email formats are returned.' }
-    ]
+      { q: 'How are email lists validated?', a: 'The tool checks syntax structure using RFC-compliant regular expressions to ensure only syntactically valid email formats are returned.' },
+      { q: 'Can I extract emails from HTML code?', a: 'Yes, you can paste raw HTML and the extractor will parse out all email addresses.' },
+      { q: 'Is my email list saved?', a: 'No. The email extractor works completely client-side. Your lists are never sent to a server.' },
+      { q: 'Can I sort the extracted emails?', a: 'Yes, the tool automatically de-duplicates and lists them alphabetically.' }
+    ],
+    related: ['emailtool', 'extractor', 'texttools', 'bulkcheck', 'analyzer', 'keyword']
   },
   newsdomain: {
     filename: 'domain-news.html',
@@ -243,64 +392,102 @@ const toolConfigs = {
     title: 'Domain News Generator | AI Domains',
     desc: 'Get the latest domain aftermarket sales, registration metrics, and trends news.',
     h1: 'Domain News Generator',
-    intro: 'Read AI-generated domain market analysis, aftermarket sales, and registration insights.',
+    about: [
+      'Get the latest domain aftermarket sales, registration metrics, and trends news. Read AI-generated domain market analysis, aftermarket sales, and registration insights.',
+      'Analyze emerging trends in registry sales and summarize top sales data from public aftermarket lists.',
+      'Stay informed on premium naming movements, new gTLD registries, and high-value sales metrics.'
+    ],
     features: [
       'Analyze emerging trends in registry sales',
       'Summarize top sales data from public aftermarket lists',
       'Understand search volume metrics for new domains',
-      'Analyze trademark registrations and brand protection news'
+      'Analyze trademark registrations and brand protection news',
+      'Generate domain market reports based on recent sales',
+      'Compare valuation and sales trends over time',
+      'Copy reports to clipboard instantly',
+      'Optimized for domain brokers and investors'
     ],
     faqs: [
-      { q: 'How is the news data generated?', a: 'The tool uses AI to synthesize registration data, aftermarket sales records, and search trends into clean insights.' }
-    ]
+      { q: 'How is the news data generated?', a: 'The tool uses AI to synthesize registration data, aftermarket sales records, and search trends into clean insights.' },
+      { q: 'How often is news updated?', a: 'The analysis updates regularly to reflect current domain market reports and trends.' },
+      { q: 'Can I copy the reports for my blog?', a: 'Yes, the summaries and analyses are generated for public domain research and educational purposes.' },
+      { q: 'What sales are monitored?', a: 'We track high-value public sales from major aftermarket platforms like Sedo, Afternic, and GoDaddy.' }
+    ],
+    related: ['analyzer', 'bulkcheck', 'suggestor', 'keyword', 'geo', 'brandable']
   }
 };
 
 // Generate SEO Content HTML Block to inject
 function generateSeoHtml(toolKey, config) {
-  const featuresHtml = config.features.map(f => `<li style="margin-bottom: 8px; display: flex; align-items: start; gap: 8px;"><svg viewBox="0 0 24 24" fill="none" style="width: 16px; height: 16px; color: var(--primary); margin-top: 3px; flex-shrink: 0;"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${f}</span></li>`).join('');
+  const aboutHtml = config.about.map(p => `<p class="seo-paragraph">${p}</p>`).join('');
+  const featuresHtml = config.features.map(f => `
+    <li class="seo-feature-item">
+      <span class="seo-feature-icon">✓</span>
+      <span>${f}</span>
+    </li>
+  `).join('');
   const faqsHtml = config.faqs.map(faq => `
-    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 12px;">
-      <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">${faq.q}</h3>
-      <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5;">${faq.a}</p>
+    <div class="seo-faq-item">
+      <h3 class="seo-faq-question">${faq.q}</h3>
+      <p class="seo-faq-answer">${faq.a}</p>
     </div>
   `).join('');
 
+  const relatedDisplayNames = {
+    geo: 'Geo Generator',
+    keyword: 'Keyword Generator',
+    pattern: 'Pattern Generator',
+    brandable: 'Brandable Names',
+    numeric: 'Numeric Generator',
+    suggestor: 'AI Suggestor',
+    wordlist: 'WordList Combiner',
+    analyzer: 'Smart Analyzer',
+    emailtool: 'Email Outreach',
+    bulkcheck: 'Bulk Checker',
+    extractor: 'Domain Extractor',
+    texttools: 'Text Tools',
+    emailextractor: 'Email Extractor',
+    newsdomain: 'Domain News'
+  };
+
+  const relatedHtml = config.related.map(key => {
+    const rConfig = toolConfigs[key];
+    if (!rConfig) return '';
+    return `<a href="${rConfig.path}" class="seo-related-link">${relatedDisplayNames[key]}</a>`;
+  }).join('');
+
   return `
-    <!-- SEO Semantic Content & FAQ (Pre-rendered for indexability) -->
-    <section class="seo-content-section" style="margin-top: 40px; border-top: 1px solid var(--border); padding-top: 40px; text-align: left;">
-      <div style="margin-bottom: 30px;">
-        <h2 style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 12px;">About ${config.h1}</h2>
-        <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px;">${config.intro}</p>
-        <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">${config.desc}</p>
-      </div>
-
-      <div style="margin-bottom: 40px;">
-        <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">Key Tool Features</h3>
-        <ul style="list-style: none; padding: 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
-          ${featuresHtml}
-        </ul>
-      </div>
-
-      <div class="faq-container">
-        <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 700; color: var(--text-main); margin-bottom: 16px;">Frequently Asked Questions</h3>
-        <div class="faq-list">
-          ${faqsHtml}
+    <div class="seo-grid">
+      <div class="seo-column-main">
+        <div class="seo-card">
+          <h2 class="seo-title-h2">About ${config.h1}</h2>
+          ${aboutHtml}
+        </div>
+        
+        <div class="seo-card">
+          <h2 class="seo-title-h2">Frequently Asked Questions</h2>
+          <div class="seo-faq-list">
+            ${faqsHtml}
+          </div>
         </div>
       </div>
       
-      <div style="margin-top: 30px; padding: 16px; background: rgba(6, 182, 212, 0.04); border-radius: var(--radius-sm); border: 1px solid rgba(6, 182, 212, 0.15); text-align: center;">
-        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--primary); margin-bottom: 4px;">Looking for other generators?</h4>
-        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">Explore our suite of domain names research and creation tools.</p>
-        <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
-          <a href="/geo-domains" style="font-size: 0.8rem; font-weight: 600; color: var(--primary); background: rgba(6, 182, 212, 0.1); padding: 4px 10px; border-radius: 4px;">Geo Domains</a>
-          <a href="/keyword-domains" style="font-size: 0.8rem; font-weight: 600; color: var(--primary); background: rgba(6, 182, 212, 0.1); padding: 4px 10px; border-radius: 4px;">Keyword Domains</a>
-          <a href="/pattern-domains" style="font-size: 0.8rem; font-weight: 600; color: var(--primary); background: rgba(6, 182, 212, 0.1); padding: 4px 10px; border-radius: 4px;">Pattern Domains</a>
-          <a href="/brandable-domains" style="font-size: 0.8rem; font-weight: 600; color: var(--primary); background: rgba(6, 182, 212, 0.1); padding: 4px 10px; border-radius: 4px;">Brandable Names</a>
-          <a href="/smart-analyzer" style="font-size: 0.8rem; font-weight: 600; color: var(--primary); background: rgba(6, 182, 212, 0.1); padding: 4px 10px; border-radius: 4px;">Smart Analyzer</a>
+      <div class="seo-column-side">
+        <div class="seo-card">
+          <h2 class="seo-title-h2">Key Tool Features</h2>
+          <ul class="seo-feature-list">
+            ${featuresHtml}
+          </ul>
+        </div>
+        
+        <div class="seo-card">
+          <h2 class="seo-title-h2">Related Domain Tools</h2>
+          <div class="seo-related-grid">
+            ${relatedHtml}
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   `;
 }
 
@@ -370,12 +557,20 @@ async function build() {
     const targetPanel = $(`#${key}-panel`);
     if (targetPanel.length) {
       targetPanel.addClass('active');
-      
-      // Inject pre-rendered SEO contents inside panel-container
-      const panelContainer = targetPanel.find('.panel-container');
-      if (panelContainer.length) {
-        panelContainer.append(generateSeoHtml(key, config));
+    }
+
+    // Inject all SEO tool content blocks inside #seoContentSection
+    const seoContentSection = $('#seoContentSection');
+    if (seoContentSection.length) {
+      let seoHtml = '';
+      for (const [tKey, tConfig] of Object.entries(toolConfigs)) {
+        const isActive = tKey === key;
+        seoHtml += `
+      <div id="seo-content-${tKey}" class="seo-tool-content${isActive ? ' active' : ''}">
+        ${generateSeoHtml(tKey, tConfig)}
+      </div>\n`;
       }
+      seoContentSection.html(seoHtml);
     }
 
     // Set sidebar navigation active class

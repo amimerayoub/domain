@@ -5212,3 +5212,180 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 #emailtool-panel .panel-container { width: 100%; max-width: none; margin: 0; padding: 20px 24px; }
 .email-table-wrap { width: 100%; overflow-x: auto; }
 .email-table { width: 100%; table-layout: auto; }
+
+/* ============================================
+   SEO REUSABLE CONTENT SECTION
+   ============================================ */
+.seo-content-section {
+  display: none;
+  margin: 3rem auto 2rem auto;
+  max-width: 1200px;
+  padding: 0 16px;
+  font-family: var(--font-primary);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.seo-content-section.active {
+  display: block;
+}
+
+.seo-tool-content {
+  display: none;
+}
+
+.seo-tool-content.active {
+  display: block;
+}
+
+.seo-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.seo-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.seo-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.seo-title-h2 {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+
+.seo-title-h3 {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.seo-paragraph {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.seo-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Feature List Styling */
+.seo-feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.seo-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.seo-feature-item:last-child {
+  margin-bottom: 0;
+}
+
+.seo-feature-icon {
+  flex-shrink: 0;
+  color: var(--success);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+/* FAQ Item Styling */
+.seo-faq-item {
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0;
+}
+
+.seo-faq-item:first-child {
+  padding-top: 0;
+}
+
+.seo-faq-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.seo-faq-question {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.seo-faq-answer {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Related Tools Link Grid */
+.seo-related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.seo-related-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-main);
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: all var(--transition);
+}
+
+.seo-related-link:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 992px) {
+  .seo-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .seo-card {
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+}
+

@@ -286,6 +286,15 @@ function switchTool(tool, updateHistory = true) {
   
   updateSEOMeta(tool);
   
+  // Update active SEO content block
+  const seoContainer = $('#seoContentSection');
+  if (seoContainer) {
+    seoContainer.classList.add('active');
+    $$('.seo-tool-content').forEach(el => {
+      el.classList.toggle('active', el.id === `seo-content-${tool}`);
+    });
+  }
+  
   $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tool === tool));
   $$('.tool-panel').forEach(p => {
     const isActive = p.id === tool + '-panel';
