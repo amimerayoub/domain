@@ -9,20 +9,104 @@ let campaigns = [];
 let currentCampaignId = null; // Used for the modal edit form
 export let activeCampaignId = null; // Used for the selected campaign in the workflow
 
-// Email template with multiple variants support
+// ============================================================
+// EMAIL TEMPLATES
+// ============================================================
+
+// Built-in fallback templates (used if JSON file can't be fetched)
+const FALLBACK_TEMPLATES = [
+  {
+    id: 'professional-offer',
+    name: 'Professional Offer',
+    subject: 'Business Opportunity',
+    body: `Hi {{name}},\n\nI currently own {{domain}} and I believe it could be a valuable asset for your business.\n\nI'm open to selling it at {{price}}. This domain has strong brandability and could help establish your online presence quickly.\n\nWould you be interested in discussing this further?\n\nBest regards`
+  },
+  {
+    id: 'brand-value',
+    name: 'Brand Value Pitch',
+    subject: 'A Valuable Branding Opportunity',
+    body: `Hello {{name}},\n\nThe domain {{domain}} is currently available for acquisition and could significantly strengthen your brand identity.\n\nAt {{price}}, this is a strategic investment that pays for itself in brand recognition alone.\n\nI'd love to hear your thoughts — happy to jump on a quick call.\n\nBest regards`
+  },
+  {
+    id: 'opportunity',
+    name: 'Opportunity & Scarcity',
+    subject: 'Exclusive Opportunity for Your Business',
+    body: `Hi {{name}},\n\nI wanted to reach out before I list {{domain}} publicly — I thought your business might benefit most from owning it.\n\nAsking price: {{price}}\n\nThis type of domain doesn't come up often and I expect strong interest once it's listed. Let me know if you'd like to move quickly.\n\nBest regards`
+  },
+  {
+    id: 'friendly',
+    name: 'Friendly Outreach',
+    subject: 'Quick Question',
+    body: `Hey {{name}},\n\nI own {{domain}} and I've been wondering if it might be a better fit for a business like yours than sitting unused.\n\nWould you be open to a quick chat? I'm flexible on price — {{price}} is my starting point but I'm happy to discuss.\n\nCheers`
+  },
+  {
+    id: 'blank',
+    name: 'Blank Template',
+    subject: '',
+    body: ''
+  }
+];
+
+let emailTemplates = [...FALLBACK_TEMPLATES];
+
+// Load templates from JSON file; fall back silently to built-ins
+async function loadEmailTemplates() {
+  try {
+    const res = await fetch('assets/data/email-templates.json');
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        emailTemplates = data;
+      }
+    }
+  } catch (_) {
+    // Silently use fallback templates
+  }
+  // Populate the template selector once templates are loaded
+  _populateTemplateSelector();
+}
+
+function getTemplateById(id) {
+  return emailTemplates.find(t => t.id === id) || null;
+}
+
+// Populate the <select> with all loaded templates
+function _populateTemplateSelector() {
+  const sel = $('#campaignTemplate');
+  if (!sel) return;
+  sel.innerHTML = emailTemplates.map(t =>
+    `<option value="${t.id}">${escapeHtml(t.name)}</option>`
+  ).join('');
+}
+
+// Apply a template to the subject + body fields in the modal
+// If prefillDomain is provided, it's stored in the domain field (body keeps {{domain}} literal)
+export function applyTemplate(templateId, prefillDomain) {
+  const tpl = getTemplateById(templateId);
+  if (!tpl) return;
+
+  const subjectEl = $('#campaignSubject');
+  const bodyEl    = $('#campaignBody');
+  const nameEl    = $('#campaignName');
+
+  if (subjectEl) subjectEl.value = tpl.subject;
+  if (bodyEl)    bodyEl.value    = tpl.body;
+
+  // Auto-suggest campaign name if empty
+  if (nameEl && !nameEl.value.trim()) {
+    const domain = prefillDomain || ($('#campaignDomain')?.value?.trim()) || '';
+    nameEl.value = domain ? `${domain} Outreach` : '';
+  }
+}
+
+// Legacy EMAIL_TEMPLATE kept for backward compat with openCampaignDetails preview
 const EMAIL_TEMPLATE = {
   subjects: [
-    'Domain available for your business',
+    'Business Opportunity',
     'Quick question about {{domain}}'
   ],
   messages: [
-    `Hello,
-
-I own the domain {{domain}} which could be a strong fit for your business.
-
-Price: {{price}}
-
-Let me know if you're interested.`
+    `Hi {{name}},\n\nI currently own {{domain}} and I believe it could be a valuable asset for your business.\n\nI'm open to selling it at {{price}}. This domain has strong brandability and could help establish your online presence quickly.\n\nWould you be interested in discussing this further?\n\nBest regards`
   ]
 };
 
@@ -85,40 +169,43 @@ export function createCampaign(data) {
     cpc: data.cpc || '',
     status: data.status || 'draft',
     notes: data.notes || '',
+    // Use passed subject/messages from template, or fall back to built-ins
     subjects: data.subjects || [...EMAIL_TEMPLATE.subjects],
     messages: data.messages || [...EMAIL_TEMPLATE.messages],
+    templateId: data.templateId || 'professional-offer',
     createdAt: new Date().toISOString()
   };
-  
+
   campaigns.unshift(campaign);
   saveCampaigns();
-  
+
   // Automatically select the newly created campaign
   activeCampaignId = campaign.id;
   updateCampaignSelector();
   updateEmailToolVisibility();
   document.dispatchEvent(new CustomEvent('campaign-selected', { detail: { id: activeCampaignId } }));
-  
+
   return campaign;
 }
 
 export function updateCampaign(id, data) {
   const campaign = getCampaignById(id);
   if (!campaign) return null;
-  
+
   Object.assign(campaign, {
-    name: data.name !== undefined ? data.name : campaign.name,
-    domain: data.domain !== undefined ? data.domain : campaign.domain,
-    emails: data.emails !== undefined ? data.emails : campaign.emails,
-    price: data.price !== undefined ? data.price : campaign.price,
+    name:      data.name      !== undefined ? data.name      : campaign.name,
+    domain:    data.domain    !== undefined ? data.domain    : campaign.domain,
+    emails:    data.emails    !== undefined ? data.emails    : campaign.emails,
+    price:     data.price     !== undefined ? data.price     : campaign.price,
     backlinks: data.backlinks !== undefined ? data.backlinks : campaign.backlinks,
-    cpc: data.cpc !== undefined ? data.cpc : campaign.cpc,
-    status: data.status !== undefined ? data.status : campaign.status,
-    notes: data.notes !== undefined ? data.notes : campaign.notes,
-    subjects: data.subjects !== undefined ? data.subjects : campaign.subjects,
-    messages: data.messages !== undefined ? data.messages : campaign.messages
+    cpc:       data.cpc       !== undefined ? data.cpc       : campaign.cpc,
+    status:    data.status    !== undefined ? data.status    : campaign.status,
+    notes:     data.notes     !== undefined ? data.notes     : campaign.notes,
+    subjects:  data.subjects  !== undefined ? data.subjects  : campaign.subjects,
+    messages:  data.messages  !== undefined ? data.messages  : campaign.messages,
+    templateId: data.templateId !== undefined ? data.templateId : campaign.templateId
   });
-  
+
   saveCampaigns();
   return campaign;
 }
@@ -131,8 +218,7 @@ export function openModal(modalId) {
   const modal = $(modalId);
   if (modal) {
     modal.style.display = 'flex';
-    // Trigger reflow for animation
-    modal.offsetHeight;
+    modal.offsetHeight; // Trigger reflow for animation
     modal.classList.add('open');
   }
 }
@@ -141,9 +227,7 @@ export function closeModal(modalId) {
   const modal = $(modalId);
   if (modal) {
     modal.classList.remove('open');
-    setTimeout(() => {
-      modal.style.display = 'none';
-    }, 200);
+    setTimeout(() => { modal.style.display = 'none'; }, 200);
   }
 }
 
@@ -151,28 +235,57 @@ export function showSaveNotification() {
   const notif = $('#saveNotification');
   if (notif) {
     notif.style.display = 'block';
-    setTimeout(() => {
-      notif.style.display = 'none';
-    }, 2000);
+    setTimeout(() => { notif.style.display = 'none'; }, 2000);
   }
 }
 
+// Open the create-campaign modal with optional domain prefill
+function openCreateModal(prefillDomain) {
+  currentCampaignId = null;
+  $('#campaignForm').reset();
+  $('#campaignId').value = '';
+  $('#campaignModalTitle').textContent = 'Create Campaign';
+
+  // Show template selector (hidden in edit mode)
+  const tplWrap = $('#templateSelectorWrap');
+  if (tplWrap) tplWrap.style.display = 'block';
+
+  const stepBar = $('#campaignStepBar');
+  if (stepBar) stepBar.style.display = 'flex';
+
+  // Show subject/body fields
+  const emailFieldsWrap = $('#campaignEmailFieldsWrap');
+  if (emailFieldsWrap) emailFieldsWrap.style.display = 'block';
+
+  // Pre-fill domain if provided
+  if (prefillDomain) {
+    const domainEl = $('#campaignDomain');
+    if (domainEl) domainEl.value = prefillDomain;
+  }
+
+  // Apply default template
+  const tplSel = $('#campaignTemplate');
+  const defaultTpl = tplSel?.value || 'professional-offer';
+  applyTemplate(defaultTpl, prefillDomain);
+
+  openModal('#campaignModalOverlay');
+}
+
 export function renderCampaignQuickList() {
-  const preview = $('#campaignListPreview');
+  const preview   = $('#campaignListPreview');
   const quickList = $('#campaignQuickList');
   const countBadge = $('#campaignCountBadge');
-  
+
   if (!preview || !quickList || !countBadge) return;
-  
+
   if (campaigns.length === 0) {
     preview.style.display = 'none';
     return;
   }
-  
+
   preview.style.display = 'block';
   countBadge.textContent = campaigns.length;
-  
-  // Show last 3 campaigns
+
   const recent = campaigns.slice(0, 3);
   quickList.innerHTML = recent.map(c => `
     <div class="campaign-item-card" data-campaign-id="${c.id}">
@@ -183,8 +296,7 @@ export function renderCampaignQuickList() {
       <span class="campaign-status-badge campaign-status-${c.status}">${c.status}</span>
     </div>
   `).join('');
-  
-  // Add click handlers
+
   $$('#campaignQuickList .campaign-item-card').forEach(card => {
     card.addEventListener('click', () => {
       const id = card.getAttribute('data-campaign-id');
@@ -195,19 +307,19 @@ export function renderCampaignQuickList() {
 
 export function renderCampaignsList() {
   const content = $('#campaignsListContent');
-  const noMsg = $('#noCampaignsMsg');
-  
+  const noMsg   = $('#noCampaignsMsg');
+
   if (!content) return;
-  
+
   if (campaigns.length === 0) {
     content.style.display = 'none';
     if (noMsg) noMsg.style.display = 'block';
     return;
   }
-  
+
   if (noMsg) noMsg.style.display = 'none';
   content.style.display = 'flex';
-  
+
   content.innerHTML = campaigns.map(c => `
     <div class="campaign-item-card" data-campaign-id="${c.id}">
       <div class="campaign-item-info">
@@ -220,8 +332,7 @@ export function renderCampaignsList() {
       </div>
     </div>
   `).join('');
-  
-  // Add click handlers
+
   $$('#campaignsListContent .campaign-item-card').forEach(card => {
     card.addEventListener('click', () => {
       const id = card.getAttribute('data-campaign-id');
@@ -233,42 +344,45 @@ export function renderCampaignsList() {
 export function openCampaignDetails(id) {
   const campaign = getCampaignById(id);
   if (!campaign) return;
-  
+
   currentCampaignId = id;
-  
-  // Fill details
-  $('#detailCampaignName').textContent = campaign.name;
-  $('#detailDomain').textContent = campaign.domain;
-  $('#detailEmailCount').textContent = (campaign.emails ? campaign.emails.length : 0);
-  $('#detailPrice').textContent = campaign.price || '-';
-  
+
+  $('#detailCampaignName').textContent  = campaign.name;
+  $('#detailDomain').textContent        = campaign.domain;
+  $('#detailEmailCount').textContent    = (campaign.emails ? campaign.emails.length : 0);
+  $('#detailPrice').textContent         = campaign.price || '-';
+
   const statusEl = $('#detailStatus');
   statusEl.textContent = campaign.status;
-  statusEl.className = `campaign-status-badge campaign-status-${campaign.status}`;
-  
+  statusEl.className   = `campaign-status-badge campaign-status-${campaign.status}`;
+
   $('#detailBacklinks').textContent = campaign.backlinks || '-';
-  $('#detailCpc').textContent = campaign.cpc || '-';
-  
-  // Notes
+  $('#detailCpc').textContent       = campaign.cpc || '-';
+
   const notesWrap = $('#detailNotesWrap');
-  const notesEl = $('#detailNotes');
+  const notesEl   = $('#detailNotes');
   if (campaign.notes) {
     notesWrap.style.display = 'block';
     notesEl.textContent = campaign.notes;
   } else {
     notesWrap.style.display = 'none';
   }
-  
-  // Generate email preview (use first subject/message from campaign or template)
+
+  // Email preview — use saved subject/message; fall back to defaults
   const subjectTpl = (campaign.subjects && campaign.subjects[0]) || EMAIL_TEMPLATE.subjects[0] || '';
   const messageTpl = (campaign.messages && campaign.messages[0]) || EMAIL_TEMPLATE.messages[0] || '';
-  const subject = subjectTpl.replace(/\{\{domain\}\}/gi, campaign.domain).replace(/\{\{price\}\}/gi, campaign.price || 'N/A');
-  const body    = messageTpl.replace(/\{\{domain\}\}/gi, campaign.domain).replace(/\{\{price\}\}/gi, campaign.price || 'N/A');
-  
+  const subject = subjectTpl
+    .replace(/\{\{domain\}\}/gi, campaign.domain)
+    .replace(/\{\{price\}\}/gi, campaign.price || 'N/A')
+    .replace(/\{\{name\}\}/gi, 'there');
+  const body = messageTpl
+    .replace(/\{\{domain\}\}/gi, campaign.domain)
+    .replace(/\{\{price\}\}/gi, campaign.price || 'N/A')
+    .replace(/\{\{name\}\}/gi, 'there');
+
   $('#previewSubjectLine').textContent = subject;
-  $('#previewEmailBody').textContent = body;
-  
-  // Close list modal and open details modal
+  $('#previewEmailBody').textContent   = body;
+
   closeModal('#campaignsListModal');
   openModal('#campaignDetailsModal');
 }
@@ -276,32 +390,56 @@ export function openCampaignDetails(id) {
 export function openEditCampaign(id) {
   const campaign = getCampaignById(id);
   if (!campaign) return;
-  
+
   currentCampaignId = id;
-  
-  // Fill form
-  $('#campaignId').value = campaign.id;
-  $('#campaignName').value = campaign.name;
-  $('#campaignDomain').value = campaign.domain;
-  $('#campaignPrice').value = campaign.price;
-  $('#campaignBacklinks').value = campaign.backlinks;
-  $('#campaignCpc').value = campaign.cpc;
-  $('#campaignStatus').value = campaign.status;
-  $('#campaignNotes').value = campaign.notes;
-  
+
+  $('#campaignId').value         = campaign.id;
+  $('#campaignName').value       = campaign.name;
+  $('#campaignDomain').value     = campaign.domain;
+  $('#campaignPrice').value      = campaign.price;
+  $('#campaignBacklinks').value  = campaign.backlinks;
+  $('#campaignCpc').value        = campaign.cpc;
+  $('#campaignStatus').value     = campaign.status;
+  $('#campaignNotes').value      = campaign.notes;
+
+  // Fill subject & body from saved campaign data
+  const subjectEl = $('#campaignSubject');
+  const bodyEl    = $('#campaignBody');
+  if (subjectEl) subjectEl.value = (campaign.subjects && campaign.subjects[0]) || '';
+  if (bodyEl)    bodyEl.value    = (campaign.messages && campaign.messages[0]) || '';
+
+  // Hide template selector in edit mode (user already has an email)
+  const tplWrap = $('#templateSelectorWrap');
+  if (tplWrap) tplWrap.style.display = 'none';
+
+  const stepBar = $('#campaignStepBar');
+  if (stepBar) stepBar.style.display = 'none';
+
+  // Show subject/body fields
+  const emailFieldsWrap = $('#campaignEmailFieldsWrap');
+  if (emailFieldsWrap) emailFieldsWrap.style.display = 'block';
+
   $('#campaignModalTitle').textContent = 'Edit Campaign';
-  
+
   closeModal('#campaignDetailsModal');
   openModal('#campaignModalOverlay');
 }
 
 export function generateGmailLink(campaign) {
-  const subject = encodeURIComponent(EMAIL_TEMPLATE.subject.replace('{{domain}}', campaign.domain));
-  const body = encodeURIComponent(EMAIL_TEMPLATE.body
-    .replace('{{domain}}', campaign.domain)
-    .replace('{{price}}', campaign.price || 'N/A'));
-  
-  return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(campaign.email)}&su=${subject}&body=${body}`;
+  const subjectTpl = (campaign.subjects && campaign.subjects[0]) || EMAIL_TEMPLATE.subjects[0] || '';
+  const messageTpl = (campaign.messages && campaign.messages[0]) || EMAIL_TEMPLATE.messages[0] || '';
+
+  const subject = subjectTpl
+    .replace(/\{\{domain\}\}/gi, campaign.domain)
+    .replace(/\{\{price\}\}/gi, campaign.price || 'N/A')
+    .replace(/\{\{name\}\}/gi, 'there');
+  const body = messageTpl
+    .replace(/\{\{domain\}\}/gi, campaign.domain)
+    .replace(/\{\{price\}\}/gi, campaign.price || 'N/A')
+    .replace(/\{\{name\}\}/gi, 'there');
+
+  const emailTo = (campaign.emails && campaign.emails[0]) || '';
+  return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(emailTo)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 // ============================================================
@@ -321,23 +459,17 @@ function escapeHtml(str) {
 
 export function initCampaignManager() {
   loadCampaigns();
-  
-  // Initialize campaign selector UI
+  loadEmailTemplates(); // async — populates selector when done
+
   initCampaignSelector();
   updateEmailToolVisibility();
-  
+
   // Create Campaign button
   const btnCreate = $('#btnCreateCampaign');
   if (btnCreate) {
-    btnCreate.addEventListener('click', () => {
-      currentCampaignId = null;
-      $('#campaignForm').reset();
-      $('#campaignId').value = '';
-      $('#campaignModalTitle').textContent = 'Create Campaign';
-      openModal('#campaignModalOverlay');
-    });
+    btnCreate.addEventListener('click', () => openCreateModal());
   }
-  
+
   // View Campaigns button
   const btnView = $('#btnViewCampaigns');
   if (btnView) {
@@ -346,59 +478,72 @@ export function initCampaignManager() {
       openModal('#campaignsListModal');
     });
   }
-  
+
   // Close modal buttons
   $('#btnCloseCampaignModal')?.addEventListener('click', () => closeModal('#campaignModalOverlay'));
-  $('#btnCancelCampaign')?.addEventListener('click', () => closeModal('#campaignModalOverlay'));
+  $('#btnCancelCampaign')?.addEventListener('click',    () => closeModal('#campaignModalOverlay'));
   $('#btnCloseDetailsModal')?.addEventListener('click', () => closeModal('#campaignDetailsModal'));
-  $('#btnCloseListModal')?.addEventListener('click', () => closeModal('#campaignsListModal'));
-  
+  $('#btnCloseListModal')?.addEventListener('click',    () => closeModal('#campaignsListModal'));
+
   // Create first campaign button
   $('#btnCreateFirstCampaign')?.addEventListener('click', () => {
     closeModal('#campaignsListModal');
-    currentCampaignId = null;
-    $('#campaignForm').reset();
-    $('#campaignId').value = '';
-    $('#campaignModalTitle').textContent = 'Create Campaign';
-    openModal('#campaignModalOverlay');
+    openCreateModal();
   });
-  
+
+  // Template selector → live update subject + body
+  $('#campaignTemplate')?.addEventListener('change', (e) => {
+    const domain = $('#campaignDomain')?.value?.trim() || '';
+    applyTemplate(e.target.value, domain);
+  });
+
+  // Domain field → update campaign name suggestion if empty
+  $('#campaignDomain')?.addEventListener('input', (e) => {
+    const nameEl = $('#campaignName');
+    if (nameEl && !nameEl.value.trim()) {
+      const domain = e.target.value.trim();
+      if (domain) nameEl.value = `${domain} Outreach`;
+    }
+  });
+
   // Form submit
   $('#campaignForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    
+
+    const subject = ($('#campaignSubject')?.value?.trim()) || '';
+    const body    = ($('#campaignBody')?.value?.trim())    || '';
+
     const data = {
-      name: $('#campaignName').value.trim(),
-      domain: $('#campaignDomain').value.trim(),
-      price: $('#campaignPrice').value.trim(),
-      backlinks: $('#campaignBacklinks').value.trim(),
-      cpc: $('#campaignCpc').value.trim(),
-      status: $('#campaignStatus').value,
-      notes: $('#campaignNotes').value.trim()
+      name:       $('#campaignName').value.trim(),
+      domain:     $('#campaignDomain').value.trim(),
+      price:      $('#campaignPrice').value.trim(),
+      backlinks:  $('#campaignBacklinks').value.trim(),
+      cpc:        $('#campaignCpc').value.trim(),
+      status:     $('#campaignStatus').value,
+      notes:      $('#campaignNotes').value.trim(),
+      subjects:   subject ? [subject] : [...EMAIL_TEMPLATE.subjects],
+      messages:   body    ? [body]    : [...EMAIL_TEMPLATE.messages],
+      templateId: $('#campaignTemplate')?.value || 'professional-offer'
     };
-    
+
     if (currentCampaignId) {
       updateCampaign(currentCampaignId, data);
     } else {
       createCampaign(data);
     }
-    
+
     showSaveNotification();
     renderCampaignQuickList();
     updateCampaignSelector();
-    
-    setTimeout(() => {
-      closeModal('#campaignModalOverlay');
-    }, 500);
+
+    setTimeout(() => { closeModal('#campaignModalOverlay'); }, 500);
   });
-  
+
   // Edit campaign button
   $('#btnEditCampaign')?.addEventListener('click', () => {
-    if (currentCampaignId) {
-      openEditCampaign(currentCampaignId);
-    }
+    if (currentCampaignId) openEditCampaign(currentCampaignId);
   });
-  
+
   // Delete campaign button
   $('#btnDeleteCampaign')?.addEventListener('click', () => {
     if (currentCampaignId && confirm('Are you sure you want to delete this campaign?')) {
@@ -408,7 +553,7 @@ export function initCampaignManager() {
       renderCampaignsList();
     }
   });
-  
+
   // Send via Gmail button
   $('#btnSendGmail')?.addEventListener('click', () => {
     const campaign = getCampaignById(currentCampaignId);
@@ -417,21 +562,15 @@ export function initCampaignManager() {
       window.open(url, '_blank');
     }
   });
-  
-  // Auto-fill from domain data (if available from generator)
+
+  // Auto-fill from domain data (called from domain cards)
   window.fillCampaignFromDomain = function(domainData) {
-    currentCampaignId = null;
-    $('#campaignForm').reset();
-    
-    if (domainData.domain) $('#campaignDomain').value = domainData.domain;
-    if (domainData.cpc) $('#campaignCpc').value = domainData.cpc;
-    if (domainData.backlinks) $('#campaignBacklinks').value = domainData.backlinks;
-    
-    $('#campaignModalTitle').textContent = 'Create Campaign';
-    openModal('#campaignModalOverlay');
+    openCreateModal(domainData.domain || '');
+    // Also pre-fill extra fields if provided
+    if (domainData.cpc)       { const el = $('#campaignCpc');       if (el) el.value = domainData.cpc; }
+    if (domainData.backlinks) { const el = $('#campaignBacklinks'); if (el) el.value = domainData.backlinks; }
   };
-  
-  // Initial render
+
   renderCampaignQuickList();
 }
 
@@ -440,7 +579,6 @@ export function initCampaignManager() {
 // ============================================================
 
 export function updateEmailToolVisibility() {
-  // All .email-section divs inside the panel (index 0 = Campaign Manager header)
   const sections = $$('#emailtool-panel .email-section');
   const controls = $('#emailtool-panel .email-campaign-controls');
   const stats    = $('#emailtool-panel .email-stats-bar');
@@ -448,17 +586,14 @@ export function updateEmailToolVisibility() {
 
   const showSystem = !!activeCampaignId;
 
-  // sections[0] is the Campaign Manager row — always visible
-  // sections[1..n] are the email workflow steps — only visible when a campaign is active
   sections.forEach((s, idx) => {
     if (idx > 0) s.style.display = showSystem ? 'block' : 'none';
   });
 
-  if (controls) controls.style.display = showSystem ? 'flex' : 'none';
+  if (controls) controls.style.display = showSystem ? 'flex'  : 'none';
   if (stats)    stats.style.display    = showSystem ? 'flex'  : 'none';
   if (table)    table.style.display    = showSystem ? 'block' : 'none';
 
-  // Show campaign quick-list preview only when campaigns exist but none selected
   const previewList = $('#campaignListPreview');
   if (previewList) previewList.style.display = (campaigns.length > 0 && !showSystem) ? 'block' : 'none';
 }
@@ -466,26 +601,25 @@ export function updateEmailToolVisibility() {
 function updateCampaignSelector() {
   const selectorWrap = $('#campaignSelector');
   const selectorText = $('#campaignSelectorText');
-  const dropdown = $('#campaignSelectorDropdown');
-  const btnView = $('#btnViewCampaigns');
+  const dropdown     = $('#campaignSelectorDropdown');
+  const btnView      = $('#btnViewCampaigns');
 
   if (campaigns.length === 0) {
     if (selectorWrap) selectorWrap.style.display = 'none';
-    if (btnView) btnView.style.display = 'none';
+    if (btnView)      btnView.style.display      = 'none';
     activeCampaignId = null;
     updateEmailToolVisibility();
     return;
   }
 
   if (selectorWrap) selectorWrap.style.display = 'block';
-  if (btnView) btnView.style.display = 'flex';
+  if (btnView)      btnView.style.display      = 'flex';
 
   if (dropdown) {
-    dropdown.innerHTML = campaigns.map(c => 
+    dropdown.innerHTML = campaigns.map(c =>
       `<div class="select-option ${activeCampaignId === c.id ? 'active' : ''}" data-value="${c.id}">${escapeHtml(c.name)}</div>`
     ).join('');
 
-    // Rebind dropdown clicks
     dropdown.querySelectorAll('.select-option').forEach(opt => {
       opt.addEventListener('click', () => {
         dropdown.querySelectorAll('.select-option').forEach(o => o.classList.remove('active'));
@@ -518,6 +652,7 @@ window.campaignManager = {
   getCampaignById,
   openCampaignDetails,
   openEditCampaign,
+  applyTemplate,
   fillCampaignFromDomain: window.fillCampaignFromDomain,
   getActiveCampaignId: () => activeCampaignId
 };

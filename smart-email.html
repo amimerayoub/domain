@@ -948,29 +948,105 @@ Variables: {{domain}}, {{email}}, {{name}}"></textarea>
 
     <!-- ===== CAMPAIGN FORM MODAL ===== -->
     <div class="modal-overlay" id="campaignModalOverlay" style="display:none">
-      <div class="modal-content glass" style="max-width:520px;width:90%">
-        <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--glass-border)">
+      <div class="modal-content glass" style="max-width:560px;width:90%;max-height:92vh;overflow-y:auto">
+
+        <!-- Header -->
+        <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0;padding-bottom:12px;border-bottom:1px solid var(--glass-border)">
           <h3 id="campaignModalTitle" style="font-family:var(--font-primary);font-size:1rem;font-weight:700">Create Campaign</h3>
           <button class="btn-action-sm" id="btnCloseCampaignModal" style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center">
             <svg viewBox="0 0 24 24" fill="none" style="width:12px;height:12px"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
           </button>
         </div>
-        
-        <form id="campaignForm" style="display:flex;flex-direction:column;gap:12px">
+
+        <!-- Step Progress Bar (create mode only) -->
+        <div id="campaignStepBar" class="campaign-step-bar">
+          <div class="campaign-step active">
+            <div class="campaign-step-dot">
+              <svg viewBox="0 0 24 24" fill="none" width="10" height="10"><path d="M9 12h6M9 8h6M7 4h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+            </div>
+            <span>Template</span>
+          </div>
+          <div class="campaign-step-line"></div>
+          <div class="campaign-step">
+            <div class="campaign-step-dot">
+              <svg viewBox="0 0 24 24" fill="none" width="10" height="10"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="2"></path><path d="M22 6l-10 7L2 6" stroke="currentColor" stroke-width="2"></path></svg>
+            </div>
+            <span>Subject</span>
+          </div>
+          <div class="campaign-step-line"></div>
+          <div class="campaign-step">
+            <div class="campaign-step-dot">
+              <svg viewBox="0 0 24 24" fill="none" width="10" height="10"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2"></path></svg>
+            </div>
+            <span>Email</span>
+          </div>
+          <div class="campaign-step-line"></div>
+          <div class="campaign-step">
+            <div class="campaign-step-dot">
+              <svg viewBox="0 0 24 24" fill="none" width="10" height="10"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2"></path></svg>
+            </div>
+            <span>Save</span>
+          </div>
+        </div>
+
+        <form id="campaignForm" style="display:flex;flex-direction:column;gap:12px;padding-top:16px">
           <input type="hidden" id="campaignId">
-          
+
+          <!-- STEP 1 — Template Selector (create mode only) -->
+          <div id="templateSelectorWrap" class="tpl-selector-wrap">
+            <label class="tpl-selector-label">
+              <svg viewBox="0 0 24 24" fill="none" width="13" height="13" style="flex-shrink:0"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+              Email Template
+            </label>
+            <div class="tpl-selector-grid">
+              <select id="campaignTemplate" class="tpl-select email-var-field">
+                <!-- Populated dynamically by campaignManager.js -->
+                <option value="professional-offer">Professional Offer</option>
+                <option value="brand-value">Brand Value Pitch</option>
+                <option value="opportunity">Opportunity &amp; Scarcity</option>
+                <option value="friendly">Friendly Outreach</option>
+                <option value="blank">Blank Template</option>
+              </select>
+            </div>
+            <p class="tpl-hint">Choose a template — subject &amp; body are filled automatically.</p>
+          </div>
+
+          <!-- Campaign Name + Domain -->
           <div>
             <label style="display:block;font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px">Campaign Name *</label>
-            <input type="text" id="campaignName" class="email-var-field" placeholder="e.g. Tech Startups Outreach" required="" style="width:100%">
+            <input type="text" id="campaignName" class="email-var-field" placeholder="e.g. example.com Outreach" required="" style="width:100%">
           </div>
-          
+
           <div>
             <label style="display:block;font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px">Domain *</label>
             <input type="text" id="campaignDomain" class="email-var-field" placeholder="e.g. example.com" required="" style="width:100%">
           </div>
-          
 
-          
+          <!-- STEP 2 — Subject -->
+          <div id="campaignEmailFieldsWrap">
+            <div style="margin-bottom:12px">
+              <label style="display:block;font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px">
+                Subject Line
+              </label>
+              <input type="text" id="campaignSubject" class="email-var-field" placeholder="e.g. Business Opportunity" style="width:100%">
+            </div>
+
+            <!-- STEP 3 — Email Body -->
+            <div>
+              <label style="display:block;font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px">
+                Email Body
+              </label>
+              <textarea id="campaignBody" class="email-msg-field" rows="7" placeholder="Your email message..." style="width:100%;resize:vertical;font-family:var(--font-mono);font-size:.78rem;line-height:1.65"></textarea>
+              <div class="tpl-var-hint">
+                <span class="tpl-var-chip">{{name}}</span>
+                <span class="tpl-var-chip">{{domain}}</span>
+                <span class="tpl-var-chip">{{price}}</span>
+                <span style="font-size:.68rem;color:var(--text-faint);margin-left:4px">are replaced automatically</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Extra fields (collapsible row) -->
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
             <div>
               <label style="display:block;font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px">Price (USD)</label>
@@ -981,7 +1057,7 @@ Variables: {{domain}}, {{email}}, {{name}}"></textarea>
               <input type="text" id="campaignBacklinks" class="email-var-field" placeholder="e.g. 150" style="width:100%">
             </div>
           </div>
-          
+
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
             <div>
               <label style="display:block;font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px">CPC</label>
@@ -997,13 +1073,14 @@ Variables: {{domain}}, {{email}}, {{name}}"></textarea>
               </select>
             </div>
           </div>
-          
+
           <div>
             <label style="display:block;font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px">Notes</label>
-            <textarea id="campaignNotes" class="email-msg-field" placeholder="Additional notes about this campaign..." rows="3" style="width:100%;resize:vertical"></textarea>
+            <textarea id="campaignNotes" class="email-msg-field" placeholder="Additional notes about this campaign..." rows="2" style="width:100%;resize:vertical"></textarea>
           </div>
-          
-          <div style="display:flex;gap:10px;margin-top:8px">
+
+          <!-- STEP 4 — Save -->
+          <div style="display:flex;gap:10px;margin-top:4px">
             <button type="submit" class="btn-generate" style="flex:1;padding:10px 18px;font-size:.82rem">
               <svg viewBox="0 0 24 24" fill="none" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2"></path><path d="M17 21v-8H7v8M7 3v5h8" stroke="currentColor" stroke-width="2"></path></svg>
               Save Campaign
@@ -1011,10 +1088,10 @@ Variables: {{domain}}, {{email}}, {{name}}"></textarea>
             <button type="button" class="btn-action-sm" id="btnCancelCampaign" style="padding:10px 18px">Cancel</button>
           </div>
         </form>
-        
+
         <div id="saveNotification" style="display:none;margin-top:10px;padding:8px 12px;background:var(--success-bg);border:1px solid var(--success-border);border-radius:var(--radius-sm);font-size:.75rem;font-weight:600;color:var(--success);text-align:center">
           <svg viewBox="0 0 24 24" fill="none" style="width:12px;height:12px;vertical-align:middle;margin-right:6px"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path><path d="M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-          Saved locally
+          Campaign saved!
         </div>
       </div>
     </div>

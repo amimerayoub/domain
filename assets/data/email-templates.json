@@ -1,0 +1,32 @@
+[
+  {
+    "id": "professional-offer",
+    "name": "Professional Offer",
+    "subject": "Business Opportunity",
+    "body": "Hi {{name}},\n\nI currently own {{domain}} and I believe it could be a valuable asset for your business.\n\nI'm open to selling it at {{price}}. This domain has strong brandability and could help establish your online presence quickly.\n\nWould you be interested in discussing this further?\n\nBest regards"
+  },
+  {
+    "id": "brand-value",
+    "name": "Brand Value Pitch",
+    "subject": "A Valuable Branding Opportunity",
+    "body": "Hello {{name}},\n\nThe domain {{domain}} is currently available for acquisition and could significantly strengthen your brand identity.\n\nAt {{price}}, this is a strategic investment that pays for itself in brand recognition alone.\n\nI'd love to hear your thoughts — happy to jump on a quick call.\n\nBest regards"
+  },
+  {
+    "id": "opportunity",
+    "name": "Opportunity & Scarcity",
+    "subject": "Exclusive Opportunity for Your Business",
+    "body": "Hi {{name}},\n\nI wanted to reach out before I list {{domain}} publicly — I thought your business might benefit most from owning it.\n\nAsking price: {{price}}\n\nThis type of domain doesn't come up often and I expect strong interest once it's listed. Let me know if you'd like to move quickly.\n\nBest regards"
+  },
+  {
+    "id": "friendly",
+    "name": "Friendly Outreach",
+    "subject": "Quick Question",
+    "body": "Hey {{name}},\n\nI own {{domain}} and I've been wondering if it might be a better fit for a business like yours than sitting unused.\n\nWould you be open to a quick chat? I'm flexible on price — {{price}} is my starting point but I'm happy to discuss.\n\nCheers"
+  },
+  {
+    "id": "blank",
+    "name": "Blank Template",
+    "subject": "",
+    "body": ""
+  }
+]
