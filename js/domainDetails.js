@@ -23,6 +23,87 @@ function fmtNum(n) {
   if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
   return String(n);
 }
+function escHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[ch]);
+}
+function toolIcon({ icon, fallbackIcon, label, fallback }) {
+  const imageName = icon || label.toLowerCase().replace(/\s+/g, '-');
+  const fallbackImageName = fallbackIcon || imageName;
+  const safeLabel = escHtml(label);
+  return `
+    <span class="dd-tool-icon" aria-hidden="true">
+      <img
+        src="assets/tools/${imageName}.png"
+        data-fallback-src="assets/tool/${fallbackImageName}.png"
+        alt=""
+        loading="lazy"
+        decoding="async"
+        onerror="if (this.dataset.fallbackSrc) { this.src = this.dataset.fallbackSrc; this.dataset.fallbackSrc = ''; } else { this.hidden = true; this.closest('.dd-tool-icon')?.classList.add('is-fallback'); }"
+      />
+      <span class="dd-tool-fallback">${fallback}</span>
+    </span>
+    <span class="dd-tool-label">${safeLabel}</span>
+  `;
+}
+function renderToolStrip(domain) {
+  const encodedDomain = encodeURIComponent(domain);
+  const rawDomain = escHtml(domain);
+  const tools = [
+    {
+      category: 'Analysis',
+      items: [
+        { label: 'Whois', icon: 'whois', href: `https://who.is/whois/${encodedDomain}`, tooltip: 'Open Whois lookup', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="1.8"/><path d="M14 2v6h6M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' },
+        { label: 'DNS', icon: 'dns', href: `https://completedns.com/dns-history/${encodedDomain}`, tooltip: 'Open DNS history', fallback: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="6" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="18" height="6" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 7h.01M7 17h.01M12 10v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' },
+        { label: 'History', icon: 'history', fallbackIcon: 'dnshis', href: `https://dnshistory.org/historical-dns-records/soa/${encodedDomain}`, tooltip: 'Open DNS history records', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 101.9-5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 4v5h5M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
+      ]
+    },
+    {
+      category: 'Research',
+      items: [
+        { label: 'Google', icon: 'google', href: `https://www.google.com/search?q=${encodedDomain}`, tooltip: 'Search this domain on Google', fallback: '<svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' },
+        { label: 'Archive', icon: 'archive', href: `https://web.archive.org/web/*/${encodedDomain}`, tooltip: 'Open Wayback Machine snapshots', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M6 7l1-3h10l1 3M6 7v13h12V7" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 11h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' }
+      ]
+    },
+    {
+      category: 'Valuation',
+      items: [
+        { label: 'Value', icon: 'value', fallbackIcon: 'atom', href: `https://www.atom.com/domain-appraisal/${encodedDomain}`, tooltip: 'Open Atom domain appraisal', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7H14a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' },
+        { label: 'Domain Rating', icon: 'domain-rating', fallbackIcon: 'dn', href: 'https://www.dnrater.com/ref?u=1310926', tooltip: 'Open Domain Rating', domainAttr: rawDomain, fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8-4.3-4.1 5.9-.9L12 3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>' },
+        { label: 'SAW Appraisal', icon: 'appraisal', fallbackIcon: 'saw', href: `https://saw.com/appraisals?domain=${encodedDomain}`, tooltip: 'Open SAW appraisal', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8 15l3-4 3 2 5-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
+      ]
+    }
+  ];
+
+  return `
+    <nav class="dd-tool-strip" aria-label="Domain research tools">
+      ${tools.map(group => `
+        <div class="dd-tool-group" data-category="${escHtml(group.category)}">
+          <div class="dd-tool-category">${escHtml(group.category)}</div>
+          <div class="dd-tool-list">
+            ${group.items.map(item => `
+              <a
+                href="${item.href}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="dd-tool-card"
+                title="${escHtml(item.tooltip)}"
+                aria-label="${escHtml(`${item.label}: ${item.tooltip}`)}"
+                data-tooltip="${escHtml(item.tooltip)}"
+                ${item.domainAttr ? `data-domain="${item.domainAttr}"` : ''}
+              >${toolIcon(item)}</a>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </nav>
+  `;
+}
 
 // ─── Progress ───────────────────────────────────────────────────
 function setProgress(pct, text) {
@@ -85,14 +166,7 @@ function renderHero(domain, data) {
       const actionBtns = document.createElement('div');
       actionBtns.className = 'dd-hero-action-btns';
       actionBtns.innerHTML = `
-        <a href="https://who.is/whois/${domain}" target="_blank" class="btn-action-glass-sm">Whois</a>
-        <a href="https://www.google.com/search?q=${domain}" target="_blank" class="btn-action-glass-sm">Google</a>
-        <a href="https://web.archive.org/web/*/${domain}" target="_blank" class="btn-action-glass-sm">Archive</a>
-        <a href="https://www.spyfu.com/overview/domain?query=${domain}" target="_blank" class="btn-action-glass-sm">Analyze</a>
-        <a href="https://completedns.com/dns-history/${encodeURIComponent(domain)}" target="_blank" class="btn-action-glass-sm btn-accent-green">DNS</a>
-        <a href="https://www.whoxy.com/${encodeURIComponent(domain)}" target="_blank" class="btn-action-glass-sm btn-accent-orange">Whois+</a>
-        <a href="https://www.atom.com/domain-appraisal/${encodeURIComponent(domain)}" target="_blank" class="btn-action-glass-sm btn-accent-purple">Value</a>
-        <a href="https://dnshistory.org/historical-dns-records/soa/${encodeURIComponent(domain)}" target="_blank" class="btn-action-glass-sm btn-accent-red">History</a>
+        ${renderToolStrip(domain)}
       `;
       actionsEl.appendChild(actionBtns);
     } else {

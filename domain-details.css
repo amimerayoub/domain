@@ -210,6 +210,187 @@
 }
 .dd-hero-action-btns { display: flex; align-items: center; justify-content: center; gap: 7px; flex-wrap: wrap; }
 
+.dd-tool-strip {
+  width: min(100%, 920px);
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dd-tool-group {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--glass-bg), rgba(6, 182, 212, 0.03));
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-xs);
+  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+}
+
+.dd-tool-group:hover {
+  border-color: rgba(6, 182, 212, 0.28);
+  box-shadow: var(--shadow-xs), 0 0 18px rgba(6, 182, 212, 0.12);
+}
+
+.dd-tool-category {
+  color: var(--text-faint);
+  font-size: .6rem;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  user-select: none;
+}
+
+.dd-tool-list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dd-tool-card {
+  position: relative;
+  min-width: 86px;
+  min-height: 58px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text-secondary);
+  font-family: var(--font-primary);
+  font-size: .68rem;
+  font-weight: 750;
+  line-height: 1.15;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: transform var(--transition), border-color var(--transition), color var(--transition), background var(--transition), box-shadow var(--transition);
+}
+
+.dd-tool-card:hover,
+.dd-tool-card:focus-visible,
+.dd-tool-card.active,
+.dd-tool-card[aria-current="true"] {
+  z-index: 2;
+  color: var(--text-main);
+  border-color: var(--primary);
+  background: linear-gradient(135deg, var(--glass-bg-hover), rgba(6, 182, 212, 0.12));
+  box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.16), 0 0 22px rgba(6, 182, 212, 0.26);
+  transform: translateY(-2px);
+}
+
+.dd-tool-card:active {
+  transform: translateY(0) scale(.98);
+}
+
+.dd-tool-card::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 9px);
+  max-width: 220px;
+  width: max-content;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: var(--toast-bg);
+  color: var(--text-main);
+  font-size: .68rem;
+  font-weight: 650;
+  line-height: 1.25;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(4px);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  white-space: normal;
+}
+
+.dd-tool-card:hover::after,
+.dd-tool-card:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.dd-tool-icon {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 30px;
+  border-radius: 9px;
+  background: rgba(6, 182, 212, 0.08);
+  transition: background var(--transition), transform var(--transition);
+}
+
+.dd-tool-card:hover .dd-tool-icon,
+.dd-tool-card:focus-visible .dd-tool-icon {
+  background: rgba(6, 182, 212, 0.14);
+  transform: scale(1.06);
+}
+
+.dd-tool-icon img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.22));
+}
+
+.dd-tool-fallback {
+  display: none;
+  width: 24px;
+  height: 24px;
+  color: var(--primary);
+}
+
+.dd-tool-fallback svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.dd-tool-icon.is-fallback .dd-tool-fallback {
+  display: inline-flex;
+}
+
+.dd-tool-label {
+  max-width: 76px;
+  overflow-wrap: anywhere;
+}
+
+[data-theme="light"] .dd-tool-card {
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), var(--shadow-xs);
+}
+
+[data-theme="light"] .dd-tool-group {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(6, 182, 212, 0.05));
+}
+
+[data-theme="dark"] .dd-tool-icon img {
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.36));
+}
+
 .btn-primary-orange {
   background: linear-gradient(135deg, var(--primary), var(--primary-hover));
   color: var(--primary-text);
@@ -680,6 +861,29 @@
   .dd-topbar-brand span { display: none; }
   .dd-topbar-domain { max-width: 150px; }
   .dd-back-btn { width: 44px; height: 44px; }
+  .dd-hero-action-btns { width: 100%; }
+  .dd-tool-strip { width: 100%; justify-content: stretch; }
+  .dd-tool-group {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .dd-tool-category {
+    writing-mode: horizontal-tb;
+    transform: none;
+    text-align: left;
+    padding: 0 2px;
+  }
+  .dd-tool-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .dd-tool-card {
+    min-width: 0;
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -687,4 +891,21 @@
   .dd-metrics { grid-template-columns: 1fr; }
   .dd-hero-domain { font-size: 1.3rem; }
   .dd-export-bar { flex-direction: column; }
+  .dd-tool-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dd-tool-card {
+    min-height: 62px;
+    padding: 8px 7px;
+  }
+  .dd-tool-card::after {
+    left: 0;
+    right: 0;
+    width: auto;
+    max-width: none;
+    transform: translateY(4px);
+  }
+  .dd-tool-card:hover::after,
+  .dd-tool-card:focus-visible::after {
+    transform: translateY(0);
+  }
+  .dd-tool-label { max-width: 100%; }
 }

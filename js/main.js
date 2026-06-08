@@ -292,6 +292,8 @@ function generateClientSeoHtml(toolKey, config, allConfigs) {
     </li>
   `).join('');
 
+  const howToUseHtml = `<p class="seo-p">${config.desc}</p>`;
+
   const faqsHtml = config.faqs.map((faq, i) => `
     <details class="seo-faq-item" ${i === 0 ? 'open' : ''}>
       <summary class="seo-faq-trigger">
@@ -356,7 +358,7 @@ function generateClientSeoHtml(toolKey, config, allConfigs) {
         <section class="seo-doc-section">
           <div class="seo-section-label">
             <span class="seo-section-num">01</span>
-            <h3 class="seo-section-heading">About This Tool</h3>
+            <h2 class="seo-section-heading">About This Tool</h2>
           </div>
           <div class="seo-section-body">
             ${aboutHtml}
@@ -368,7 +370,7 @@ function generateClientSeoHtml(toolKey, config, allConfigs) {
         <section class="seo-doc-section">
           <div class="seo-section-label">
             <span class="seo-section-num">02</span>
-            <h3 class="seo-section-heading">Key Features</h3>
+            <h2 class="seo-section-heading">Key Features</h2>
           </div>
           <div class="seo-section-body">
             <ul class="seo-feat-grid">
@@ -382,7 +384,21 @@ function generateClientSeoHtml(toolKey, config, allConfigs) {
         <section class="seo-doc-section">
           <div class="seo-section-label">
             <span class="seo-section-num">03</span>
-            <h3 class="seo-section-heading">Frequently Asked Questions</h3>
+            <h2 class="seo-section-heading">How To Use</h2>
+          </div>
+          <div class="seo-section-body">
+            <div class="seo-how-card">
+              ${howToUseHtml}
+            </div>
+          </div>
+        </section>
+
+        <div class="seo-doc-rule"></div>
+
+        <section class="seo-doc-section">
+          <div class="seo-section-label">
+            <span class="seo-section-num">04</span>
+            <h2 class="seo-section-heading">Frequently Asked Questions</h2>
           </div>
           <div class="seo-section-body">
             <div class="seo-faq-stack">
@@ -395,8 +411,8 @@ function generateClientSeoHtml(toolKey, config, allConfigs) {
 
         <section class="seo-doc-section">
           <div class="seo-section-label">
-            <span class="seo-section-num">04</span>
-            <h3 class="seo-section-heading">Related Tools</h3>
+            <span class="seo-section-num">05</span>
+            <h2 class="seo-section-heading">Related Tools</h2>
           </div>
           <div class="seo-section-body">
             <p class="seo-p seo-related-intro">Explore other tools in the AI Domains platform:</p>
@@ -2543,7 +2559,7 @@ export async function initApp() {
   const seoContainer = $('#seoContentSection');
   if (seoContainer) {
     seoContainer.addEventListener('click', e => {
-      const link = e.target.closest('.seo-related-link');
+      const link = e.target.closest('.seo-pill, .seo-related-link');
       if (link) {
         e.preventDefault();
         const href = link.getAttribute('href');
