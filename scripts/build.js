@@ -3,8 +3,7 @@ const path = require('path');
 const cheerio = require('cheerio');
 
 const workspaceDir = path.join(__dirname, '..');
-const templatePath = path.join(workspaceDir, 'index.html');
-const landingPath = path.join(workspaceDir, 'landing.html');
+const templatePath = path.join(workspaceDir, 'template.html');
 const sitemapPath = path.join(workspaceDir, 'sitemap.xml');
 
 // Tool definitions with SEO metadata, semantic content, and FAQs

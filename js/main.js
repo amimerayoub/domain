@@ -58,7 +58,7 @@ const titles = {
 // Clean URL routing
 const ROUTE_MAP = {
   geo: '/geo-domains', keyword: '/keyword-domains',
-  pattern: '/pattern-domains', brandable: '/brandable-domains',
+  pattern: '/pattern-domains', brandable: '/brandable-names',
   numeric: '/numeric-domains', suggestor: '/domain-suggestor',
   wordlist: '/wordlist-combiner', analyzer: '/smart-analyzer',
   emailtool: '/smart-email', bulkcheck: '/bulk-checker',

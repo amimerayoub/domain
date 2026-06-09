@@ -98,7 +98,10 @@ app.post('/api/bulk-check', async (req, res) => {
 
 // Route catch-all to serve compiled static files matching path
 app.get('/:tool', (req, res, next) => {
-  const tool = req.params.tool;
+  let tool = req.params.tool;
+  if (tool === 'brandable-names') {
+    tool = 'brandable-domains';
+  }
   const filePath = path.join(__dirname, '..', `${tool}.html`);
   if (fs.existsSync(filePath)) {
     res.sendFile(filePath);
