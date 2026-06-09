@@ -7,7 +7,7 @@
 
 const VERISIGN_API = 'https://sugapi.verisign-grs.com/ns-api/2.0/bulk-check';
 const MAX_NAMES    = 100;
-const MAX_TLDS     = 10;
+const MAX_TLDS     = 3;
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin',  '*');

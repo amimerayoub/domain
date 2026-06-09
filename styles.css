@@ -183,10 +183,14 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: normal; 
   gap: 10px;
 }
 
-.logo-svg {
-  width: 28px;
-  height: 28px;
+.logo-svg,
+.logo-img {
+  width: auto;
+  height: 32px;
+  max-height: 32px;
   flex-shrink: 0;
+  display: block;
+  object-fit: contain;
 }
 
 .logo-text {

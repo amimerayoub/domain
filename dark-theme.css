@@ -299,12 +299,15 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 
 .logo { display: flex; align-items: center; gap: 10px; }
 
-.logo-svg {
-  width: 30px;
-  height: 30px;
+.logo-svg,
+.logo-img {
+  width: auto;
+  height: 32px;
+  max-height: 32px;
   flex-shrink: 0;
-  filter: drop-shadow(0 0 8px var(--primary-glow));
-  transition: filter var(--transition);
+  display: block;
+  object-fit: contain;
+  transition: filter var(--transition), opacity var(--transition);
 }
 
 .logo-text {
@@ -332,8 +335,10 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
   background: var(--glass-bg);
   box-shadow: 0 0 0 1px var(--glass-border);
 }
-.logo-link:hover .logo-svg {
-  filter: drop-shadow(0 0 12px var(--primary-glow));
+.logo-link:hover .logo-svg,
+.logo-link:hover .logo-img {
+  filter: drop-shadow(0 0 10px var(--primary-glow));
+  opacity: 0.9;
 }
 .logo-link:hover .logo-text {
   color: var(--primary);
@@ -3418,10 +3423,8 @@ input, select, textarea { font-family: inherit; color: var(--text-main); backgro
 }
 
 /* ============================================================
-   LIGHT MODE â€” SVG ADJUSTMENTS
+   LIGHT MODE — ADJUSTMENTS
    ============================================================ */
-[data-theme="light"] .logo-svg rect { fill: var(--primary); fill-opacity: 0.1; }
-[data-theme="light"] .logo-svg path { stroke: var(--primary); }
 [data-theme="light"] body::before { opacity: 0.6; }
 
 /* ============================================================

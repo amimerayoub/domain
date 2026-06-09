@@ -200,18 +200,31 @@ async function build() {
     $('meta[property="og:title"]').attr('content', config.title);
     $('meta[property="og:description"]').attr('content', config.desc);
     $('meta[property="og:url"]').attr('content', `https://aidomains.co${config.path}`);
-    
-    // Twitter Card Tags
-    if (!$('meta[name="twitter:card"]').length) {
-      $('head').append('<meta name="twitter:card" content="summary_large_image">');
-    }
-    if (!$('meta[name="twitter:title"]').length) {
-      $('head').append(`<meta name="twitter:title" content="${config.title}">`);
-      $('head').append(`<meta name="twitter:description" content="${config.desc}">`);
+    // OG Image
+    if ($('meta[property="og:image"]').length) {
+      $('meta[property="og:image"]').attr('content', '/assets/graph/image1.png');
     } else {
-      $('meta[name="twitter:title"]').attr('content', config.title);
-      $('meta[name="twitter:description"]').attr('content', config.desc);
+      $('head').append('<meta property="og:image" content="/assets/graph/image1.png">');
     }
+
+    // Twitter Card Tags
+    if (!$('meta[name="twitter:card"]').length && !$('meta[property="twitter:card"]').length) {
+      $('head').append('<meta property="twitter:card" content="summary_large_image">');
+    }
+    if (!$('meta[name="twitter:title"]').length && !$('meta[property="twitter:title"]').length) {
+      $('head').append(`<meta property="twitter:title" content="${config.title}">`);
+      $('head').append(`<meta property="twitter:description" content="${config.desc}">`);
+      $('head').append('<meta property="twitter:image" content="/assets/graph/image1.png">');
+    } else {
+      $('meta[name="twitter:title"], meta[property="twitter:title"]').attr('content', config.title);
+      $('meta[name="twitter:description"], meta[property="twitter:description"]').attr('content', config.desc);
+      if ($('meta[name="twitter:image"], meta[property="twitter:image"]').length) {
+        $('meta[name="twitter:image"], meta[property="twitter:image"]').attr('content', '/assets/graph/image1.png');
+      } else {
+        $('head').append('<meta property="twitter:image" content="/assets/graph/image1.png">');
+      }
+    }
+
 
     // Append JSON-LD Schema
     $('head').append('\n  ' + getJsonLdSchema(key, config));
