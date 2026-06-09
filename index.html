@@ -198,16 +198,7 @@
             will-change: transform;
         }
         .tilt-card-inner { transform: translateZ(30px); }
-        .floating-particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: -1; }
-        .particle {
-            position: absolute; background: rgba(6, 182, 212, 0.4); border-radius: 50%;
-            animation: float-up linear infinite; box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
-        }
-        @keyframes float-up {
-            0% { transform: translateY(100vh) scale(0); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
-        }
+
         .metric-counter { font-variant-numeric: tabular-nums; font-weight: 800; }
         .score-ring {
             width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -228,42 +219,59 @@
         }
 
         /* ══════════════════════════════════════════════════════
-           MOBILE HAMBURGER + DRAWER
+           MOBILE HAMBURGER + DRAWER (GLASSMORPHISM REDESIGN)
            ══════════════════════════════════════════════════════ */
+
+        :root {
+            --mob-hamburger-bg: rgba(255, 255, 255, 0.65);
+            --mob-hamburger-border: rgba(34, 211, 238, 0.25);
+            --mob-drawer-bg: rgba(255, 255, 255, 0.72);
+            --mob-drawer-border: rgba(255, 255, 255, 0.5);
+            --mob-drawer-text: #0f172a;
+            --mob-drawer-subtext: #64748b;
+            --mob-drawer-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            --mob-close-bg: rgba(0, 0, 0, 0.05);
+        }
+        .dark {
+            --mob-hamburger-bg: rgba(15, 15, 15, 0.65);
+            --mob-hamburger-border: rgba(34, 211, 238, 0.25);
+            --mob-drawer-bg: rgba(15, 15, 15, 0.72);
+            --mob-drawer-border: rgba(255, 255, 255, 0.08);
+            --mob-drawer-text: #ffffff;
+            --mob-drawer-subtext: #94a3b8;
+            --mob-drawer-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            --mob-close-bg: rgba(255, 255, 255, 0.08);
+        }
 
         /* Hamburger button — fixed top-left, mobile only */
         #mob-hamburger {
             display: none;
             position: fixed;
-            top: 12px;
-            left: 12px;
+            top: 16px;
+            left: 16px;
             z-index: 9999;
             width: 48px;
             height: 48px;
             align-items: center;
             justify-content: center;
-            background: #ffffff;
-            border: 2px solid #06b6d4;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            background: var(--mob-hamburger-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--mob-hamburger-border);
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.08);
             cursor: pointer;
-            transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .dark #mob-hamburger {
-            background: #0c0c0c;
-            border-color: #06b6d4;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+        #mob-hamburger svg {
+            width: 20px;
+            height: 20px;
+            color: #22D3EE;
+            transition: transform 0.3s ease;
         }
         #mob-hamburger:hover {
-            background: #06b6d4;
-            box-shadow: 0 4px 20px rgba(6,182,212,0.35);
-        }
-        #mob-hamburger:hover svg { color: #ffffff; }
-        #mob-hamburger svg {
-            width: 22px;
-            height: 22px;
-            color: #06b6d4;
-            transition: color 0.2s;
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(34, 211, 238, 0.15);
         }
 
         /* Overlay behind drawer */
@@ -271,11 +279,12 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.45);
+            background: rgba(0,0,0,0.25);
             backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             z-index: 10000;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.4s ease;
         }
         #mob-overlay.open { opacity: 1; }
 
@@ -284,22 +293,20 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 85vw;
-            max-width: 320px;
+            width: 300px;
             height: 100vh;
             height: 100dvh;
-            background: #ffffff;
+            background: var(--mob-drawer-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-right: 1px solid var(--mob-drawer-border);
             z-index: 10001;
             transform: translateX(-100%);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 4px 0 40px rgba(0,0,0,0.2);
-        }
-        .dark #mob-drawer {
-            background: #0c0c0c;
-            box-shadow: 4px 0 40px rgba(0,0,0,0.8);
+            box-shadow: var(--mob-drawer-shadow);
         }
         #mob-drawer.open { transform: translateX(0); }
 
@@ -308,109 +315,131 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 20px;
-            border-bottom: 1px solid rgba(0,0,0,0.08);
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--mob-drawer-border);
             flex-shrink: 0;
         }
-        .dark .mob-drawer-header { border-color: rgba(255,255,255,0.07); }
         .mob-drawer-logo {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             text-decoration: none;
         }
         .mob-drawer-logo img {
-            height: 30px;
+            height: 32px;
             width: auto;
         }
         .mob-drawer-logo-text {
             font-weight: 800;
-            font-size: 1rem;
-            color: #0f172a;
+            font-size: 1.1rem;
+            color: var(--mob-drawer-text);
             letter-spacing: -0.02em;
+            line-height: 1.1;
         }
-        .dark .mob-drawer-logo-text { color: #ffffff; }
 
         /* Close button */
         #mob-close {
             width: 36px;
             height: 36px;
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(0,0,0,0.05);
+            background: var(--mob-close-bg);
             border: none;
             cursor: pointer;
-            color: #64748b;
-            font-size: 1.25rem;
-            line-height: 1;
-            transition: background 0.2s, color 0.2s;
+            color: var(--mob-drawer-subtext);
+            transition: all 0.2s ease;
             flex-shrink: 0;
         }
-        .dark #mob-close { background: rgba(255,255,255,0.08); color: #94a3b8; }
-        #mob-close:hover { background: rgba(6,182,212,0.1); color: #06b6d4; }
+        #mob-close:hover {
+            background: rgba(34, 211, 238, 0.1);
+            color: #22D3EE;
+        }
 
         /* Scrollable nav area */
         .mob-drawer-nav {
             flex: 1;
             overflow-y: auto;
-            padding: 12px 8px 24px 8px;
+            padding: 16px 12px 32px 12px;
             scrollbar-width: thin;
         }
 
         /* Section labels */
         .mob-nav-section-label {
             font-size: 0.65rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
+            font-weight: 800;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: #94a3b8;
-            padding: 10px 12px 4px;
+            color: var(--mob-drawer-subtext);
+            padding: 14px 14px 6px;
+            opacity: 0.8;
         }
-        .dark .mob-nav-section-label { color: #475569; }
 
         /* Drawer nav links */
         .mob-nav-link {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 10px;
+            gap: 12px;
+            height: 48px;
+            padding: 0 14px;
+            border-radius: 12px;
             font-size: 0.88rem;
             font-weight: 600;
-            color: #334155;
+            color: var(--mob-drawer-text);
             text-decoration: none;
-            transition: background 0.15s, color 0.15s;
-            margin-bottom: 2px;
-        }
-        .dark .mob-nav-link { color: #cbd5e1; }
-        .mob-nav-link:hover {
-            background: rgba(6,182,212,0.08);
-            color: #06b6d4;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            margin-bottom: 4px;
+            position: relative;
         }
         .mob-nav-link svg {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
+            color: var(--mob-drawer-subtext);
+            transition: color 0.2s;
             flex-shrink: 0;
-            opacity: 0.65;
+        }
+        .mob-nav-link:hover {
+            background: rgba(34, 211, 238, 0.08);
+            color: #22d3ee;
+        }
+        .mob-nav-link:hover svg {
+            color: #22d3ee;
+        }
+        .mob-nav-link.active {
+            background: rgba(34, 211, 238, 0.12);
+            color: #22d3ee;
+        }
+        .mob-nav-link.active svg {
+            color: #22d3ee;
+        }
+        .mob-nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            bottom: 12px;
+            width: 3px;
+            background: #22d3ee;
+            border-radius: 0 4px 4px 0;
         }
         .mob-nav-link.primary {
-            background: #0f172a;
-            color: #ffffff;
-            margin: 12px 4px 4px;
+            background: var(--mob-drawer-text);
+            color: var(--bg-card);
+            margin: 16px 4px 4px;
             justify-content: center;
-            padding: 12px;
+            height: 48px;
             border-radius: 12px;
         }
-        .dark .mob-nav-link.primary { background: #06b6d4; color: #0f172a; }
-        .mob-nav-link.primary:hover { background: #06b6d4; color: #0f172a; }
+        .mob-nav-link.primary:hover {
+            background: #22d3ee;
+            color: #050505;
+        }
         .mob-drawer-divider {
             height: 1px;
-            background: rgba(0,0,0,0.07);
-            margin: 8px 0;
+            background: var(--mob-drawer-border);
+            margin: 12px 14px;
         }
-        .dark .mob-drawer-divider { background: rgba(255,255,255,0.06); }
 
         /* ══ Mobile responsive fixes ═══════════════════════════ */
         html,
@@ -425,7 +454,7 @@
         @media (max-width: 1023px) {
             #mob-hamburger { display: flex; }
             /* Push logo right of hamburger */
-            #header .flex.justify-between { padding-left: 56px; }
+            #header .flex.justify-between { padding-left: 72px; }
         }
 
         /* Hero Layout & Typography */
@@ -577,7 +606,10 @@
         <div class="mob-drawer-header">
             <a href="/" class="mob-drawer-logo" onclick="closeDrawer()">
                 <img src="/assets/logo/logo.png" alt="AI Domains">
-                <span class="mob-drawer-logo-text">AI Domains</span>
+                <div class="flex flex-col">
+                    <span class="mob-drawer-logo-text">AI Domains</span>
+                    <span class="text-[9px] text-slate-500 dark:text-slate-400 font-semibold leading-none mt-0.5 uppercase tracking-wider">AI-Powered Domain Platform</span>
+                </div>
             </a>
             <button id="mob-close" aria-label="Close Menu" onclick="closeDrawer()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -588,7 +620,7 @@
         <div class="mob-drawer-nav">
 
             <!-- Main links -->
-            <a href="/" class="mob-nav-link" onclick="closeDrawer()">
+            <a href="/" class="mob-nav-link active" onclick="closeDrawer()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 Home
             </a>
@@ -832,7 +864,6 @@
          HERO SEARCH SECTION
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <main class="pt-32 pb-16 relative px-4 z-10 flex flex-col items-center justify-center min-h-[85vh]">
-        <div class="floating-particles" id="particles"></div>
         <div class="max-w-4xl mx-auto w-full text-center animate-fade-in-up">
             
             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-medium text-xs mb-6 border border-cyan-500/20 backdrop-blur-md">
@@ -1534,37 +1565,6 @@
         }, observerOptions);
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-        // Generate Particles
-        function createParticles() {
-            const oldContainer = document.getElementById('particles');
-            if (oldContainer) {
-                oldContainer.remove();
-            }
-
-            const mainEl = document.querySelector('main');
-            if (!mainEl) return;
-
-            const container = document.createElement('div');
-            container.id = 'particles';
-            container.className = 'floating-particles hero-particles';
-            mainEl.insertBefore(container, mainEl.firstChild);
-
-            for(let i=0; i<30; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                const size = Math.random() * 8 + 4;
-                p.style.width = size + 'px';
-                p.style.height = size + 'px';
-                p.style.left = Math.random() * 100 + '%';
-                p.style.animationDuration = (Math.random() * 15 + 10) + 's';
-                p.style.animationDelay = Math.random() * 10 + 's';
-                container.appendChild(p);
-            }
-        }
-
-        if (!document.querySelector('.hero-particles')) {
-            createParticles();
-        }
 
         // Tilt Card Logic (Vanilla)
         document.querySelectorAll('.tilt-card').forEach(card => {
