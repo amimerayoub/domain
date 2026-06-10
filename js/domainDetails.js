@@ -139,7 +139,7 @@ function renderHero(domain, data) {
   // Domain name with highlighted TLD and gradient
   const heroEl = $('#heroDomain');
   if (heroEl) {
-    heroEl.innerHTML = `<span style="background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${base}</span><span class="dd-tld-hl">${tld}</span>`;
+    heroEl.innerHTML = `<span style="background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; padding-left: 0.05em; display: inline-block;">${base}</span><span class="dd-tld-hl">${tld}</span>`;
   }
 
   // Topbar domain
