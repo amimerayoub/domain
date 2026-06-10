@@ -3,14 +3,23 @@
 
 const EXTERNAL_SVG = `<svg viewBox="0 0 24 24" fill="none" style="width:11px;height:11px;flex-shrink:0;opacity:.4"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
+// Helper function to extract a clean query separated by spaces from camel/PascalCase domains (e.g., ToweringChair.com -> Towering Chair)
+function getCleanQuery(domainName) {
+  const base = domainName.split('.')[0];
+  const spaced = base.replace(/([a-z])([A-Z])/g, '$1 $2');
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+}
+
 export const ACTION_LINKS = {
   analysis: [
     { id: 'whois', label: 'Whois', icon: 'whois.png', url: d => `https://whois.domaintools.com/${d}` },
-    { id: 'google', label: 'Search', icon: 'google.png', url: d => `https://www.google.com/search?q=${d}` },
-    { id: 'spyfu', label: 'SpyFu', icon: 'spyfu.png', url: d => `https://www.spyfu.com/overview/domain?query=${d}` },
+    { id: 'google', label: 'Search', icon: 'google.png', url: d => `https://www.google.com/search?q=${encodeURIComponent(getCleanQuery(d))}` },
+    { id: 'spyfu', label: 'SpyFu', icon: 'spyfu.png', url: d => `https://www.spyfu.com/keyword/overview?query=${encodeURIComponent(getCleanQuery(d))}` },
     { id: 'dotdb', label: 'DotDB', icon: 'dotdb.png', url: d => `https://dotdb.com/search?keyword=${d}` },
     { id: 'archive', label: 'Wayback Machine', icon: 'archive.png', url: d => `https://web.archive.org/web/*/${d}` },
     { id: 'namebio', label: 'Comparable Sales', icon: 'pc.png', url: d => `https://namebio.com/?term=${d.split('.')[0]}` },
+    { id: 'gmaps', label: 'Google Maps', icon: 'gmaps.png', url: d => `https://www.google.com/maps/search/${encodeURIComponent(getCleanQuery(d))}` },
+    { id: 'yelp', label: 'Yelp', icon: 'Yelp.png', url: d => `https://www.yelp.com/search?find_desc=${encodeURIComponent(getCleanQuery(d))}` },
   ],
   seo: [
     { id: 'spamcheck', label: 'Spam', icon: 'spam.png', url: d => `https://www.spamhaus.org/query/domain/${d}` },
@@ -26,7 +35,7 @@ let activeMenu = null;
 
 function positionDropdown(panel, trigger) {
   const rect = trigger.getBoundingClientRect();
-  const pw = 240;
+  const pw = 300; // 300px width fits 2-column layout perfectly
   const vw = window.innerWidth;
   const vh = window.innerHeight;
 
@@ -71,50 +80,52 @@ export function createActionMenu(card, domain) {
 
   let html = '';
 
-  // 1. Analysis Tools
+  // 1. Analysis Tools (2-column layout)
   html += '<div class="dd-section-label">Analysis</div>';
-  html += '<div class="dd-links">';
+  html += '<div class="dd-links" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">';
   ACTION_LINKS.analysis.forEach(a => {
-    html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="dd-link dd-registrar-link">
+    html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="dd-link dd-registrar-link" style="padding: 6px 8px;">
       <img src="/assets/aidomains/${a.icon}" loading="lazy" class="dd-link-icon" />
-      <span class="dd-link-text">${a.label}</span>
+      <span class="dd-link-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${a.label}</span>
       ${EXTERNAL_SVG}
     </a>`;
   });
   html += '</div>';
 
-  // 2. SEO & Research
+  // 2. SEO & Research (2-column layout)
   html += '<div class="dd-divider"></div>';
   html += '<div class="dd-section-label">SEO &amp; Research</div>';
-  html += '<div class="dd-links">';
+  html += '<div class="dd-links" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">';
   ACTION_LINKS.seo.forEach(a => {
-    html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="dd-link dd-registrar-link">
+    html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="dd-link dd-registrar-link" style="padding: 6px 8px;">
       <img src="/assets/aidomains/${a.icon}" loading="lazy" class="dd-link-icon" />
-      <span class="dd-link-text">${a.label}</span>
+      <span class="dd-link-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${a.label}</span>
       ${EXTERNAL_SVG}
     </a>`;
   });
   html += '</div>';
 
-  // 3. Appraisal
+  // 3. Appraisal (2-column layout)
   html += '<div class="dd-divider"></div>';
   html += '<div class="dd-section-label">Appraisal</div>';
-  html += '<div class="dd-links">';
+  html += '<div class="dd-links" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">';
   ACTION_LINKS.appraisal.forEach(a => {
-    html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="dd-link dd-registrar-link">
+    html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="dd-link dd-registrar-link" style="padding: 6px 8px;">
       <img src="/assets/aidomains/${a.icon}" loading="lazy" class="dd-link-icon" />
-      <span class="dd-link-text">${a.label}</span>
+      <span class="dd-link-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${a.label}</span>
       ${EXTERNAL_SVG}
     </a>`;
   });
   html += '</div>';
 
-  // 4. Send to Smart Analyzer
+  // 4. Send to Smart Analyzer (Full-width button)
   html += '<div class="dd-divider"></div>';
-  html += `<button class="dd-link dd-tool-link" data-action="send-to-analyzer">
+  html += '<div class="dd-links">';
+  html += `<button class="dd-link dd-tool-link" data-action="send-to-analyzer" style="padding: 6px 8px;">
     <img src="/assets/aidomains/pc.png" loading="lazy" class="dd-link-icon" />
     <span class="dd-link-text" style="font-weight: 600;">Send to Smart Analyzer</span>
   </button>`;
+  html += '</div>';
 
   panel.innerHTML = html;
 
