@@ -1,20 +1,7 @@
 // components/action-menu.js — Domain analysis action menu
-// SVG icon helper
-function svgIcon(path, viewBox = '0 0 24 24') {
-  return `<svg viewBox="${viewBox}" fill="none"><path d="${path}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-}
+// Premium glassmorphism dropdown styled exactly like domain-dropdown.js
 
-const ICO = {
-  globe: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zM2 12h2M12 2v2M22 12h-2',
-  search: 'M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.35-4.35',
-  chart: 'M3 3v18h18M7 16l4-4 4 4 5-6',
-  barChart: 'M3 3v18h18M7 16v-6M11 16v-4M15 16v-8M19 16V10',
-  clock: 'M12 2a10 10 0 100 20 10 10 0 000-20zM12 6v6l4 2',
-  dollar: 'M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6',
-  shield: 'M12 2l8 4v6c0 5.25-3.5 8.25-8 10-4.5-1.75-8-4.75-8-10V6l8-4z',
-  alert: 'M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01',
-  cart: 'M3 3h2l1.68 8.39a2 2 0 002 1.61h8.72a2 2 0 002-1.61L21 6H6',
-};
+const EXTERNAL_SVG = `<svg viewBox="0 0 24 24" fill="none" style="width:11px;height:11px;flex-shrink:0;opacity:.4"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 export const ACTION_LINKS = {
   analysis: [
@@ -32,114 +19,34 @@ export const ACTION_LINKS = {
   appraisal: [
     { id: 'godaddy', label: 'GoDaddy', icon: 'godaddy.png', url: d => `https://www.godaddy.com/domain-value-appraisal/appraisal/?domainToCheck=${d}` },
     { id: 'dynadot-app', label: 'Dynadot', icon: 'dynadot.png', url: d => `https://www.dynadot.com/domain/appraisal?domain=${d}` },
-  ],
-  registrar: [
-    { id: 'namecheap', label: 'Namecheap', icon: 'namecheap.png', url: d => `https://www.namecheap.com/domains/registration/results/?domain=${d}` },
-    { id: 'dynadot', label: 'Dynadot', icon: 'dynadot.png', url: d => `https://www.dynadot.com/domain/search.html?domain=${d}` },
-    { id: 'namesilo', label: 'NameSilo', icon: 'namesilo.png', url: d => `https://www.namesilo.com/domain/search-domains?query=${d}` },
-    { id: 'spaceship', label: 'Spaceship', icon: 'spaceship.png', url: d => `https://spaceship.com/domain/search?query=${d}` },
-    { id: 'porkbun', label: 'Porkbun', icon: 'porkbun.png', url: d => `https://porkbun.com/checkout/search?q=${d}` },
-    { id: 'ud', label: 'Unstoppable', icon: 'ud.ico', url: d => `https://unstoppabledomains.com/search?searchTerm=${d}` },
   ]
 };
 
 let activeMenu = null;
 
-function positionPanel(panel, trigger) {
+function positionDropdown(panel, trigger) {
   const rect = trigger.getBoundingClientRect();
+  const pw = 240;
   const vw = window.innerWidth;
   const vh = window.innerHeight;
 
-  const isMobile = vw <= 480;
+  let left = rect.right - pw;
+  let top = rect.bottom + 6;
 
-  // Make it temporarily visible to measure height accurately
-  const prevDisplay = panel.style.display;
-  panel.style.display = 'block';
-  panel.style.visibility = 'hidden';
-  
-  if (isMobile) {
-    panel.style.width = '92vw';
-    panel.style.maxWidth = '320px';
-  } else {
-    panel.style.width = '320px';
-    panel.style.maxWidth = 'none';
-  }
-
-  const menuW = panel.offsetWidth;
-  const menuH = panel.scrollHeight;
-  
-  panel.style.display = prevDisplay;
-  panel.style.visibility = '';
+  if (left < 10) left = 10;
+  if (left + pw > vw - 10) left = vw - pw - 10;
 
   panel.style.position = 'fixed';
-  
-  if (isMobile) {
-    const left = (vw - menuW) / 2;
-    let top = rect.bottom + 12;
-    let animDir = 'below';
-    
-    if (top + menuH > vh - 12) {
-      top = rect.top - menuH - 12;
-      animDir = 'above';
-    }
-    if (top < 12) {
-      top = (vh - menuH) / 2;
-      animDir = 'center';
-    }
-    
-    panel.style.left = left + 'px';
-    panel.style.top = top + 'px';
-    panel.style.maxHeight = (vh - 24) + 'px';
-    panel.dataset.anim = animDir;
-    return;
-  }
-
-  // Desktop positioning logic
-  const gap = 8;
-  const padding = 12;
-  
-  let left = rect.left;
-  let top = rect.bottom + gap;
-  let animDir = 'below';
-  
-  // Check horizontal space
-  if (left + menuW > vw - padding) {
-    // Open left
-    left = rect.right - menuW;
-    animDir += '-left';
-  } else {
-    animDir += '-right';
-  }
-  
-  // Clamp horizontally
-  if (left < padding) left = padding;
-  if (left + menuW > vw - padding) left = vw - padding - menuW;
-  
-  let maxHeight = vh - top - padding;
-
-  // Check vertical space
-  if (top + menuH > vh - padding && rect.top - menuH - gap > padding) {
-    // Open above
-    top = rect.top - menuH - gap;
-    maxHeight = rect.top - gap - padding;
-    animDir = animDir.replace('below', 'above');
-  } else if (top + menuH > vh - padding) {
-    // Neither above or below fits perfectly, pick side with more space
-    const spaceBelow = vh - rect.bottom - gap - padding;
-    const spaceAbove = rect.top - gap - padding;
-    if (spaceAbove > spaceBelow) {
-      top = padding; // Clamp to top
-      maxHeight = spaceAbove;
-      animDir = animDir.replace('below', 'above');
-    } else {
-      maxHeight = spaceBelow;
-    }
-  }
-
   panel.style.left = left + 'px';
   panel.style.top = top + 'px';
-  panel.style.maxHeight = maxHeight + 'px';
-  panel.dataset.anim = animDir;
+  panel.style.width = pw + 'px';
+
+  requestAnimationFrame(() => {
+    const menuH = panel.scrollHeight;
+    if (top + menuH > vh - 10 && rect.top - menuH - 6 > 10) {
+      panel.style.top = (rect.top - menuH - 6) + 'px';
+    }
+  });
 }
 
 export function createActionMenu(card, domain) {
@@ -150,101 +57,90 @@ export function createActionMenu(card, domain) {
   menu.className = 'domain-action-menu';
 
   const domainName = domain.name || domain;
-  const isAvailable = domain.available !== false;
 
-  // Analyse button
+  // Analyse trigger button
   const trigger = document.createElement('button');
   trigger.className = 'btn-analyse';
   trigger.title = 'Click for external tools · "Send to Smart Analyzer" in menu';
   trigger.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M9.663 17h4.674M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343 5.657l-.707-.707m2.828 2.828l-.707.707M12 12a4 4 0 100-8 4 4 0 000 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Analyse';
 
-  // Dropdown panel — rendered at body level to avoid stacking context issues
+  // Dropdown panel
   const panel = document.createElement('div');
-  panel.className = 'action-panel';
+  panel.className = 'domain-dropdown dd-open';
   panel.dataset.domain = domainName;
 
   let html = '';
 
   // 1. Analysis Tools
-  html += '<div class="action-section-label"><span>ANALYSIS</span></div><div class="action-links">';
+  html += '<div class="dd-section-label">Analysis</div>';
+  html += '<div class="dd-links">';
   ACTION_LINKS.analysis.forEach(a => {
-    html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="action-link"><img src="/assets/aidomains/${a.icon}" loading="lazy" class="action-icon" />${a.label}</a>`;
+    html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="dd-link dd-registrar-link">
+      <img src="/assets/aidomains/${a.icon}" loading="lazy" class="dd-link-icon" />
+      <span class="dd-link-text">${a.label}</span>
+      ${EXTERNAL_SVG}
+    </a>`;
   });
   html += '</div>';
 
-  // 2. SEO / Research
-  html += '<div class="action-section-label"><span>SEO &amp; RESEARCH</span></div><div class="action-links">';
+  // 2. SEO & Research
+  html += '<div class="dd-divider"></div>';
+  html += '<div class="dd-section-label">SEO &amp; Research</div>';
+  html += '<div class="dd-links">';
   ACTION_LINKS.seo.forEach(a => {
-    html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="action-link"><img src="/assets/aidomains/${a.icon}" loading="lazy" class="action-icon" />${a.label}</a>`;
+    html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="dd-link dd-registrar-link">
+      <img src="/assets/aidomains/${a.icon}" loading="lazy" class="dd-link-icon" />
+      <span class="dd-link-text">${a.label}</span>
+      ${EXTERNAL_SVG}
+    </a>`;
   });
   html += '</div>';
 
   // 3. Appraisal
-  html += '<div class="action-section-label"><span>APPRAISAL</span></div><div class="action-links">';
+  html += '<div class="dd-divider"></div>';
+  html += '<div class="dd-section-label">Appraisal</div>';
+  html += '<div class="dd-links">';
   ACTION_LINKS.appraisal.forEach(a => {
-    html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="action-link"><img src="/assets/aidomains/${a.icon}" loading="lazy" class="action-icon" />${a.label}</a>`;
+    html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="dd-link dd-registrar-link">
+      <img src="/assets/aidomains/${a.icon}" loading="lazy" class="dd-link-icon" />
+      <span class="dd-link-text">${a.label}</span>
+      ${EXTERNAL_SVG}
+    </a>`;
   });
   html += '</div>';
 
-  // 4. Register (only if available)
-  if (isAvailable) {
-    html += '<div class="action-section-label action-register-label"><span>REGISTER</span></div><div class="action-links">';
-    ACTION_LINKS.registrar.forEach(a => {
-      html += `<a href="${a.url(domainName)}" target="_blank" rel="noopener" class="action-link action-register"><img src="/assets/aidomains/${a.icon}" loading="lazy" class="action-icon" />${a.label}</a>`;
-    });
-    html += '</div>';
-  }
-
-  // Divider + Send to Analyzer
-  html += '<div class="action-divider"></div>';
-  html += `<button class="action-btn action-send" data-action="send-to-analyzer"><img src="/assets/aidomains/pc.png" loading="lazy" class="action-icon" />Send to Smart Analyzer</button>`;
+  // 4. Send to Smart Analyzer
+  html += '<div class="dd-divider"></div>';
+  html += `<button class="dd-link dd-tool-link" data-action="send-to-analyzer">
+    <img src="/assets/aidomains/pc.png" loading="lazy" class="dd-link-icon" />
+    <span class="dd-link-text" style="font-weight: 600;">Send to Smart Analyzer</span>
+  </button>`;
 
   panel.innerHTML = html;
 
-  // Append menu container to card, but panel to body
   menu.appendChild(trigger);
   card.appendChild(menu);
-
-  // Append panel to body for highest stacking priority
-  document.body.appendChild(panel);
 
   // Toggle handler
   trigger.addEventListener('click', e => {
     e.preventDefault();
     e.stopPropagation();
 
-    const isOpen = panel.classList.contains('open');
-
     // Close any open menu first
-    if (activeMenu && activeMenu !== panel) {
-      activeMenu.panelEl.classList.remove('open');
-      setTimeout(() => {
-        if (activeMenu && !activeMenu.panelEl.classList.contains('open') && activeMenu.panelEl.parentNode) {
-          activeMenu.panelEl.remove();
-        }
-      }, 180);
+    if (activeMenu) {
+      const isSame = activeMenu.panelEl === panel;
+      closeAllActionMenus();
+      if (isSame) return;
     }
 
-    if (!isOpen) {
-      if (!panel.parentNode) {
-        document.body.appendChild(panel);
-      }
-      positionPanel(panel, trigger);
-      panel.classList.add('open');
-      activeMenu = { panelEl: panel, card, trigger };
-    } else {
-      panel.classList.remove('open');
-      activeMenu = null;
-      setTimeout(() => {
-        if (!panel.classList.contains('open') && panel.parentNode) {
-          panel.remove();
-        }
-      }, 180);
-    }
+    document.body.appendChild(panel);
+    positionDropdown(panel, trigger);
+    panel.classList.add('dd-open');
+    activeMenu = { panelEl: panel, trigger };
   });
 
-  // "Send to Smart Analyzer" button inside panel
-  panel.querySelectorAll('.action-send').forEach(btn => {
+  // "Send to Smart Analyzer" button
+  panel.querySelectorAll('[data-action="send-to-analyzer"]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
@@ -256,10 +152,10 @@ export function createActionMenu(card, domain) {
 
 export function closeAllActionMenus() {
   if (activeMenu) {
-    activeMenu.panelEl.classList.remove('open');
+    activeMenu.panelEl.classList.remove('dd-open');
     const panelToRemove = activeMenu.panelEl;
     setTimeout(() => {
-      if (!panelToRemove.classList.contains('open') && panelToRemove.parentNode) {
+      if (!panelToRemove.classList.contains('dd-open') && panelToRemove.parentNode) {
         panelToRemove.remove();
       }
     }, 180);
@@ -284,16 +180,10 @@ document.addEventListener('keydown', e => {
 });
 
 // Close menu on scroll and resize
-let scrollTimeout;
 window.addEventListener('scroll', () => {
-  if (activeMenu) {
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => closeAllActionMenus(), 50);
-  }
-}, { passive: true, capture: true });
+  if (activeMenu) closeAllActionMenus();
+}, { passive: true });
 
 window.addEventListener('resize', () => {
-  if (activeMenu) {
-    closeAllActionMenus();
-  }
+  if (activeMenu) closeAllActionMenus();
 });
