@@ -57,7 +57,7 @@ function toolIcon({ icon, fallbackIcon, label, fallback }) {
     <span class="dd-tool-icon" aria-hidden="true">
       <img
         src="${finalSrc}"
-        alt=""
+        alt="${safeLabel}"
         loading="lazy"
         decoding="async"
         onerror="this.src='/assets/logo/logo.png'; this.onerror=null;"
@@ -76,7 +76,8 @@ function renderToolStrip(domain) {
       items: [
         { label: 'Whois', icon: 'whois', href: `https://who.is/whois/${encodedDomain}`, tooltip: 'Open Whois lookup', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="1.8"/><path d="M14 2v6h6M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' },
         { label: 'DNS', icon: 'dns', href: `https://completedns.com/dns-history/${encodedDomain}`, tooltip: 'Open DNS history', fallback: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="6" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="18" height="6" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 7h.01M7 17h.01M12 10v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' },
-        { label: 'History', icon: 'history', fallbackIcon: 'dnshis', href: `https://dnshistory.org/historical-dns-records/soa/${encodedDomain}`, tooltip: 'Open DNS history records', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 101.9-5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 4v5h5M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
+        { label: 'History', icon: 'history', fallbackIcon: 'dnshis', href: `https://dnshistory.org/historical-dns-records/soa/${encodedDomain}`, tooltip: 'Open DNS history records', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 101.9-5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 4v5h5M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+        { label: 'Whoxy', icon: 'whoxy', href: `https://www.whoxy.com/${encodedDomain}`, tooltip: 'Open Whoxy domain lookup', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
       ]
     },
     {

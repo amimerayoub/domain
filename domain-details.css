@@ -65,6 +65,12 @@
   white-space: nowrap;
 }
 
+.dd-topbar-brand img {
+  height: 22px;
+  width: auto;
+  display: block;
+}
+
 .dd-topbar-domain {
   font-size: .8rem;
   font-weight: 700;
