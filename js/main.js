@@ -9,12 +9,88 @@ import { initCustomSelects, getSelectValue } from '../components/dropdown.js';
 import { initTheme, toggleTheme } from './theme.js';
 import { closeAllActionMenus } from '../components/action-menu.js';
 import { initFavorites, openFavoritesPanel, setFavoritesChangeListener, getFavoritesCount, isFavorite, toggleFavorite } from './favorites.js';
-import { analyzeDomains, filterDomains, detectMode } from './domainAnalyzer.js';
-import { emailState, parseCSVText, parsePastedEmails, cleanContacts, replaceVariables, startCampaign, pauseCampaign, resumeCampaign, stopCampaign, resetCampaign, generatePreview, getDelay } from './emailTool.js';
-import { generateDomainNews, clearCache } from '../services/newsGenOrchestrator.js';
-import { initCampaignManager } from './campaignManager.js';
 import { loadAllApiKeys, saveAllApiKeys, loadAiProvider, saveAiProvider } from '../services/apiSettings.js';
-import { bulkCheckDomains, updateResultsGridUI, updateAnalyzerUI, updateBulkResultsUI, applyResultsToData } from './bulkChecker.js';
+
+// Dynamic module placeholder variables
+let analyzeDomains, filterDomains, detectMode;
+let emailState, parseCSVText, parsePastedEmails, cleanContacts, replaceVariables, startCampaign, pauseCampaign, resumeCampaign, stopCampaign, resetCampaign, generatePreview, getDelay;
+let generateDomainNews, clearCache;
+let initCampaignManager;
+let bulkCheckDomains, updateResultsGridUI, updateAnalyzerUI, updateBulkResultsUI, applyResultsToData;
+
+// Dynamic module loading promises/functions
+let emailModulePromise = null;
+async function loadEmailModule() {
+  if (!emailModulePromise) {
+    emailModulePromise = import('./emailTool.js').then(mod => {
+      emailState = mod.emailState;
+      parseCSVText = mod.parseCSVText;
+      parsePastedEmails = mod.parsePastedEmails;
+      cleanContacts = mod.cleanContacts;
+      replaceVariables = mod.replaceVariables;
+      startCampaign = mod.startCampaign;
+      pauseCampaign = mod.pauseCampaign;
+      resumeCampaign = mod.resumeCampaign;
+      stopCampaign = mod.stopCampaign;
+      resetCampaign = mod.resetCampaign;
+      generatePreview = mod.generatePreview;
+      getDelay = mod.getDelay;
+      return mod;
+    });
+  }
+  return emailModulePromise;
+}
+
+let campaignModulePromise = null;
+async function loadCampaignModule() {
+  if (!campaignModulePromise) {
+    campaignModulePromise = import('./campaignManager.js').then(mod => {
+      initCampaignManager = mod.initCampaignManager;
+      return mod;
+    });
+  }
+  return campaignModulePromise;
+}
+
+let analyzerModulePromise = null;
+async function loadAnalyzerModule() {
+  if (!analyzerModulePromise) {
+    analyzerModulePromise = import('./domainAnalyzer.js').then(mod => {
+      analyzeDomains = mod.analyzeDomains;
+      filterDomains = mod.filterDomains;
+      detectMode = mod.detectMode;
+      return mod;
+    });
+  }
+  return analyzerModulePromise;
+}
+
+let bulkCheckerModulePromise = null;
+async function loadBulkCheckerModule() {
+  if (!bulkCheckerModulePromise) {
+    bulkCheckerModulePromise = import('./bulkChecker.js').then(mod => {
+      bulkCheckDomains = mod.bulkCheckDomains;
+      updateResultsGridUI = mod.updateResultsGridUI;
+      updateAnalyzerUI = mod.updateAnalyzerUI;
+      updateBulkResultsUI = mod.updateBulkResultsUI;
+      applyResultsToData = mod.applyResultsToData;
+      return mod;
+    });
+  }
+  return bulkCheckerModulePromise;
+}
+
+let newsModulePromise = null;
+async function loadNewsModule() {
+  if (!newsModulePromise) {
+    newsModulePromise = import('../services/newsGenOrchestrator.js').then(mod => {
+      generateDomainNews = mod.generateDomainNews;
+      clearCache = mod.clearCache;
+      return mod;
+    });
+  }
+  return newsModulePromise;
+}
 
 // State
 const state = {
@@ -748,6 +824,8 @@ async function runAvailabilityCheck(domainsArray, updateFn) {
     return;
   }
 
+  await loadBulkCheckerModule();
+
   state.isChecking = true;
   updateExportState();
   toggleGenerateButtons(true);
@@ -901,6 +979,7 @@ document.addEventListener('retry-domain-check', e => {
 
 // ==================== GEN DOMAIN NEWS HANDLER ====================
 async function handleGenDomains() {
+  await loadNewsModule();
   const btn = $('#btnGenDomains');
   setButtonState(btn, true);
   showLoading(true);
@@ -1107,7 +1186,8 @@ function initCSVUpload() {
   }
 }
 
-function handleAnalyze() {
+async function handleAnalyze() {
+  await Promise.all([loadAnalyzerModule(), loadBulkCheckerModule()]);
   const btn = $('#btnAnalyze');
   let input = '';
 
@@ -2141,6 +2221,7 @@ export async function initApp() {
       
       // Real check
       try {
+        await loadBulkCheckerModule();
         const resultsMap = await bulkCheckDomains(domains, { useCache: true });
         applyResultsToData(domains, resultsMap);
         if (homeLiveResults && homeSearchInput.value.trim() === query) {
