@@ -32,24 +32,35 @@ function escHtml(value) {
     "'": '&#39;'
   })[ch]);
 }
-const EXISTING_ICONS = new Set([
-  'whois.png', 'dns.png', 'dnshis.png', 'google.png',
-  'archive.png', 'atom.png', 'dn.png', 'saw.png',
-  'spy.png', 'whoxy.png'
-]);
+function getCleanQuery(domainName) {
+  const base = domainName.split('.')[0];
+  const spaced = base.replace(/([a-z])([A-Z])/g, '$1 $2');
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+}
 
-function toolIcon({ icon, fallbackIcon, label, fallback }) {
-  const imageName = icon || label.toLowerCase().replace(/\s+/g, '-');
-  const fallbackImageName = fallbackIcon || imageName;
-  
-  const primaryFile = imageName + '.png';
-  const fallbackFile = fallbackImageName + '.png';
-  
+const TOOL_ICONS_MAPPING = {
+  'whois': 'assets/tool/whois.png',
+  'dns': 'assets/tool/dns.png',
+  'history': 'assets/tool/dnshis.png',
+  'whoxy': 'assets/tool/whoxy.png',
+  'google': 'assets/aidomains/google.png',
+  'archive': 'assets/aidomains/archive.png',
+  'gmaps': 'assets/aidomains/gmaps.png',
+  'yelp': 'assets/aidomains/Yelp.png',
+  'godaddy': 'assets/aidomains/godaddy.png',
+  'dynadot': 'assets/aidomains/dynadot.png',
+  'spam': 'assets/aidomains/spam.png',
+  'trademark': 'assets/aidomains/trademark.png',
+  'value': 'assets/tool/atom.png',
+  'domain-rating': 'assets/tool/dn.png',
+  'appraisal': 'assets/tool/saw.png',
+  'spyfu': 'assets/aidomains/spyfu.png'
+};
+
+function toolIcon({ icon, label, fallback }) {
   let finalSrc = '/assets/logo/logo.png';
-  if (EXISTING_ICONS.has(primaryFile)) {
-    finalSrc = `assets/tool/${primaryFile}`;
-  } else if (EXISTING_ICONS.has(fallbackFile)) {
-    finalSrc = `assets/tool/${fallbackFile}`;
+  if (icon && TOOL_ICONS_MAPPING[icon]) {
+    finalSrc = TOOL_ICONS_MAPPING[icon];
   }
 
   const safeLabel = escHtml(label);
@@ -70,29 +81,44 @@ function toolIcon({ icon, fallbackIcon, label, fallback }) {
 function renderToolStrip(domain) {
   const encodedDomain = encodeURIComponent(domain);
   const rawDomain = escHtml(domain);
+  const cleanQuery = getCleanQuery(domain);
+  const encodedCleanQuery = encodeURIComponent(cleanQuery);
+
   const tools = [
     {
       category: 'Analysis',
       items: [
         { label: 'Whois', icon: 'whois', href: `https://who.is/whois/${encodedDomain}`, tooltip: 'Open Whois lookup', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="1.8"/><path d="M14 2v6h6M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' },
         { label: 'DNS', icon: 'dns', href: `https://completedns.com/dns-history/${encodedDomain}`, tooltip: 'Open DNS history', fallback: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="6" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="18" height="6" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 7h.01M7 17h.01M12 10v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' },
-        { label: 'History', icon: 'history', fallbackIcon: 'dnshis', href: `https://dnshistory.org/historical-dns-records/soa/${encodedDomain}`, tooltip: 'Open DNS history records', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 101.9-5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 4v5h5M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+        { label: 'History', icon: 'history', href: `https://dnshistory.org/historical-dns-records/soa/${encodedDomain}`, tooltip: 'Open DNS history records', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 101.9-5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 4v5h5M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
         { label: 'Whoxy', icon: 'whoxy', href: `https://www.whoxy.com/${encodedDomain}`, tooltip: 'Open Whoxy domain lookup', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
       ]
     },
     {
       category: 'Research',
       items: [
-        { label: 'Google', icon: 'google', href: `https://www.google.com/search?q=${encodedDomain}`, tooltip: 'Search this domain on Google', fallback: '<svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' },
-        { label: 'Archive', icon: 'archive', href: `https://web.archive.org/web/*/${encodedDomain}`, tooltip: 'Open Wayback Machine snapshots', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M6 7l1-3h10l1 3M6 7v13h12V7" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 11h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' }
+        { label: 'Search', icon: 'google', href: `https://www.google.com/search?q=${encodedCleanQuery}`, tooltip: 'Search this domain on Google', fallback: '<svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' },
+        { label: 'SpyFu', icon: 'spyfu', href: `https://www.spyfu.com/keyword/overview?query=${encodedCleanQuery}`, tooltip: 'Search keywords on SpyFu', fallback: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M14.5 12a2.5 2.5 0 01-5 0" stroke="currentColor" stroke-width="1.8"/></svg>' },
+        { label: 'Google Maps', icon: 'gmaps', href: `https://www.google.com/maps/search/${encodedCleanQuery}`, tooltip: 'Search on Google Maps', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.8"/></svg>' },
+        { label: 'Yelp', icon: 'yelp', href: `https://www.yelp.com/search?find_desc=${encodedCleanQuery}`, tooltip: 'Search local directory on Yelp', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' },
+        { label: 'Wayback', icon: 'archive', href: `https://web.archive.org/web/*/${encodedDomain}`, tooltip: 'Open Wayback Machine snapshots', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M6 7l1-3h10l1 3M6 7v13h12V7" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 11h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' }
+      ]
+    },
+    {
+      category: 'SEO & Safety',
+      items: [
+        { label: 'Spam', icon: 'spam', href: `https://www.spamhaus.org/query/domain/${encodedDomain}`, tooltip: 'Check domain spam status', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+        { label: 'Trademark', icon: 'trademark', href: 'https://tmsearch.uspto.gov/search/search-information', tooltip: 'Search trademarks', fallback: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M14.5 9h-5v6h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
       ]
     },
     {
       category: 'Valuation',
       items: [
-        { label: 'Value', icon: 'value', fallbackIcon: 'atom', href: `https://www.atom.com/domain-appraisal/${encodedDomain}`, tooltip: 'Open Atom domain appraisal', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7H14a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' },
-        { label: 'Domain Rating', icon: 'domain-rating', fallbackIcon: 'dn', href: 'https://www.dnrater.com/ref?u=1310926', tooltip: 'Open Domain Rating', domainAttr: rawDomain, fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8-4.3-4.1 5.9-.9L12 3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>' },
-        { label: 'SAW Appraisal', icon: 'appraisal', fallbackIcon: 'saw', href: `https://saw.com/appraisals?domain=${encodedDomain}`, tooltip: 'Open SAW appraisal', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8 15l3-4 3 2 5-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
+        { label: 'Value', icon: 'value', href: `https://www.atom.com/domain-appraisal/${encodedDomain}`, tooltip: 'Open Atom domain appraisal', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7H14a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' },
+        { label: 'GoDaddy', icon: 'godaddy', href: `https://www.godaddy.com/domain-value-appraisal/appraisal/?domainToCheck=${encodedDomain}`, tooltip: 'Open GoDaddy appraisal', fallback: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' },
+        { label: 'Dynadot', icon: 'dynadot', href: `https://www.dynadot.com/domain/appraisal?domain=${encodedDomain}`, tooltip: 'Open Dynadot appraisal', fallback: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+        { label: 'Domain Rating', icon: 'domain-rating', href: 'https://www.dnrater.com/ref?u=1310926', tooltip: 'Open Domain Rating', domainAttr: rawDomain, fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8-4.3-4.1 5.9-.9L12 3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>' },
+        { label: 'SAW Appraisal', icon: 'appraisal', href: `https://saw.com/appraisals?domain=${encodedDomain}`, tooltip: 'Open SAW appraisal', fallback: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8 15l3-4 3 2 5-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
       ]
     }
   ];
