@@ -27,31 +27,83 @@ const FALLBACK = {
 
 let cache = null;
 
+export async function loadGeoData() {
+  if (cache === FALLBACK) cache = {};
+  if (cache && cache.GEO_DOMAINS_DATA) return cache.GEO_DOMAINS_DATA;
+  try {
+    const res = await fetch('assets/data/geo.json');
+    if (!res.ok) throw new Error('Network error');
+    const data = await res.json();
+    if (!cache) cache = {};
+    cache.GEO_DOMAINS_DATA = data.GEO_DOMAINS_DATA;
+    return cache.GEO_DOMAINS_DATA;
+  } catch (e) {
+    console.error('Failed to load geo.json', e);
+    throw e;
+  }
+}
+
+export async function loadKeywordData() {
+  if (cache === FALLBACK) cache = {};
+  if (cache && cache.KEYWORD_CATEGORIES) return cache.KEYWORD_CATEGORIES;
+  try {
+    const res = await fetch('assets/data/keywords.json');
+    if (!res.ok) throw new Error('Network error');
+    const data = await res.json();
+    if (!cache) cache = {};
+    cache.KEYWORD_CATEGORIES = data.KEYWORD_CATEGORIES;
+    return cache.KEYWORD_CATEGORIES;
+  } catch (e) {
+    console.error('Failed to load keywords.json', e);
+    throw e;
+  }
+}
+
+export async function loadBrandableData() {
+  if (cache === FALLBACK) cache = {};
+  if (cache && cache.BRANDABLE_PREFIX) return cache;
+  try {
+    const res = await fetch('assets/data/brandable.json');
+    if (!res.ok) throw new Error('Network error');
+    const data = await res.json();
+    if (!cache) cache = {};
+    cache.BRANDABLE_PREFIX = data.BRANDABLE_PREFIX;
+    cache.BRANDABLE_SUFFIX = data.BRANDABLE_SUFFIX;
+    cache.BRANDABLE_BOTH = data.BRANDABLE_BOTH;
+    return cache;
+  } catch (e) {
+    console.error('Failed to load brandable.json', e);
+    throw e;
+  }
+}
+
 export async function loadData(smartMode = true) {
   if (!smartMode) {
-    // FAST MODE: strictly use fallback only
     cache = FALLBACK;
     return FALLBACK;
   }
   
-  // SMART MODE: strict requirement for JSON
-  if (cache && cache !== FALLBACK) return cache;
+  if (cache && cache !== FALLBACK && cache.GEO_DOMAINS_DATA && cache.KEYWORD_CATEGORIES && cache.BRANDABLE_PREFIX) {
+    return cache;
+  }
+  
   try {
-    const res = await fetch('assets/data/data.json');
-    if (!res.ok) throw new Error('Network error');
-    cache = await res.json();
+    await Promise.all([
+      loadGeoData(),
+      loadKeywordData(),
+      loadBrandableData()
+    ]);
     return cache;
   } catch (e) {
-    console.error('SMART Mode Error: Failed to load assets/data/data.json', e);
-    // Return null or throw so the UI can show an error
-    throw new Error('SMART mode requires data.json to be loaded successfully. Please ensure the file exists.');
+    console.error('SMART Mode Error: Failed to load split data files', e);
+    throw new Error('SMART mode requires data files to be loaded successfully.');
   }
 }
 
 export function getData(smartMode = true) {
   if (!smartMode) return FALLBACK;
-  if (!cache || cache === FALLBACK) {
-     throw new Error('SMART mode data not loaded! Cannot use FALLBACK in SMART mode.');
+  if (!cache) {
+    cache = {};
   }
   return cache;
 }

@@ -112,6 +112,9 @@ function closeActive() {
 
 export function initCustomSelects() {
   document.querySelectorAll('.custom-select').forEach(sel => {
+    if (sel.dataset.initialized === 'true') return;
+    sel.dataset.initialized = 'true';
+
     const trigger  = sel.querySelector('.custom-select-trigger');
     const dropdown = sel.querySelector('.custom-select-dropdown');
     if (!trigger || !dropdown) return;

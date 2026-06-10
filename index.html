@@ -70,7 +70,7 @@
     </script>
 
     <!-- Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
 
     <style>
         body { overflow-x: hidden; }
@@ -1398,7 +1398,9 @@
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     
     <script>
-        lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
 
         // ── Mobile Drawer Logic ──────────────────────────────
         const mobDrawer   = document.getElementById('mob-drawer');

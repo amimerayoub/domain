@@ -32,19 +32,35 @@ function escHtml(value) {
     "'": '&#39;'
   })[ch]);
 }
+const EXISTING_ICONS = new Set([
+  'whois.png', 'dns.png', 'dnshis.png', 'google.png',
+  'archive.png', 'atom.png', 'dn.png', 'saw.png',
+  'spy.png', 'whoxy.png'
+]);
+
 function toolIcon({ icon, fallbackIcon, label, fallback }) {
   const imageName = icon || label.toLowerCase().replace(/\s+/g, '-');
   const fallbackImageName = fallbackIcon || imageName;
+  
+  const primaryFile = imageName + '.png';
+  const fallbackFile = fallbackImageName + '.png';
+  
+  let finalSrc = '/assets/logo/logo.png';
+  if (EXISTING_ICONS.has(primaryFile)) {
+    finalSrc = `assets/tool/${primaryFile}`;
+  } else if (EXISTING_ICONS.has(fallbackFile)) {
+    finalSrc = `assets/tool/${fallbackFile}`;
+  }
+
   const safeLabel = escHtml(label);
   return `
     <span class="dd-tool-icon" aria-hidden="true">
       <img
-        src="assets/tools/${imageName}.png"
-        data-fallback-src="assets/tool/${fallbackImageName}.png"
+        src="${finalSrc}"
         alt=""
         loading="lazy"
         decoding="async"
-        onerror="if (this.dataset.fallbackSrc) { this.src = this.dataset.fallbackSrc; this.dataset.fallbackSrc = ''; } else { this.hidden = true; this.closest('.dd-tool-icon')?.classList.add('is-fallback'); }"
+        onerror="this.src='/assets/logo/logo.png'; this.onerror=null;"
       />
       <span class="dd-tool-fallback">${fallback}</span>
     </span>

@@ -451,7 +451,43 @@ async function renderSeoContent(toolKey) {
 }
 
 // ==================== NAVIGATION ====================
-function switchTool(tool, updateHistory = true) {
+let emailToolInitialized = false;
+
+async function ensureKeywordDropdownPopulated() {
+  const kwNicheDropdown = $('#kwNicheDropdown');
+  if (kwNicheDropdown && kwNicheDropdown.children.length === 0) {
+    try {
+      let keywordsData;
+      if (state.smartMode) {
+        keywordsData = await loadKeywordData();
+      } else {
+        const fallback = await loadData(false);
+        keywordsData = fallback.KEYWORD_CATEGORIES;
+      }
+      if (keywordsData) {
+        kwNicheDropdown.innerHTML = '';
+        Object.keys(keywordsData).forEach((cat, index) => {
+          const div = document.createElement('div');
+          div.className = 'select-option' + (index === 0 ? ' active' : '');
+          div.dataset.value = cat;
+          div.textContent = cat;
+          kwNicheDropdown.appendChild(div);
+        });
+        const firstCat = Object.keys(keywordsData)[0];
+        const kwNicheSelect = $('#kwNicheSelect');
+        if (kwNicheSelect) {
+          const triggerText = kwNicheSelect.querySelector('.selected-text');
+          if (triggerText) triggerText.textContent = firstCat;
+        }
+        initCustomSelects();
+      }
+    } catch (e) {
+      console.error('Failed to populate keyword dropdown:', e);
+    }
+  }
+}
+
+async function switchTool(tool, updateHistory = true) {
   if (state.activeTool && state.activeTool !== tool) {
      saveToolInputs(state.activeTool);
   }
@@ -461,6 +497,49 @@ function switchTool(tool, updateHistory = true) {
       clearResults();
     }
   }
+  
+  // Load modules & datasets for active tool in SMART mode
+  if (state.smartMode) {
+    try {
+      if (tool === 'geo') {
+        await loadGeoData();
+      } else if (tool === 'keyword') {
+        await ensureKeywordDropdownPopulated();
+      } else if (tool === 'brandable') {
+        await loadBrandableData();
+      } else if (tool === 'analyzer') {
+        await Promise.all([loadAnalyzerModule(), loadBulkCheckerModule()]);
+      } else if (tool === 'bulkcheck') {
+        await loadBulkCheckerModule();
+      } else if (tool === 'newsdomain') {
+        await loadNewsModule();
+      }
+    } catch (err) {
+      console.error(`Failed to load data/module for ${tool}, falling back to fast mode:`, err);
+      toast('Failed to load dataset/module. Falling back to local data.');
+      state.smartMode = false;
+      localStorage.setItem('domainMode', 'fast');
+      $$('.mode-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.mode === 'fast');
+      });
+    }
+  }
+
+  // Email tool initialization must happen on demand (both fast and smart mode)
+  if (tool === 'emailtool') {
+    try {
+      await Promise.all([loadEmailModule(), loadCampaignModule()]);
+      if (!emailToolInitialized) {
+        initEmailTool();
+        initCampaignManager();
+        emailToolInitialized = true;
+      }
+    } catch (err) {
+      console.error('Failed to load Email module:', err);
+      toast('Error: Failed to load Email module.');
+    }
+  }
+
   state.activeTool = tool;
   localStorage.setItem('activeTool', tool);
   
@@ -522,8 +601,13 @@ function handleGenerate(type) {
   setButtonState(btn, true);
   showLoading(true);
 
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
+      if (state.smartMode) {
+        if (type === 'geo') await loadGeoData();
+        else if (type === 'keyword') await ensureKeywordDropdownPopulated();
+        else if (type === 'brandable') await loadBrandableData();
+      }
       let domains = [];
       switch (type) {
         case 'geo': {
@@ -1944,41 +2028,7 @@ export async function initApp() {
     b.classList.toggle('active', b.dataset.mode === (state.smartMode ? 'smart' : 'fast'));
   });
 
-  let initialData = null;
-  try {
-    initialData = await loadData(state.smartMode);
-  } catch (err) {
-    console.error("Init Data Load Error:", err);
-    // If SMART mode fails, fallback to FAST mode on load
-    state.smartMode = false;
-    localStorage.setItem('domainMode', 'fast');
-    $$('.mode-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.mode === 'fast');
-    });
-    initialData = await loadData(false);
-  }
-
-  // Populate Keyword Niche Dropdown dynamically
-  if (initialData && initialData.KEYWORD_CATEGORIES) {
-    const kwNicheDropdown = $('#kwNicheDropdown');
-    const kwNicheSelect = $('#kwNicheSelect');
-    if (kwNicheDropdown) {
-      kwNicheDropdown.innerHTML = '';
-      Object.keys(initialData.KEYWORD_CATEGORIES).forEach((cat, index) => {
-        const div = document.createElement('div');
-        div.className = 'select-option' + (index === 0 ? ' active' : '');
-        div.dataset.value = cat;
-        div.textContent = cat;
-        kwNicheDropdown.appendChild(div);
-      });
-      // Set the first item as selected in the trigger text
-      const firstCat = Object.keys(initialData.KEYWORD_CATEGORIES)[0];
-      if (kwNicheSelect) {
-        const triggerText = kwNicheSelect.querySelector('.selected-text');
-        if (triggerText) triggerText.textContent = firstCat;
-      }
-    }
-  }
+  // Dataset loading and keyword dropdown population are deferred to switchTool()
 
   // Letter grids
   const cg = $('#consonantGrid');
@@ -2157,9 +2207,24 @@ export async function initApp() {
       if (resDiv) resDiv.innerHTML = '';
       state.lastResults = [];
 
-      // 🔁 MODE SWITCHING RULES: reload data source completely
+      // 🔁 MODE SWITCHING RULES: reload data source completely for active tool
       try {
-        await loadData(state.smartMode);
+        if (state.smartMode) {
+          if (state.activeTool === 'geo') await loadGeoData();
+          else if (state.activeTool === 'keyword') {
+            const kwNicheDropdown = $('#kwNicheDropdown');
+            if (kwNicheDropdown) kwNicheDropdown.innerHTML = '';
+            await ensureKeywordDropdownPopulated();
+          }
+          else if (state.activeTool === 'brandable') await loadBrandableData();
+        } else {
+          await loadData(false);
+          if (state.activeTool === 'keyword') {
+            const kwNicheDropdown = $('#kwNicheDropdown');
+            if (kwNicheDropdown) kwNicheDropdown.innerHTML = '';
+            await ensureKeywordDropdownPopulated();
+          }
+        }
       } catch (err) {
         if (resDiv) {
           resDiv.innerHTML = `<div class="dc-error-msg">⚠️ ${err.message}</div>`;
@@ -2275,11 +2340,7 @@ export async function initApp() {
   const be = $('#btnExtract'); if (be) be.addEventListener('click', handleExtract);
   const ee = $('#btnExtractEmail'); if (ee) ee.addEventListener('click', handleExtractEmails);
 
-  // ==================== SMART EMAIL TOOL ====================
-  initEmailTool();
-   
-  // ==================== CAMPAIGN MANAGER ====================
-  initCampaignManager();
+  // SMART EMAIL TOOL & CAMPAIGN MANAGER are initialized on-demand in switchTool()
 
   // Analyzer button
   const ba = $('#btnAnalyze'); if (ba) ba.addEventListener('click', handleAnalyze);
