@@ -236,7 +236,7 @@ async function rdapAvailabilityCheck(domain, tld) {
   try {
     const r = await safeFetch(url, {
       headers: { Accept: 'application/rdap+json,application/json,*/*', 'User-Agent': 'DomainKit/2.0' }
-    }, { timeout: 4000, retries: 1 });
+    }, { timeout: 2500, retries: 0 });
 
     if (r.status === 404) return 'available';
     if (r.ok) {
@@ -249,7 +249,7 @@ async function rdapAvailabilityCheck(domain, tld) {
   try {
     const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=NS`, {
       headers: { Accept: 'application/dns-json' }
-    }, { timeout: 3000, retries: 1 });
+    }, { timeout: 1500, retries: 0 });
     if (r.ok) {
       const j = await r.json();
       if (j.Status === 0 && (j.Answer && j.Answer.length > 0)) {
@@ -262,7 +262,7 @@ async function rdapAvailabilityCheck(domain, tld) {
   try {
     const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=A`, {
       headers: { Accept: 'application/dns-json' }
-    }, { timeout: 3000, retries: 1 });
+    }, { timeout: 1500, retries: 0 });
     if (r.ok) {
       const j = await r.json();
       if (j.Status === 0 && (j.Answer && j.Answer.length > 0)) {
@@ -288,7 +288,7 @@ async function fetchWhois(domain) {
     try {
       const r = await safeFetch(url, {
         headers: { Accept: 'application/rdap+json,application/json,*/*', 'User-Agent': 'DomainKit/2.0' }
-      }, { timeout: 8000, retries: 1 });
+      }, { timeout: 2500, retries: 0 });
       if (r.status === 404) return { registered: false };
       if (!r.ok) continue;
       const j = await r.json();
@@ -342,7 +342,7 @@ async function fetchDns(domain) {
     try {
       const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=${type}`, {
         headers: { Accept: 'application/dns-json' }
-      }, { timeout: 5000, retries: 1 });
+      }, { timeout: 2000, retries: 0 });
       if (!r.ok) return { type, records: [] };
       const j = await r.json();
       if (j.Status !== 0) return { type, records: [] };
@@ -405,7 +405,7 @@ async function bulkSearchCheck(domains) {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36',
     },
     body,
-  }, { timeout: 12000, retries: 2 });
+  }, { timeout: 3000, retries: 0 });
   if (!res.ok) throw new Error(`BulkSearch ${res.status}`);
   return res.json();
 }
@@ -455,7 +455,7 @@ async function fetchTlds(baseName) {
           Accept: 'application/json', Origin: 'https://dnhub.io', Referer: 'https://dnhub.io/',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36',
         }
-      }, { timeout: 8000, retries: 1 });
+      }, { timeout: 2500, retries: 0 });
 
       if (r.ok) {
         const j = await r.json();
@@ -570,7 +570,7 @@ async function fetchBrandCheck(baseName) {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36',
       },
       body: p.toString(),
-    }, { timeout: 15000, retries: 1 });
+    }, { timeout: 3000, retries: 0 });
 
     if (!r.ok) {
       throw new Error(`NameCheckerr returned status ${r.status}`);
@@ -631,7 +631,7 @@ async function fetchBacklinks(domain) {
 
   const r = await safeFetch(`${RANKIFYER_EMBED}?id=${RANKIFYER_TOOL_ID}&h=0&r=${RANKIFYER_R}&cookies=0`, {
     method: 'POST', headers, body: formParams.toString()
-  }, { timeout: 20000, retries: 1 });
+  }, { timeout: 4000, retries: 0 });
   if (!r.ok) throw new Error(`Rankifyer ${r.status}`);
   const html = await r.text();
   if (!html.includes('class="stats"')) return { total: 0, backlinks: [] };
@@ -685,11 +685,11 @@ async function fetchDnsHistory(domain) {
     // HackerTarget NS lookup history
     safeFetch(`${HACKERTARGET_API}${domain}`, {
       headers: { 'User-Agent': 'DomainKit/2.0', Accept: 'text/plain' }
-    }, { timeout: 8000, retries: 1 }).then(r => r.ok ? r.text() : null),
+    }, { timeout: 3000, retries: 0 }).then(r => r.ok ? r.text() : null),
     // Live NS via Cloudflare DoH
     safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=NS`, {
       headers: { Accept: 'application/dns-json' }
-    }, { timeout: 5000, retries: 1 }).then(r => r.ok ? r.json() : null),
+    }, { timeout: 2000, retries: 0 }).then(r => r.ok ? r.json() : null),
   ]).then(r => r.map(x => x.status === 'fulfilled' ? x.value : null));
 
   const liveNs = (liveNsR?.Answer || []).map(a => a.data?.replace(/\.$/, '')).filter(Boolean);
@@ -722,7 +722,7 @@ async function fetchReachability(domain) {
       const r = await safeFetch(`${proto}://${domain}`, {
         method: 'HEAD', redirect: 'follow',
         headers: { 'User-Agent': 'DomainKit/2.0' }
-      }, { timeout: 6000, retries: 1 });
+      }, { timeout: 2000, retries: 0 });
       return {
         reachable: true,
         https: proto === 'https',

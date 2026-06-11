@@ -581,10 +581,10 @@ async function loadDomainData(domain, isRetry = false) {
   try {
     setProgress(20, 'Fetching domain intelligence...');
     
-    // 8-second timeout wrapper
+    // 9-second timeout wrapper
     const timeoutId = setTimeout(() => {
       if (currentAbortController) currentAbortController.abort('timeout');
-    }, 8000);
+    }, 9000);
 
     const r = await fetch(url, { signal: currentAbortController.signal });
     clearTimeout(timeoutId);
@@ -635,7 +635,7 @@ async function loadDomainData(domain, isRetry = false) {
 
 function renderErrorFallback(domain, error) {
   const isTimeout = error === 'timeout' || error.name === 'AbortError' || (error.message && error.message.includes('timeout'));
-  const errorMsg = isTimeout ? 'Connection timed out (8s)' : 'Failed to connect to analysis server';
+  const errorMsg = isTimeout ? 'Connection timed out (9s)' : 'Failed to connect to analysis server';
   
   // Generate partial fallback data
   const parts = domain.split('.');

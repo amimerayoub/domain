@@ -217,10 +217,7 @@ async function verisignBulk(names, tlds, includeRegistered = true) {
       'Accept-Language': 'en-GB,en;q=0.5',
       'Origin': 'https://dnhub.io',
       'Referer': 'https://dnhub.io/',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36',
-      'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'cross-site', 'Sec-GPC': '1',
-    }
-  }, { timeout: 8000, retries: 1 });
+  }, { timeout: 2500, retries: 0 });
   if (!res.ok) throw new Error(`Verisign ${res.status}`);
   return res.json();
 }
@@ -235,7 +232,7 @@ async function rdapAvailabilityCheck(domain, tld) {
   try {
     const r = await safeFetch(url, {
       headers: { Accept: 'application/rdap+json,application/json,*/*', 'User-Agent': 'DomainKit/2.0' }
-    }, { timeout: 4000, retries: 1 });
+    }, { timeout: 2500, retries: 0 });
 
     if (r.status === 404) return 'available';
     if (r.ok) {
@@ -248,7 +245,7 @@ async function rdapAvailabilityCheck(domain, tld) {
   try {
     const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=NS`, {
       headers: { Accept: 'application/dns-json' }
-    }, { timeout: 3000, retries: 1 });
+    }, { timeout: 1500, retries: 0 });
     if (r.ok) {
       const j = await r.json();
       if (j.Status === 0 && j.Answer && j.Answer.length > 0) return 'taken';
@@ -259,7 +256,7 @@ async function rdapAvailabilityCheck(domain, tld) {
   try {
     const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=A`, {
       headers: { Accept: 'application/dns-json' }
-    }, { timeout: 3000, retries: 1 });
+    }, { timeout: 1500, retries: 0 });
     if (r.ok) {
       const j = await r.json();
       if (j.Status === 0 && j.Answer && j.Answer.length > 0) return 'taken';
@@ -290,7 +287,7 @@ async function bulkSearchCheck(domains) {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36',
     },
     body,
-  }, { timeout: 12000, retries: 2 });
+  }, { timeout: 3000, retries: 0 });
 
   if (!res.ok) throw new Error(`BulkSearch ${res.status}`);
   return res.json();
