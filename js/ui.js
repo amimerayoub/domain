@@ -35,10 +35,10 @@ function createDomainCard(domain, index = 0) {
   let sc = 'status-checking';
   let st = 'Checking...';
   let isUnknown = false;
-  if (domain.available === true) { sc = 'status-available'; st = 'Available'; }
-  else if (domain.available === false) { sc = 'status-taken'; st = 'Taken'; }
+  if (domain.available === true) { sc = 'status-available'; st = '✓ Available'; }
+  else if (domain.available === false) { sc = 'status-taken'; st = '✗ Registered'; }
   else if (domain.available === 'error' || domain.available === 'unknown' || domain.available === null) {
-    sc = 'status-unknown'; st = 'Unknown'; isUnknown = true;
+    sc = 'status-unknown'; st = '⚠ Check Failed'; isUnknown = true;
   }
   const favActive = isFavorite(domainName);
   const isAvail = domain.available === true;
@@ -254,9 +254,9 @@ export function renderBulkResults(domains) {
     const a = d.available;
     let statusClass, statusText;
     if (a === 'checking') { statusClass = 'bulk-checking'; statusText = 'Checking...'; }
-    else if (a === true) { statusClass = 'bulk-available'; statusText = 'Available'; }
-    else if (a === false) { statusClass = 'bulk-taken'; statusText = 'Taken'; }
-    else { statusClass = 'bulk-taken'; statusText = 'Unknown'; }
+    else if (a === true) { statusClass = 'bulk-available'; statusText = '✓ Available'; }
+    else if (a === false) { statusClass = 'bulk-taken'; statusText = '✗ Registered'; }
+    else { statusClass = 'bulk-taken'; statusText = '⚠ Check Failed'; }
     const domName = d.name || d.domain;
     item.innerHTML = `<span class="bulk-domain" style="cursor:pointer">${domName}</span><span class="bulk-status ${statusClass}">${statusText}</span>`;
     item.querySelector('.bulk-domain').addEventListener('click', () => navigateToDomain(domName));
@@ -451,7 +451,7 @@ function renderAnalyzerTable(container, domains) {
         <div class="dc-main-top">
           <p class="dc-name" data-domain='${JSON.stringify(d).replace(/'/g, "&#39;")}'>${d.name}</p>
           <span class="dc-badge ${d.available === true ? 'dc-avail' : d.available === 'checking' ? 'dc-checking' : (d.available === null || d.available === 'unknown' || d.available === 'error') ? 'dc-unknown' : 'dc-taken'}">
-            <span class="dc-badge-dot"></span>${d.available === true ? 'Available' : d.available === 'checking' ? 'Checking...' : (d.available === null || d.available === 'unknown' || d.available === 'error') ? 'Unknown' : 'Registered'}
+            <span class="dc-badge-dot"></span>${d.available === true ? '✓ Available' : d.available === 'checking' ? 'Checking...' : (d.available === null || d.available === 'unknown' || d.available === 'error') ? '⚠ Check Failed' : '✗ Registered'}
             ${(d.available === null || d.available === 'unknown' || d.available === 'error') ? `<button class="btn-retry-status" data-domain="${d.name}" style="margin-left: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: var(--text-primary); font-size: 0.65rem; padding: 2px 6px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='var(--primary)'; this.style.borderColor='var(--primary)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='rgba(255,255,255,0.15)'">Retry</button>` : ''}
           </span>
         </div>
@@ -620,10 +620,10 @@ function renderAnalyzerCards(container, domains) {
     let sc = 'status-checking';
     let st = 'Checking...';
     let isUnknown = false;
-    if (d.available === true) { sc = 'status-available'; st = 'Available'; }
-    else if (d.available === false) { sc = 'status-taken'; st = 'Taken'; }
+    if (d.available === true) { sc = 'status-available'; st = '✓ Available'; }
+    else if (d.available === false) { sc = 'status-taken'; st = '✗ Registered'; }
     else if (d.available === null || d.available === 'unknown' || d.available === 'error') {
-      sc = 'status-unknown'; st = 'Unknown'; isUnknown = true;
+      sc = 'status-unknown'; st = '⚠ Check Failed'; isUnknown = true;
     }
     const favActive = isFavorite(d.name);
     const isAvail = d.available === true;

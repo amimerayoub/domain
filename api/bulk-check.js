@@ -121,7 +121,7 @@ const PRIMARY_API_TLDS = new Set([
   "city",
   "email",
   "fund",
-  "gold",
+  "vip",
   "plus",
 ]);
 
@@ -293,7 +293,31 @@ async function bulkSearchCheck(domains) {
   }, { timeout: 12000, retries: 2 });
 
   if (!res.ok) throw new Error(`BulkSearch ${res.status}`);
-  return res.json(); // { "example.com": true, "example.ai": false }
+  return res.json();
+}
+
+function normalizeBulkSearch(domains, response) {
+  if (!response || !Array.isArray(response.results)) {
+    throw new Error("Invalid BulkSearch response");
+  }
+  if (domains.length !== response.results.length) {
+    console.warn("BulkSearch length mismatch");
+  }
+  const limit = Math.min(domains.length, response.results.length);
+  const mapped = [];
+  for (let i = 0; i < limit; i++) {
+    const val = response.results[i];
+    let available;
+    if (val === 1) available = true;
+    else if (val === 0) available = false;
+    else available = null; // Error/Unknown
+    mapped.push({
+      domain: domains[i],
+      available,
+      source: "bulksearch"
+    });
+  }
+  return mapped;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -339,7 +363,7 @@ async function processDomainBatch(batch, includeRegistered) {
         if (data && Array.isArray(data.results)) {
           for (const r of data.results) {
             const key = r.name.toLowerCase();
-            const result = { name: r.name, availability: r.availability };
+            const result = { name: r.name, availability: r.availability, source: 'verisign' };
             resultsMap[key] = result;
             cacheSet(key, result);
           }
@@ -369,7 +393,7 @@ async function processDomainBatch(batch, includeRegistered) {
     await Promise.allSettled(rdapDomains.map(async item => {
       const status = await rdapAvailabilityCheck(item.domain, item.tld);
       const availability = status === 'available' ? 'available' : status === 'taken' ? 'registered' : 'unknown';
-      const result = { name: item.domain, availability };
+      const result = { name: item.domain, availability, source: 'rdap' };
       const key = item.domain.toLowerCase();
       resultsMap[key] = result;
       if (status !== 'unknown') {
@@ -388,24 +412,41 @@ async function processDomainBatch(batch, includeRegistered) {
     await Promise.allSettled(bulkBatches.map(async batchSlice => {
       const domainList = batchSlice.map(i => i.domain);
       try {
-        const data = await bulkSearchCheck(domainList);
-        for (const item of batchSlice) {
+        const tStart = Date.now();
+        const rawResponse = await bulkSearchCheck(domainList);
+        const elapsed = Date.now() - tStart;
+
+        const normalized = normalizeBulkSearch(domainList, rawResponse);
+        const availableCount = normalized.filter(d => d.available === true).length;
+        const registeredCount = normalized.filter(d => d.available === false).length;
+        console.log(`BulkSearch Lookup: domains count: ${domainList.length}, results count: ${rawResponse?.results?.length || 0}, response time: ${elapsed}ms, available count: ${availableCount}, registered count: ${registeredCount}`);
+
+        for (const item of normalized) {
           const key = item.domain.toLowerCase();
-          const taken = data[item.domain] ?? data[key];
           let availability;
-          if (taken === true) { availability = 'registered'; _analytics.bulksearch_hits++; }
-          else if (taken === false) { availability = 'available'; _analytics.bulksearch_hits++; }
+          if (item.available === true) { availability = 'available'; _analytics.bulksearch_hits++; }
+          else if (item.available === false) { availability = 'registered'; _analytics.bulksearch_hits++; }
           else { availability = 'unknown'; _analytics.bulksearch_misses++; }
-          const result = { name: item.domain, availability };
+
+          const result = { name: item.domain, availability, source: item.source };
           resultsMap[key] = result;
           if (availability !== 'unknown') cacheSet(key, result);
         }
-      } catch (_) {
+
+        // Fill any mismatch gaps
+        for (const item of batchSlice) {
+          const key = item.domain.toLowerCase();
+          if (!resultsMap[key]) {
+            resultsMap[key] = { name: item.domain, availability: 'unknown', source: 'bulksearch' };
+          }
+        }
+      } catch (err) {
+        console.error(`BulkSearch failed: ${err.message}`);
         // Both primary and BulkSearch failed — mark as unknown
         _analytics.bulksearch_misses++;
         for (const item of batchSlice) {
           const key = item.domain.toLowerCase();
-          resultsMap[key] = { name: item.domain, availability: 'unknown' };
+          resultsMap[key] = { name: item.domain, availability: 'unknown', source: 'bulksearch' };
         }
       }
     }));
@@ -436,7 +477,7 @@ function enrich(results) {
     const e = {
       domain: item.name.toLowerCase(), name: base, tld: tld.toLowerCase(),
       availability: item.availability, available: ok, taken: !ok,
-      engine: VERISIGN_TLDS.has(tld) ? 'verisign' : PRIMARY_API_TLDS.has(tld) ? 'rdap' : 'bulksearch',
+      source: item.source || (VERISIGN_TLDS.has(tld) ? 'verisign' : PRIMARY_API_TLDS.has(tld) ? 'rdap' : 'bulksearch'),
       register_url: ok ? `https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(item.name.toLowerCase())}` : null,
       whois_url: `https://lookup.icann.org/en/lookup?name=${encodeURIComponent(item.name.toLowerCase())}`,
     };
@@ -543,6 +584,7 @@ export default async function handler(req, res) {
         domain: r.name.toLowerCase(),
         availability: r.availability,
         available: r.availability === 'available',
+        source: r.source || (VERISIGN_TLDS.has(r.name.split('.').pop().toLowerCase()) ? 'verisign' : PRIMARY_API_TLDS.has(r.name.split('.').pop().toLowerCase()) ? 'rdap' : 'bulksearch'),
       })),
     },
     by_name: Object.values(byName),

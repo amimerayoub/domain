@@ -2228,8 +2228,8 @@ export async function initApp() {
           let html = '<div class="results-grid" style="grid-template-columns: 1fr;">';
           domains.forEach((d, i) => {
              const isAvail = d.available === true;
-             const color = isAvail ? 'var(--success)' : 'var(--danger)';
-             const status = isAvail ? 'Available' : 'Taken';
+             const color = isAvail ? 'var(--success)' : (d.available === false ? 'var(--danger)' : 'var(--text-secondary)');
+             const status = isAvail ? '✓ Available' : (d.available === false ? '✗ Registered' : '⚠ Check Failed');
              html += `<div class="domain-card" style="padding: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-left: 4px solid ${color};" onclick="window.location.href='domain.html?domain='+encodeURIComponent('${d.name}')">
                        <span style="font-size: 1.1rem; font-weight: 600;">${d.name}</span>
                        <span style="font-size: 0.8rem; font-weight: 700; color: ${color}">${status}</span>

@@ -146,7 +146,7 @@ const PRIMARY_API_TLDS = new Set([
   "city",
   "email",
   "fund",
-  "gold",
+  "vip",
   "plus",
 ]);
 const SOCIAL_KEYS = ['facebook', 'twitter', 'instagram', 'youtube', 'github', 'linkedin', 'tiktok', 'reddit', 'pinterest', 'snapchat', 'twitch'];
@@ -410,6 +410,30 @@ async function bulkSearchCheck(domains) {
   return res.json();
 }
 
+function normalizeBulkSearch(domains, response) {
+  if (!response || !Array.isArray(response.results)) {
+    throw new Error("Invalid BulkSearch response");
+  }
+  if (domains.length !== response.results.length) {
+    console.warn("BulkSearch length mismatch");
+  }
+  const limit = Math.min(domains.length, response.results.length);
+  const mapped = [];
+  for (let i = 0; i < limit; i++) {
+    const val = response.results[i];
+    let available;
+    if (val === 1) available = true;
+    else if (val === 0) available = false;
+    else available = null; // Error/Unknown
+    mapped.push({
+      domain: domains[i],
+      available,
+      source: "bulksearch"
+    });
+  }
+  return mapped;
+}
+
 async function fetchTlds(baseName) {
   const verisignQueryTlds = TLD_VARIANTS.filter(tld => VERISIGN_TLDS.has(tld));
   const rdapOnlyTlds = TLD_VARIANTS.filter(tld => !VERISIGN_TLDS.has(tld) && PRIMARY_API_TLDS.has(tld));
@@ -444,6 +468,7 @@ async function fetchTlds(baseName) {
             available: avail,
             domain: item.name.toLowerCase(),
             engine: 'verisign',
+            source: 'verisign',
             register_url: avail ? `https://www.namecheap.com/domains/registration/results/?domain=${item.name.toLowerCase()}` : null,
           };
         }
@@ -459,11 +484,11 @@ async function fetchTlds(baseName) {
     const domain = `${baseName}.${tld}`;
     const status = await rdapAvailabilityCheck(domain, tld);
     if (status === 'available') {
-      out[tld] = { status: 'available', available: true, domain, engine: 'rdap', register_url: `https://www.namecheap.com/domains/registration/results/?domain=${domain}` };
+      out[tld] = { status: 'available', available: true, domain, engine: 'rdap', source: 'rdap', register_url: `https://www.namecheap.com/domains/registration/results/?domain=${domain}` };
     } else if (status === 'taken') {
-      out[tld] = { status: 'taken', available: false, domain, engine: 'rdap', register_url: null };
+      out[tld] = { status: 'taken', available: false, domain, engine: 'rdap', source: 'rdap', register_url: null };
     } else {
-      out[tld] = { status: 'unknown', available: null, domain, engine: 'rdap', register_url: null };
+      out[tld] = { status: 'unknown', available: null, domain, engine: 'rdap', source: 'rdap', register_url: null };
     }
   }));
 
@@ -471,18 +496,44 @@ async function fetchTlds(baseName) {
   if (bulksearchTlds.length > 0) {
     const domains = bulksearchTlds.map(t => `${baseName}.${t}`);
     try {
-      const data = await bulkSearchCheck(domains);
-      for (const tld of bulksearchTlds) {
-        const domain = `${baseName}.${tld}`;
-        const taken = data[domain] ?? data[domain.toLowerCase()];
-        if (taken === true) out[tld] = { status: 'taken', available: false, domain, engine: 'bulksearch', register_url: null };
-        else if (taken === false) out[tld] = { status: 'available', available: true, domain, engine: 'bulksearch', register_url: `https://www.namecheap.com/domains/registration/results/?domain=${domain}` };
-        else out[tld] = { status: 'unknown', available: null, domain, engine: 'bulksearch', register_url: null };
+      const tStart = Date.now();
+      const rawResponse = await bulkSearchCheck(domains);
+      const elapsed = Date.now() - tStart;
+
+      const normalized = normalizeBulkSearch(domains, rawResponse);
+      const availableCount = normalized.filter(d => d.available === true).length;
+      const registeredCount = normalized.filter(d => d.available === false).length;
+      console.log(`BulkSearch Lookup: domains count: ${domains.length}, results count: ${rawResponse?.results?.length || 0}, response time: ${elapsed}ms, available count: ${availableCount}, registered count: ${registeredCount}`);
+
+      for (const item of normalized) {
+        const tld = item.domain.split('.').pop().toLowerCase();
+        let status;
+        if (item.available === true) status = 'available';
+        else if (item.available === false) status = 'taken';
+        else status = 'unknown';
+
+        out[tld] = {
+          status,
+          available: item.available,
+          domain: item.domain,
+          engine: 'bulksearch',
+          source: item.source,
+          register_url: item.available === true ? `https://www.namecheap.com/domains/registration/results/?domain=${item.domain}` : null
+        };
       }
-    } catch (_) {
+
+      // Fill any mismatch gaps
+      for (const tld of bulksearchTlds) {
+        if (!out[tld]) {
+          const domain = `${baseName}.${tld}`;
+          out[tld] = { status: 'unknown', available: null, domain, engine: 'bulksearch', source: 'bulksearch', register_url: null };
+        }
+      }
+    } catch (err) {
+      console.error(`BulkSearch failed: ${err.message}`);
       for (const tld of bulksearchTlds) {
         const domain = `${baseName}.${tld}`;
-        out[tld] = { status: 'unknown', available: null, domain, engine: 'bulksearch', register_url: null };
+        out[tld] = { status: 'unknown', available: null, domain, engine: 'bulksearch', source: 'bulksearch', register_url: null };
       }
     }
   }

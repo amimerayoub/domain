@@ -121,7 +121,7 @@ const PRIMARY_API_TLDS = new Set([
   "city",
   "email",
   "fund",
-  "gold",
+  "vip",
   "plus",
 ]);
 
@@ -287,6 +287,30 @@ async function bulkSearchCheck(domains) {
   return res.json();
 }
 
+function normalizeBulkSearch(domains, response) {
+  if (!response || !Array.isArray(response.results)) {
+    throw new Error("Invalid BulkSearch response");
+  }
+  if (domains.length !== response.results.length) {
+    console.warn("BulkSearch length mismatch");
+  }
+  const limit = Math.min(domains.length, response.results.length);
+  const mapped = [];
+  for (let i = 0; i < limit; i++) {
+    const val = response.results[i];
+    let available;
+    if (val === 1) available = true;
+    else if (val === 0) available = false;
+    else available = null; // Error/Unknown
+    mapped.push({
+      domain: domains[i],
+      available,
+      source: "bulksearch"
+    });
+  }
+  return mapped;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // DOMAIN AVAILABILITY CHECKER (routes to correct engine)
 // ═══════════════════════════════════════════════════════════════
@@ -310,7 +334,7 @@ async function checkDomainsAvailability(q, tlds) {
           const tld = item.name.split('.').pop().toLowerCase();
           failedVerisignTlds.delete(tld);
           const isAvail = item.availability === 'available';
-          results[tld] = { available: isAvail, status: isAvail ? 'available' : 'taken', engine: 'verisign' };
+          results[tld] = { available: isAvail, status: isAvail ? 'available' : 'taken', engine: 'verisign', source: 'verisign' };
         }
       }
     } catch (_) { /* keep failedVerisignTlds set to trigger RDAP fallback */ }
@@ -322,9 +346,9 @@ async function checkDomainsAvailability(q, tlds) {
     await Promise.allSettled(rdapTlds.map(async tld => {
       const domain = `${q}.${tld}`;
       const status = await rdapAvailabilityCheck(domain, tld);
-      if (status === 'available') results[tld] = { available: true, status: 'available', engine: 'rdap' };
-      else if (status === 'taken') results[tld] = { available: false, status: 'taken', engine: 'rdap' };
-      else results[tld] = { available: null, status: 'unknown', engine: 'rdap' };
+      if (status === 'available') results[tld] = { available: true, status: 'available', engine: 'rdap', source: 'rdap' };
+      else if (status === 'taken') results[tld] = { available: false, status: 'taken', engine: 'rdap', source: 'rdap' };
+      else results[tld] = { available: null, status: 'unknown', engine: 'rdap', source: 'rdap' };
     }));
   }
 
@@ -332,18 +356,40 @@ async function checkDomainsAvailability(q, tlds) {
   if (bulksearchTlds.length > 0) {
     const domains = bulksearchTlds.map(t => `${q}.${t}`);
     try {
-      const data = await bulkSearchCheck(domains);
-      for (const tld of bulksearchTlds) {
-        const domain = `${q}.${tld}`;
-        const taken = data[domain] ?? data[domain.toLowerCase()];
-        if (taken === true) results[tld] = { available: false, status: 'taken', engine: 'bulksearch' };
-        else if (taken === false) results[tld] = { available: true, status: 'available', engine: 'bulksearch' };
-        else results[tld] = { available: null, status: 'unknown', engine: 'bulksearch' };
+      const tStart = Date.now();
+      const rawResponse = await bulkSearchCheck(domains);
+      const elapsed = Date.now() - tStart;
+
+      const normalized = normalizeBulkSearch(domains, rawResponse);
+      const availableCount = normalized.filter(d => d.available === true).length;
+      const registeredCount = normalized.filter(d => d.available === false).length;
+      console.log(`BulkSearch Lookup: domains count: ${domains.length}, results count: ${rawResponse?.results?.length || 0}, response time: ${elapsed}ms, available count: ${availableCount}, registered count: ${registeredCount}`);
+
+      for (const item of normalized) {
+        const tld = item.domain.split('.').pop().toLowerCase();
+        let status;
+        if (item.available === true) status = 'available';
+        else if (item.available === false) status = 'taken';
+        else status = 'unknown';
+
+        results[tld] = {
+          available: item.available,
+          status,
+          engine: 'bulksearch',
+          source: item.source
+        };
       }
-    } catch (_) {
+      // If there are bulksearchTlds that were NOT mapped due to minimum length, we mark them as unknown
+      for (const tld of bulksearchTlds) {
+        if (!results[tld]) {
+          results[tld] = { available: null, status: 'unknown', engine: 'bulksearch', source: 'bulksearch' };
+        }
+      }
+    } catch (err) {
+      console.error(`BulkSearch failed: ${err.message}`);
       // BulkSearch failed — mark as unknown (never show a failed state)
       for (const tld of bulksearchTlds) {
-        results[tld] = { available: null, status: 'unknown', engine: 'bulksearch' };
+        results[tld] = { available: null, status: 'unknown', engine: 'bulksearch', source: 'bulksearch' };
       }
     }
   }
@@ -391,12 +437,22 @@ function normalise(raw, q) {
     if (typeof data === 'boolean') isAvail = data;
     else if (data && typeof data === 'object') { isAvail = data.available ?? data.status ?? null; profileUrl = data.url || null; }
     if (isSocial) profileUrl = profileUrl || socialUrl(slug, q);
+
+    let source = 'unknown';
+    if (isSocial) {
+      source = 'namecheckerr';
+    } else if (isDomain) {
+      source = (data && data.source) || (data && data.engine) || (VERISIGN_TLDS.has(slug) ? 'verisign' : PRIMARY_API_TLDS.has(slug) ? 'rdap' : 'bulksearch');
+    }
+
     const e = {
       slug, type: isDomain && !isSocial ? 'domain' : 'social',
       name: isDomain && !isSocial ? `.${slug}` : cap(slug),
       full: isDomain && !isSocial ? `${q}.${slug}` : `${slug}.com/${q}`,
+      domain: isDomain && !isSocial ? `${q}.${slug}` : `${slug}.com/${q}`,
       available: isAvail,
       status: isAvail === true ? 'available' : isAvail === false ? 'taken' : 'unknown',
+      source,
       profile_url: profileUrl,
       register_url: isDomain && !isSocial && isAvail === true
         ? `https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(`${q}.${slug}`)}`
