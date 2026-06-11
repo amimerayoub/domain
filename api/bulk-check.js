@@ -9,7 +9,7 @@ const VERISIGN_API = 'https://sugapi.verisign-grs.com/ns-api/2.0/bulk-check';
 const MAX_NAMES    = 100;
 const MAX_TLDS     = 3;
 
-const VERISIGN_TLDS = ['com', 'net'];
+const VERISIGN_TLDS = ['com', 'net', 'org', 'vip'];
 const RDAP_SERVERS = {
   com:'https://rdap.verisign.com/com/v1',     net:'https://rdap.verisign.com/net/v1',
   org:'https://rdap.publicinterestregistry.org/rdap', io:'https://rdap.nic.io',
@@ -131,6 +131,84 @@ function enrich(results) {
   return { available, registered, byName, byTld };
 }
 
+async function processDomainBatch(batch, includeRegistered) {
+  const verisignGroup = [];
+  const rdapGroup = [];
+  const resultsMap = {};
+
+  for (const item of batch) {
+    if (VERISIGN_TLDS.includes(item.tld)) {
+      verisignGroup.push(item);
+    } else {
+      rdapGroup.push(item);
+    }
+  }
+
+  // 1. Check Verisign-supported domains
+  const failedVerisignDomains = [];
+  if (verisignGroup.length > 0) {
+    const tldGroups = {};
+    for (const item of verisignGroup) {
+      if (!tldGroups[item.tld]) tldGroups[item.tld] = [];
+      tldGroups[item.tld].push(item.name);
+    }
+
+    const verisignPromises = Object.entries(tldGroups).map(async ([tld, names]) => {
+      try {
+        const data = await verisignBulk(names, [tld], includeRegistered);
+        if (data && Array.isArray(data.results)) {
+          for (const res of data.results) {
+            const domainLower = res.name.toLowerCase();
+            resultsMap[domainLower] = {
+              name: res.name,
+              availability: res.availability
+            };
+          }
+        }
+        for (const name of names) {
+          const domain = `${name}.${tld}`;
+          const domainLower = domain.toLowerCase();
+          if (!resultsMap[domainLower]) {
+            failedVerisignDomains.push({ name, tld, domain });
+          }
+        }
+      } catch (e) {
+        for (const name of names) {
+          failedVerisignDomains.push({ name, tld, domain: `${name}.${tld}` });
+        }
+      }
+    });
+    await Promise.allSettled(verisignPromises);
+  }
+
+  // 2. Check fallback TLDs and failed Verisign domains via RDAP
+  const rdapCheckDomains = [...rdapGroup, ...failedVerisignDomains];
+  if (rdapCheckDomains.length > 0) {
+    const rdapPromises = rdapCheckDomains.map(async item => {
+      const status = await rdapAvailabilityCheck(item.domain, item.tld);
+      const domainLower = item.domain.toLowerCase();
+      if (status === 'available') {
+        resultsMap[domainLower] = { name: item.domain, availability: 'available' };
+      } else if (status === 'taken') {
+        resultsMap[domainLower] = { name: item.domain, availability: 'registered' };
+      } else {
+        resultsMap[domainLower] = { name: item.domain, availability: 'unknown' };
+      }
+    });
+    await Promise.allSettled(rdapPromises);
+  }
+
+  // 3. Ensure all requested domains in the batch have a result
+  for (const item of batch) {
+    const domainLower = item.domain.toLowerCase();
+    if (!resultsMap[domainLower]) {
+      resultsMap[domainLower] = { name: item.domain, availability: 'unknown' };
+    }
+  }
+
+  return batch.map(item => resultsMap[item.domain.toLowerCase()]);
+}
+
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -161,72 +239,52 @@ export default async function handler(req, res) {
   const allResults = [], errors = [];
   const timings = { batches: [] };
 
-  const verisignTlds = tlds.filter(t => VERISIGN_TLDS.includes(t));
-  const fallbackTlds = tlds.filter(t => !VERISIGN_TLDS.includes(t));
+  // Generate flat list of domain name + TLD pairs
+  const requestedDomains = [];
+  for (const name of names) {
+    for (const tld of tlds) {
+      requestedDomains.push({ name, tld, domain: `${name}.${tld}` });
+    }
+  }
 
-  const nameBatches = chunk(names, 20);
-  for (let i = 0; i < nameBatches.length; i++) {
-    const batch = nameBatches[i];
+  // Chunk domains list into batches of 100 max
+  const domainBatches = chunk(requestedDomains, 100);
+
+  // Process batches in parallel via Promise.allSettled
+  const batchPromises = domainBatches.map(async (batch, index) => {
     const tStart = Date.now();
-    let batchOk = true;
-    let batchError = null;
-
-    // 1. Verisign check for Verisign TLDs
-    if (verisignTlds.length > 0) {
-      try {
-        const d = await verisignBulk(batch, verisignTlds, includeRegistered);
-        if (Array.isArray(d.results)) {
-          allResults.push(...d.results);
-        }
-      } catch (e) {
-        batchOk = false;
-        batchError = e.message;
-        errors.push(`Verisign batch error: ${e.message}`);
-        // Populate unknown results for this batch's Verisign TLDs
-        for (const name of batch) {
-          for (const tld of verisignTlds) {
-            allResults.push({
-              name: `${name}.${tld}`,
-              availability: 'unknown'
-            });
-          }
-        }
-      }
+    try {
+      const results = await processDomainBatch(batch, includeRegistered);
+      return { index, ok: true, results, elapsed_ms: Date.now() - tStart };
+    } catch (err) {
+      errors.push(`Batch ${index + 1} failed: ${err.message}`);
+      const fallbackResults = batch.map(item => ({ name: item.domain, availability: 'unknown' }));
+      return { index, ok: false, results: fallbackResults, elapsed_ms: Date.now() - tStart, error: err.message };
     }
+  });
 
-    // 2. Fallback check for fallback TLDs
-    if (fallbackTlds.length > 0) {
-      const fallbackPromises = [];
-      for (const name of batch) {
-        for (const tld of fallbackTlds) {
-          const domain = `${name}.${tld}`;
-          fallbackPromises.push((async () => {
-            try {
-              const status = await rdapAvailabilityCheck(domain, tld);
-              return {
-                name: domain,
-                availability: status
-              };
-            } catch (e) {
-              return {
-                name: domain,
-                availability: 'unknown'
-              };
-            }
-          })());
-        }
-      }
-      const fallbackResults = await Promise.all(fallbackPromises);
-      allResults.push(...fallbackResults);
+  const settled = await Promise.allSettled(batchPromises);
+
+  // Merge results in correct order
+  const orderedBatches = [];
+  for (const r of settled) {
+    if (r.status === 'fulfilled') {
+      orderedBatches.push(r.value);
+      timings.batches.push({
+        id: r.value.index + 1,
+        size: r.value.results.length,
+        elapsed_ms: r.value.elapsed_ms,
+        ok: r.value.ok,
+        ...(r.value.error ? { error: r.value.error } : {})
+      });
+    } else {
+      errors.push(`Promise rejected: ${r.reason?.message || 'Unknown error'}`);
     }
+  }
 
-    timings.batches.push({
-      id: i + 1,
-      size: batch.length,
-      elapsed_ms: Date.now() - tStart,
-      ok: batchOk,
-      ...(batchError ? { error: batchError } : {})
-    });
+  orderedBatches.sort((a, b) => a.index - b.index);
+  for (const b of orderedBatches) {
+    allResults.push(...b.results);
   }
 
   if (!allResults.length && errors.length) return res.status(502).json({ success:false, error:'Upstream failed.', details:errors });

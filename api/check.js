@@ -24,6 +24,22 @@ function socialUrl(platform, u) {
 
 function cap(s) { return s.charAt(0).toUpperCase()+s.slice(1); }
 
+const VERISIGN_API = 'https://sugapi.verisign-grs.com/ns-api/2.0/bulk-check';
+const VERISIGN_TLDS = ['com', 'net', 'org', 'vip'];
+
+const RDAP_SERVERS = {
+  com:'https://rdap.verisign.com/com/v1',     net:'https://rdap.verisign.com/net/v1',
+  org:'https://rdap.publicinterestregistry.org/rdap', io:'https://rdap.nic.io',
+  co:'https://rdap.nic.co',                   ai:'https://rdap.nic.ai',
+  app:'https://rdap.nic.google',              dev:'https://rdap.nic.google',
+  info:'https://rdap.afilias.net/rdap/info',  biz:'https://rdap.nic.biz',
+  us:'https://rdap.nic.us',                   me:'https://rdap.nic.me',
+  xyz:'https://rdap.nic.xyz',                 tech:'https://rdap.nic.tech',
+  uk:'https://rdap.nominet.uk',               de:'https://rdap.denic.de',
+};
+const RDAP_BOOTSTRAP = 'https://rdap.org/domain';
+const DOH_URL = 'https://cloudflare-dns.com/dns-query';
+
 async function safeFetch(url, options = {}, { timeout = 8000, retries = 1 } = {}) {
   let lastErr;
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -39,6 +55,119 @@ async function safeFetch(url, options = {}, { timeout = 8000, retries = 1 } = {}
     }
   }
   throw lastErr || new Error(`Failed to fetch ${url}`);
+}
+
+async function rdapAvailabilityCheck(domain, tld) {
+  const server = RDAP_SERVERS[tld] || RDAP_BOOTSTRAP;
+  const url = `${server}/domain/${domain.toUpperCase()}`;
+  try {
+    const r = await safeFetch(url, {
+      headers: { Accept: 'application/rdap+json,application/json,*/*', 'User-Agent': 'DomainKit/2.0' }
+    }, { timeout: 4000, retries: 1 });
+    
+    if (r.status === 404) return 'available';
+    if (r.ok) {
+      const j = await r.json();
+      if (j && j.handle) return 'taken';
+    }
+  } catch (_) {}
+
+  // Fallback to DNS records check (NS type) via Cloudflare DoH
+  try {
+    const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=NS`, {
+      headers: { Accept: 'application/dns-json' }
+    }, { timeout: 3000, retries: 1 });
+    if (r.ok) {
+      const j = await r.json();
+      if (j.Status === 0 && (j.Answer && j.Answer.length > 0)) {
+        return 'taken';
+      }
+    }
+  } catch (_) {}
+
+  // Fallback to DNS records check (A type) via Cloudflare DoH
+  try {
+    const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=A`, {
+      headers: { Accept: 'application/dns-json' }
+    }, { timeout: 3000, retries: 1 });
+    if (r.ok) {
+      const j = await r.json();
+      if (j.Status === 0 && (j.Answer && j.Answer.length > 0)) {
+        return 'taken';
+      }
+    }
+  } catch (_) {}
+
+  return 'unknown';
+}
+
+async function verisignBulk(names, tlds) {
+  const params = new URLSearchParams({ names: names.join(','), tlds: tlds.join(','), 'include-registered': 'true' });
+  const res = await safeFetch(`${VERISIGN_API}?${params}`, {
+    headers: {
+      'Accept': 'application/json, */*',
+      'Accept-Language': 'en-GB,en;q=0.5',
+      'Origin': 'https://dnhub.io',
+      'Referer': 'https://dnhub.io/',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36',
+    }
+  }, { timeout: 8000, retries: 1 });
+  if (!res.ok) throw new Error(`Verisign ${res.status}`);
+  return res.json();
+}
+
+async function checkDomainsAvailability(q, tlds) {
+  const verisignQueryTlds = tlds.filter(t => VERISIGN_TLDS.includes(t));
+  const directRdapTlds = tlds.filter(t => !VERISIGN_TLDS.includes(t));
+
+  const results = {};
+  const failedVerisignTlds = new Set(verisignQueryTlds);
+
+  // 1. Check Verisign-supported TLDs
+  if (verisignQueryTlds.length > 0) {
+    try {
+      const data = await verisignBulk([q], verisignQueryTlds);
+      if (data && Array.isArray(data.results)) {
+        for (const item of data.results) {
+          const tld = item.name.split('.').pop().toLowerCase();
+          failedVerisignTlds.delete(tld);
+          const isAvail = item.availability === 'available';
+          results[tld] = {
+            available: isAvail,
+            status: isAvail ? 'available' : 'taken'
+          };
+        }
+      }
+    } catch (err) {
+      // Keep failedVerisignTlds to trigger fallback
+    }
+  }
+
+  // 2. Fallback to RDAP for unsupported TLDs and Verisign failures
+  const rdapCheckTlds = [...new Set([...directRdapTlds, ...failedVerisignTlds])];
+  if (rdapCheckTlds.length > 0) {
+    const promises = rdapCheckTlds.map(async tld => {
+      const domain = `${q}.${tld}`;
+      const status = await rdapAvailabilityCheck(domain, tld);
+      if (status === 'available') {
+        results[tld] = { available: true, status: 'available' };
+      } else if (status === 'taken') {
+        results[tld] = { available: false, status: 'taken' };
+      } else {
+        results[tld] = { available: null, status: 'unknown' };
+      }
+    });
+    await Promise.allSettled(promises);
+  }
+
+  // 3. Ensure all requested TLDs have a result
+  for (const tld of tlds) {
+    if (!results[tld]) {
+      results[tld] = { available: null, status: 'unknown' };
+    }
+  }
+
+  return results;
 }
 
 async function callUpstream(q, keys) {
@@ -121,7 +250,7 @@ export default async function handler(req, res) {
   if (type === 'all' || type === 'domains') {
     const tStart = Date.now();
     promises.push(
-      callUpstream(q, tlds)
+      checkDomainsAvailability(q, tlds)
         .then(r => {
           timings.domains = { ok: true, elapsed_ms: Date.now() - tStart };
           return { _t: 'domains', ...r };

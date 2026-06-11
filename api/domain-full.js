@@ -45,7 +45,7 @@ const RANKIFYER_R       = '423b01';
 const HACKERTARGET_API  = 'https://api.hackertarget.com/hostsearch/?q=';
 
 const TLD_VARIANTS  = ['com','net','org','io','co','ai'];
-const VERISIGN_TLDS = ['com','net'];
+const VERISIGN_TLDS = ['com','net','org','vip'];
 const SOCIAL_KEYS   = ['facebook','twitter','instagram','youtube','github','linkedin','tiktok','reddit','pinterest','snapchat','twitch'];
 const DNS_REC_TYPES = ['A','AAAA','MX','TXT','CNAME','NS','SOA'];
 
@@ -288,9 +288,10 @@ async function fetchDns(domain) {
 
 async function fetchTlds(baseName) {
   const verisignQueryTlds = TLD_VARIANTS.filter(tld => VERISIGN_TLDS.includes(tld));
-  const fallbackQueryTlds = TLD_VARIANTS.filter(tld => !VERISIGN_TLDS.includes(tld));
+  const directRdapTlds = TLD_VARIANTS.filter(tld => !VERISIGN_TLDS.includes(tld));
 
   const out = {};
+  const failedVerisignTlds = new Set(verisignQueryTlds);
 
   // 1. Fetch Verisign TLDs
   if (verisignQueryTlds.length > 0) {
@@ -311,6 +312,7 @@ async function fetchTlds(baseName) {
         const j = await r.json();
         for (const item of (j.results || [])) {
           const tld = item.name.split('.').pop().toLowerCase();
+          failedVerisignTlds.delete(tld);
           const avail = item.availability === 'available';
           out[tld] = {
             status: avail ? 'available' : 'taken',
@@ -321,28 +323,37 @@ async function fetchTlds(baseName) {
         }
       }
     } catch (err) {
-      for (const tld of verisignQueryTlds) {
-        out[tld] = {
-          status: 'unknown',
-          available: false,
-          domain: `${baseName}.${tld}`,
-          register_url: null,
-        };
-      }
+      // Keep failedVerisignTlds populated to trigger fallback
     }
   }
 
-  // 2. Fetch Fallback TLDs in parallel
-  const fallbackPromises = fallbackQueryTlds.map(async tld => {
+  // 2. Fetch RDAP TLDs (both direct and failed Verisign fallbacks)
+  const rdapQueryTlds = [...new Set([...directRdapTlds, ...failedVerisignTlds])];
+  const fallbackPromises = rdapQueryTlds.map(async tld => {
     const domain = `${baseName}.${tld}`;
     const status = await rdapAvailabilityCheck(domain, tld);
-    const avail = status === 'available';
-    out[tld] = {
-      status,
-      available: avail,
-      domain,
-      register_url: avail ? `https://www.namecheap.com/domains/registration/results/?domain=${domain}` : null,
-    };
+    if (status === 'available') {
+      out[tld] = {
+        status: 'available',
+        available: true,
+        domain,
+        register_url: `https://www.namecheap.com/domains/registration/results/?domain=${domain}`
+      };
+    } else if (status === 'taken') {
+      out[tld] = {
+        status: 'taken',
+        available: false,
+        domain,
+        register_url: null
+      };
+    } else {
+      out[tld] = {
+        status: 'unknown',
+        available: null,
+        domain,
+        register_url: null
+      };
+    }
   });
   
   await Promise.allSettled(fallbackPromises);
@@ -352,7 +363,7 @@ async function fetchTlds(baseName) {
     if (!out[tld]) {
       out[tld] = {
         status: 'unknown',
-        available: false,
+        available: null,
         domain: `${baseName}.${tld}`,
         register_url: null,
       };
