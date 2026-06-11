@@ -45,7 +45,7 @@ const RANKIFYER_TOOL_ID = 'high-quality-backlinks';
 const RANKIFYER_R = '423b01';
 const HACKERTARGET_API = 'https://api.hackertarget.com/hostsearch/?q=';
 
-const TLD_VARIANTS = ['com', 'net', 'org', 'io', 'co', 'ai', 'app', 'dev', 'xyz', 'me', 'tech', 'vip'];
+const TLD_VARIANTS = ['com', 'net', 'org', 'io', 'co', 'ai', 'me', 'vip','online','info'];
 const VERISIGN_TLDS = new Set(['com', 'net', 'org', 'vip']);
 const PRIMARY_API_TLDS = new Set([
   "com",
@@ -422,8 +422,8 @@ function normalizeBulkSearch(domains, response) {
   for (let i = 0; i < limit; i++) {
     const val = response.results[i];
     let available;
-    if (val === 1) available = true;
-    else if (val === 0) available = false;
+    if (val === 0) available = true;
+    else if (val === 1) available = false;
     else available = null; // Error/Unknown
     mapped.push({
       domain: domains[i],
