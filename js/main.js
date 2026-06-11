@@ -1,6 +1,6 @@
 // main.js — App init + navigation + event wiring
 import { $, $$, cap, sanitizeInput, extractKeywords, debounce } from './utils.js';
-import { loadData } from './dataLoader.js';
+import { loadData, loadGeoData, loadBrandableData, loadKeywordData } from './dataLoader.js';
 import { genState, generateGeo, generateKeyword, generatePattern, validatePattern, previewPattern, generateBrandable, generateNumeric, generateSuggestor, generateWordlist } from './generators.js';
 import { clearResults, showLoading, renderResults, renderBulkResults, renderExtractedResults, renderAnalyzerResults, showFilterControls, toast, copyText, setButtonState, uiState, applyFilterSort, updateDomainCounter, showAvailabilityProgress, showAvailabilityErrorBanner } from './ui.js';
 import { initExportSystem, syncExportDomains } from './exportSystem.js';
