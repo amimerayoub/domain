@@ -13,42 +13,138 @@
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════
 
-const VERISIGN_API    = 'https://sugapi.verisign-grs.com/ns-api/2.0/bulk-check';
-const BULKSEARCH_API  = 'https://api.bulksearch.domains/exists';
-const MAX_TLDS        = 10;
-const BATCH_SIZE      = 100;
+const VERISIGN_API = 'https://sugapi.verisign-grs.com/ns-api/2.0/bulk-check';
+const BULKSEARCH_API = 'https://api.bulksearch.domains/exists';
+const MAX_TLDS = 10;
+const BATCH_SIZE = 100;
 
 // TLDs supported by Verisign bulk-check
 const VERISIGN_TLDS = new Set(['com', 'net', 'org', 'vip']);
 
 // Extended list of TLDs that work reliably via RDAP (no need for BulkSearch)
 const PRIMARY_API_TLDS = new Set([
-  'com', 'net', 'org', 'io', 'co', 'ai', 'app', 'dev',
-  'xyz', 'me', 'live', 'tech', 'shop', 'store', 'online',
-  'site', 'cloud', 'info', 'biz', 'us', 'uk', 'de',
-  'vip', 'cc', 'at', 'eu', 'ru', 'jp', 'in', 'mobi', 'do', 'cn', 'ee',
+  "com",
+  "net",
+  "org",
+  "info",
+  "biz",
+  "uk",
+  "co.uk",
+  "org.uk",
+  "me.uk",
+  "net.uk",
+  "app",
+  "dev",
+  "tech",
+  "cloud",
+  "digital",
+  "systems",
+  "network",
+  "software",
+  "bot",
+  "data",
+  "inc",
+  "llc",
+  "ltd",
+  "company",
+  "group",
+  "business",
+  "enterprises",
+  "finance",
+  "financial",
+  "capital",
+  "money",
+  "bank",
+  "credit",
+  "investments",
+  "legal",
+  "law",
+  "lawyer",
+  "tax",
+  "expert",
+  "services",
+  "solutions",
+  "shop",
+  "store",
+  "market",
+  "marketing",
+  "online",
+  "xyz",
+  "site",
+  "website",
+  "sale",
+  "deals",
+  "blog",
+  "media",
+  "design",
+  "studio",
+  "video",
+  "audio",
+  "news",
+  "today",
+  "press",
+  "art",
+  "photo",
+  "photos",
+  "photography",
+  "club",
+  "space",
+  "live",
+  "life",
+  "community",
+  "world",
+  "global",
+  "zone",
+  "link",
+  "click",
+  "download",
+  "help",
+  "support",
+  "health",
+  "healthcare",
+  "education",
+  "academy",
+  "fitness",
+  "beauty",
+  "fashion",
+  "style",
+  "cafe",
+  "restaurant",
+  "travel",
+  "hotels",
+  "nyc",
+  "london",
+  "paris",
+  "berlin",
+  "agency",
+  "center",
+  "city",
+  "email",
+  "fund",
+  "gold",
+  "plus",
 ]);
 
 const RDAP_SERVERS = {
   com: 'https://rdap.verisign.com/com/v1',
   net: 'https://rdap.verisign.com/net/v1',
   org: 'https://rdap.publicinterestregistry.org/rdap',
-  io:  'https://rdap.nic.io',
-  co:  'https://rdap.nic.co',
-  ai:  'https://rdap.nic.ai',
+  io: 'https://rdap.nic.io',
+  co: 'https://rdap.nic.co',
+  ai: 'https://rdap.nic.ai',
   app: 'https://rdap.nic.google',
   dev: 'https://rdap.nic.google',
-  info:'https://rdap.afilias.net/rdap/info',
+  info: 'https://rdap.afilias.net/rdap/info',
   biz: 'https://rdap.nic.biz',
-  us:  'https://rdap.nic.us',
-  me:  'https://rdap.nic.me',
+  us: 'https://rdap.nic.us',
+  me: 'https://rdap.nic.me',
   xyz: 'https://rdap.nic.xyz',
-  tech:'https://rdap.nic.tech',
-  uk:  'https://rdap.nominet.uk',
-  de:  'https://rdap.denic.de',
+  tech: 'https://rdap.nic.tech',
+  uk: 'https://rdap.nominet.uk',
+  de: 'https://rdap.denic.de',
 };
 const RDAP_BOOTSTRAP = 'https://rdap.org/domain';
-const DOH_URL        = 'https://cloudflare-dns.com/dns-query';
+const DOH_URL = 'https://cloudflare-dns.com/dns-query';
 
 // ── In-memory cache (TTL 24h per domain result) ────────────────
 const _cache = new Map(); // key: "domain.tld" => { result, ts }
@@ -57,7 +153,7 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 // ── Analytics counters ─────────────────────────────────────────
 const _analytics = {
   verisign_hits: 0, verisign_misses: 0,
-  rdap_hits: 0,     rdap_misses: 0,
+  rdap_hits: 0, rdap_misses: 0,
   bulksearch_hits: 0, bulksearch_misses: 0,
   cache_hits: 0,
 };
@@ -67,14 +163,14 @@ const _analytics = {
 // ═══════════════════════════════════════════════════════════════
 
 function setCors(res) {
-  res.setHeader('Access-Control-Allow-Origin',  '*');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Content-Type', 'application/json');
 }
 
 function cleanName(s) { return s.trim().replace(/\..*$/, '').replace(/[^a-zA-Z0-9\-]/g, ''); }
-function cleanTld(s)  { return s.trim().replace(/^\./, '').toLowerCase().replace(/[^a-z0-9\-]/g, ''); }
+function cleanTld(s) { return s.trim().replace(/^\./, '').toLowerCase().replace(/[^a-z0-9\-]/g, ''); }
 function chunk(arr, n) { const r = []; for (let i = 0; i < arr.length; i += n) r.push(arr.slice(i, i + n)); return r; }
 
 function cacheGet(domain) {
@@ -146,7 +242,7 @@ async function rdapAvailabilityCheck(domain, tld) {
       const j = await r.json();
       if (j && j.handle) return 'taken';
     }
-  } catch (_) {}
+  } catch (_) { }
 
   // DNS NS lookup via Cloudflare DoH
   try {
@@ -157,7 +253,7 @@ async function rdapAvailabilityCheck(domain, tld) {
       const j = await r.json();
       if (j.Status === 0 && j.Answer && j.Answer.length > 0) return 'taken';
     }
-  } catch (_) {}
+  } catch (_) { }
 
   // DNS A lookup via Cloudflare DoH
   try {
@@ -168,7 +264,7 @@ async function rdapAvailabilityCheck(domain, tld) {
       const j = await r.json();
       if (j.Status === 0 && j.Answer && j.Answer.length > 0) return 'taken';
     }
-  } catch (_) {}
+  } catch (_) { }
 
   return 'unknown';
 }
@@ -297,9 +393,9 @@ async function processDomainBatch(batch, includeRegistered) {
           const key = item.domain.toLowerCase();
           const taken = data[item.domain] ?? data[key];
           let availability;
-          if (taken === true)       { availability = 'registered'; _analytics.bulksearch_hits++; }
-          else if (taken === false) { availability = 'available';  _analytics.bulksearch_hits++; }
-          else                      { availability = 'unknown';    _analytics.bulksearch_misses++; }
+          if (taken === true) { availability = 'registered'; _analytics.bulksearch_hits++; }
+          else if (taken === false) { availability = 'available'; _analytics.bulksearch_hits++; }
+          else { availability = 'unknown'; _analytics.bulksearch_misses++; }
           const result = { name: item.domain, availability };
           resultsMap[key] = result;
           if (availability !== 'unknown') cacheSet(key, result);
@@ -333,11 +429,11 @@ async function processDomainBatch(batch, includeRegistered) {
 function enrich(results) {
   const available = [], registered = [], byName = {}, byTld = {};
   for (const item of results) {
-    const dot  = item.name.lastIndexOf('.');
-    const base = dot > -1 ? item.name.slice(0, dot)  : item.name;
-    const tld  = dot > -1 ? item.name.slice(dot + 1) : '';
-    const ok   = item.availability === 'available';
-    const e    = {
+    const dot = item.name.lastIndexOf('.');
+    const base = dot > -1 ? item.name.slice(0, dot) : item.name;
+    const tld = dot > -1 ? item.name.slice(dot + 1) : '';
+    const ok = item.availability === 'available';
+    const e = {
       domain: item.name.toLowerCase(), name: base, tld: tld.toLowerCase(),
       availability: item.availability, available: ok, taken: !ok,
       engine: VERISIGN_TLDS.has(tld) ? 'verisign' : PRIMARY_API_TLDS.has(tld) ? 'rdap' : 'bulksearch',
@@ -346,7 +442,7 @@ function enrich(results) {
     };
     if (ok) available.push(e); else registered.push(e);
     if (!byName[base]) byName[base] = { name: base, results: [] }; byName[base].results.push(e);
-    if (!byTld[tld])   byTld[tld]  = { tld,  results: [] };        byTld[tld].results.push(e);
+    if (!byTld[tld]) byTld[tld] = { tld, results: [] }; byTld[tld].results.push(e);
   }
   return { available, registered, byName, byTld };
 }
@@ -362,23 +458,23 @@ export default async function handler(req, res) {
   let rawNames, rawTlds, includeRegistered = true, debug = false;
   if (req.method === 'GET') {
     rawNames = (req.query.names || req.query.name || '').split(',').map(s => s.trim()).filter(Boolean);
-    rawTlds  = (req.query.tlds  || req.query.tld  || 'com').split(',').map(s => s.trim()).filter(Boolean);
+    rawTlds = (req.query.tlds || req.query.tld || 'com').split(',').map(s => s.trim()).filter(Boolean);
     includeRegistered = req.query['include-registered'] !== 'false';
     debug = req.query.debug === '1' || req.query.debug === 'true';
   } else if (req.method === 'POST') {
-    const b  = req.body || {};
-    const n  = b.names || b.name || [];
-    const t  = b.tlds  || b.tld  || ['com'];
+    const b = req.body || {};
+    const n = b.names || b.name || [];
+    const t = b.tlds || b.tld || ['com'];
     rawNames = (Array.isArray(n) ? n : String(n).split(',')).map(s => s.trim()).filter(Boolean);
-    rawTlds  = (Array.isArray(t) ? t : String(t).split(',')).map(s => s.trim()).filter(Boolean);
+    rawTlds = (Array.isArray(t) ? t : String(t).split(',')).map(s => s.trim()).filter(Boolean);
     includeRegistered = b['include-registered'] !== false;
     debug = b.debug === '1' || b.debug === 'true';
   } else return res.status(405).json({ success: false, error: 'Method not allowed' });
 
   if (!rawNames.length) return res.status(400).json({ success: false, error: 'No names provided.', usage: 'GET /api/bulk-check?names=Zynora,Veltrix&tlds=com,io' });
 
-  const names  = [...new Set(rawNames.map(cleanName).filter(Boolean))];
-  const tlds   = [...new Set(rawTlds.map(cleanTld).filter(Boolean))].slice(0, MAX_TLDS);
+  const names = [...new Set(rawNames.map(cleanName).filter(Boolean))];
+  const tlds = [...new Set(rawTlds.map(cleanTld).filter(Boolean))].slice(0, MAX_TLDS);
   if (!names.length) return res.status(400).json({ success: false, error: 'All names were invalid.' });
 
   const t0 = Date.now();
@@ -450,8 +546,8 @@ export default async function handler(req, res) {
       })),
     },
     by_name: Object.values(byName),
-    by_tld:  Object.values(byTld),
-    errors:  errors.length ? errors : undefined,
+    by_tld: Object.values(byTld),
+    errors: errors.length ? errors : undefined,
   };
 
   if (debug) {

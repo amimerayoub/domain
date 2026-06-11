@@ -13,8 +13,8 @@
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════
 
-const DOMAIN_TLDS = ['com','net','org','io','co','ai','app','dev','us','cc','me','biz','info','de','at','eu','ru','jp','mobi','in','xyz','uk','ca','ws','ee','do','cn','tech'];
-const SOCIAL_PLATFORMS = ['facebook','twitter','youtube','pinterest','vimeo','etsy','github','flickr','reddit','wordpress','soundcloud','500px','behance','tumblr','myspace','meetup','dribbble','aboutme','lastfm','cashapp','venmo','kinja','mix','deviantart','livejournal','ifttt','disqus','twitch','ello','blogger','snapchat'];
+const DOMAIN_TLDS = ['com', 'net', 'org', 'io', 'co', 'ai', 'app', 'dev', 'us', 'cc', 'me', 'biz', 'info', 'de', 'at', 'eu', 'ru', 'jp', 'mobi', 'in', 'xyz', 'uk', 'ca', 'ws', 'ee', 'do', 'cn', 'tech'];
+const SOCIAL_PLATFORMS = ['facebook', 'twitter', 'youtube', 'pinterest', 'vimeo', 'etsy', 'github', 'flickr', 'reddit', 'wordpress', 'soundcloud', '500px', 'behance', 'tumblr', 'myspace', 'meetup', 'dribbble', 'aboutme', 'lastfm', 'cashapp', 'venmo', 'kinja', 'mix', 'deviantart', 'livejournal', 'ifttt', 'disqus', 'twitch', 'ello', 'blogger', 'snapchat'];
 const NC_API = 'https://namecheckerr.com/api/check-name';
 const NC_KEY = 'arr12';
 
@@ -23,42 +23,138 @@ const VERISIGN_TLDS = new Set(['com', 'net', 'org', 'vip']);
 
 // Extended set of TLDs that work reliably via RDAP
 const PRIMARY_API_TLDS = new Set([
-  'com', 'net', 'org', 'io', 'co', 'ai', 'app', 'dev',
-  'xyz', 'me', 'live', 'tech', 'shop', 'store', 'online',
-  'site', 'cloud', 'info', 'biz', 'us', 'uk', 'de',
-  'vip', 'cc', 'at', 'eu', 'ru', 'jp', 'in', 'mobi', 'do', 'cn', 'ee', 'ca', 'ws',
+  "com",
+  "net",
+  "org",
+  "info",
+  "biz",
+  "uk",
+  "co.uk",
+  "org.uk",
+  "me.uk",
+  "net.uk",
+  "app",
+  "dev",
+  "tech",
+  "cloud",
+  "digital",
+  "systems",
+  "network",
+  "software",
+  "bot",
+  "data",
+  "inc",
+  "llc",
+  "ltd",
+  "company",
+  "group",
+  "business",
+  "enterprises",
+  "finance",
+  "financial",
+  "capital",
+  "money",
+  "bank",
+  "credit",
+  "investments",
+  "legal",
+  "law",
+  "lawyer",
+  "tax",
+  "expert",
+  "services",
+  "solutions",
+  "shop",
+  "store",
+  "market",
+  "marketing",
+  "online",
+  "xyz",
+  "site",
+  "website",
+  "sale",
+  "deals",
+  "blog",
+  "media",
+  "design",
+  "studio",
+  "video",
+  "audio",
+  "news",
+  "today",
+  "press",
+  "art",
+  "photo",
+  "photos",
+  "photography",
+  "club",
+  "space",
+  "live",
+  "life",
+  "community",
+  "world",
+  "global",
+  "zone",
+  "link",
+  "click",
+  "download",
+  "help",
+  "support",
+  "health",
+  "healthcare",
+  "education",
+  "academy",
+  "fitness",
+  "beauty",
+  "fashion",
+  "style",
+  "cafe",
+  "restaurant",
+  "travel",
+  "hotels",
+  "nyc",
+  "london",
+  "paris",
+  "berlin",
+  "agency",
+  "center",
+  "city",
+  "email",
+  "fund",
+  "gold",
+  "plus",
 ]);
 
-const VERISIGN_API   = 'https://sugapi.verisign-grs.com/ns-api/2.0/bulk-check';
+const VERISIGN_API = 'https://sugapi.verisign-grs.com/ns-api/2.0/bulk-check';
 const BULKSEARCH_API = 'https://api.bulksearch.domains/exists';
 
 const RDAP_SERVERS = {
   com: 'https://rdap.verisign.com/com/v1',
   net: 'https://rdap.verisign.com/net/v1',
   org: 'https://rdap.publicinterestregistry.org/rdap',
-  io:  'https://rdap.nic.io',
-  co:  'https://rdap.nic.co',
-  ai:  'https://rdap.nic.ai',
+  io: 'https://rdap.nic.io',
+  co: 'https://rdap.nic.co',
+  ai: 'https://rdap.nic.ai',
   app: 'https://rdap.nic.google',
   dev: 'https://rdap.nic.google',
-  info:'https://rdap.afilias.net/rdap/info',
+  info: 'https://rdap.afilias.net/rdap/info',
   biz: 'https://rdap.nic.biz',
-  us:  'https://rdap.nic.us',
-  me:  'https://rdap.nic.me',
+  us: 'https://rdap.nic.us',
+  me: 'https://rdap.nic.me',
   xyz: 'https://rdap.nic.xyz',
-  tech:'https://rdap.nic.tech',
-  uk:  'https://rdap.nominet.uk',
-  de:  'https://rdap.denic.de',
+  tech: 'https://rdap.nic.tech',
+  uk: 'https://rdap.nominet.uk',
+  de: 'https://rdap.denic.de',
 };
 const RDAP_BOOTSTRAP = 'https://rdap.org/domain';
-const DOH_URL        = 'https://cloudflare-dns.com/dns-query';
+const DOH_URL = 'https://cloudflare-dns.com/dns-query';
 
 // ═══════════════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════════════
 
 function setCors(res) {
-  res.setHeader('Access-Control-Allow-Origin',  '*');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Content-Type', 'application/json');
@@ -66,22 +162,22 @@ function setCors(res) {
 
 function socialUrl(platform, u) {
   const map = {
-    facebook:`https://facebook.com/${u}`,twitter:`https://twitter.com/${u}`,
-    youtube:`https://youtube.com/@${u}`,pinterest:`https://pinterest.com/${u}`,
-    vimeo:`https://vimeo.com/${u}`,etsy:`https://etsy.com/shop/${u}`,
-    github:`https://github.com/${u}`,flickr:`https://flickr.com/people/${u}`,
-    reddit:`https://reddit.com/user/${u}`,wordpress:`https://${u}.wordpress.com`,
-    soundcloud:`https://soundcloud.com/${u}`,'500px':`https://500px.com/${u}`,
-    behance:`https://behance.net/${u}`,tumblr:`https://${u}.tumblr.com`,
-    myspace:`https://myspace.com/${u}`,meetup:`https://meetup.com/${u}`,
-    dribbble:`https://dribbble.com/${u}`,aboutme:`https://about.me/${u}`,
-    lastfm:`https://last.fm/user/${u}`,cashapp:`https://cash.app/$${u}`,
-    venmo:`https://venmo.com/${u}`,kinja:`https://${u}.kinja.com`,
-    mix:`https://mix.com/${u}`,deviantart:`https://${u}.deviantart.com`,
-    livejournal:`https://${u}.livejournal.com`,ifttt:`https://ifttt.com/p/${u}`,
-    disqus:`https://disqus.com/by/${u}`,twitch:`https://twitch.tv/${u}`,
-    ello:`https://ello.co/${u}`,blogger:`https://${u}.blogspot.com`,
-    snapchat:`https://snapchat.com/add/${u}`,
+    facebook: `https://facebook.com/${u}`, twitter: `https://twitter.com/${u}`,
+    youtube: `https://youtube.com/@${u}`, pinterest: `https://pinterest.com/${u}`,
+    vimeo: `https://vimeo.com/${u}`, etsy: `https://etsy.com/shop/${u}`,
+    github: `https://github.com/${u}`, flickr: `https://flickr.com/people/${u}`,
+    reddit: `https://reddit.com/user/${u}`, wordpress: `https://${u}.wordpress.com`,
+    soundcloud: `https://soundcloud.com/${u}`, '500px': `https://500px.com/${u}`,
+    behance: `https://behance.net/${u}`, tumblr: `https://${u}.tumblr.com`,
+    myspace: `https://myspace.com/${u}`, meetup: `https://meetup.com/${u}`,
+    dribbble: `https://dribbble.com/${u}`, aboutme: `https://about.me/${u}`,
+    lastfm: `https://last.fm/user/${u}`, cashapp: `https://cash.app/$${u}`,
+    venmo: `https://venmo.com/${u}`, kinja: `https://${u}.kinja.com`,
+    mix: `https://mix.com/${u}`, deviantart: `https://${u}.deviantart.com`,
+    livejournal: `https://${u}.livejournal.com`, ifttt: `https://ifttt.com/p/${u}`,
+    disqus: `https://disqus.com/by/${u}`, twitch: `https://twitch.tv/${u}`,
+    ello: `https://ello.co/${u}`, blogger: `https://${u}.blogspot.com`,
+    snapchat: `https://snapchat.com/add/${u}`,
   };
   return map[platform] || null;
 }
@@ -141,7 +237,7 @@ async function rdapAvailabilityCheck(domain, tld) {
       const j = await r.json();
       if (j && j.handle) return 'taken';
     }
-  } catch (_) {}
+  } catch (_) { }
 
   try {
     const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=NS`, {
@@ -151,7 +247,7 @@ async function rdapAvailabilityCheck(domain, tld) {
       const j = await r.json();
       if (j.Status === 0 && j.Answer && j.Answer.length > 0) return 'taken';
     }
-  } catch (_) {}
+  } catch (_) { }
 
   try {
     const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=A`, {
@@ -161,7 +257,7 @@ async function rdapAvailabilityCheck(domain, tld) {
       const j = await r.json();
       if (j.Status === 0 && j.Answer && j.Answer.length > 0) return 'taken';
     }
-  } catch (_) {}
+  } catch (_) { }
 
   return 'unknown';
 }
@@ -199,8 +295,8 @@ async function checkDomainsAvailability(q, tlds) {
   const results = {};
 
   // Partition TLDs by engine
-  const verisignTlds   = tlds.filter(t => VERISIGN_TLDS.has(t));
-  const rdapOnlyTlds   = tlds.filter(t => !VERISIGN_TLDS.has(t) && PRIMARY_API_TLDS.has(t));
+  const verisignTlds = tlds.filter(t => VERISIGN_TLDS.has(t));
+  const rdapOnlyTlds = tlds.filter(t => !VERISIGN_TLDS.has(t) && PRIMARY_API_TLDS.has(t));
   const bulksearchTlds = tlds.filter(t => !PRIMARY_API_TLDS.has(t));
 
   const failedVerisignTlds = new Set(verisignTlds);
@@ -226,9 +322,9 @@ async function checkDomainsAvailability(q, tlds) {
     await Promise.allSettled(rdapTlds.map(async tld => {
       const domain = `${q}.${tld}`;
       const status = await rdapAvailabilityCheck(domain, tld);
-      if (status === 'available')  results[tld] = { available: true,  status: 'available', engine: 'rdap' };
-      else if (status === 'taken') results[tld] = { available: false, status: 'taken',     engine: 'rdap' };
-      else                         results[tld] = { available: null,  status: 'unknown',   engine: 'rdap' };
+      if (status === 'available') results[tld] = { available: true, status: 'available', engine: 'rdap' };
+      else if (status === 'taken') results[tld] = { available: false, status: 'taken', engine: 'rdap' };
+      else results[tld] = { available: null, status: 'unknown', engine: 'rdap' };
     }));
   }
 
@@ -240,9 +336,9 @@ async function checkDomainsAvailability(q, tlds) {
       for (const tld of bulksearchTlds) {
         const domain = `${q}.${tld}`;
         const taken = data[domain] ?? data[domain.toLowerCase()];
-        if (taken === true)       results[tld] = { available: false, status: 'taken',     engine: 'bulksearch' };
-        else if (taken === false) results[tld] = { available: true,  status: 'available', engine: 'bulksearch' };
-        else                      results[tld] = { available: null,  status: 'unknown',   engine: 'bulksearch' };
+        if (taken === true) results[tld] = { available: false, status: 'taken', engine: 'bulksearch' };
+        else if (taken === false) results[tld] = { available: true, status: 'available', engine: 'bulksearch' };
+        else results[tld] = { available: null, status: 'unknown', engine: 'bulksearch' };
       }
     } catch (_) {
       // BulkSearch failed — mark as unknown (never show a failed state)
@@ -289,8 +385,8 @@ async function callUpstream(q, keys) {
 function normalise(raw, q) {
   const available = [], unavailable = [], all = [];
   for (const [slug, data] of Object.entries(raw)) {
-    const isDomain  = DOMAIN_TLDS.includes(slug);
-    const isSocial  = SOCIAL_PLATFORMS.includes(slug);
+    const isDomain = DOMAIN_TLDS.includes(slug);
+    const isSocial = SOCIAL_PLATFORMS.includes(slug);
     let isAvail = null, profileUrl = null;
     if (typeof data === 'boolean') isAvail = data;
     else if (data && typeof data === 'object') { isAvail = data.available ?? data.status ?? null; profileUrl = data.url || null; }
