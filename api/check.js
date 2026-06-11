@@ -1,14 +1,61 @@
 /**
  * /api/check.js
- * Domain + Social Media Availability — namecheckerr.com upstream
+ * Domain + Social Media Availability — Dual-Check Engine
+ * Primary:  Verisign sugapi (com/net/org/vip)
+ * RDAP:     RDAP/DNS for known TLDs (io, co, ai, app, dev, xyz, me, tech…)
+ * Fallback: BulkSearch API (api.bulksearch.domains) for exotic TLDs
+ *
  * GET  ?q=mybrand&type=all
  * POST { "q": "mybrand", "type": "domains|social|all", "tlds": "com,io" }
  */
+
+// ═══════════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════════
 
 const DOMAIN_TLDS = ['com','net','org','io','co','ai','app','dev','us','cc','me','biz','info','de','at','eu','ru','jp','mobi','in','xyz','uk','ca','ws','ee','do','cn','tech'];
 const SOCIAL_PLATFORMS = ['facebook','twitter','youtube','pinterest','vimeo','etsy','github','flickr','reddit','wordpress','soundcloud','500px','behance','tumblr','myspace','meetup','dribbble','aboutme','lastfm','cashapp','venmo','kinja','mix','deviantart','livejournal','ifttt','disqus','twitch','ello','blogger','snapchat'];
 const NC_API = 'https://namecheckerr.com/api/check-name';
 const NC_KEY = 'arr12';
+
+// TLDs supported by Verisign bulk-check
+const VERISIGN_TLDS = new Set(['com', 'net', 'org', 'vip']);
+
+// Extended set of TLDs that work reliably via RDAP
+const PRIMARY_API_TLDS = new Set([
+  'com', 'net', 'org', 'io', 'co', 'ai', 'app', 'dev',
+  'xyz', 'me', 'live', 'tech', 'shop', 'store', 'online',
+  'site', 'cloud', 'info', 'biz', 'us', 'uk', 'de',
+  'vip', 'cc', 'at', 'eu', 'ru', 'jp', 'in', 'mobi', 'do', 'cn', 'ee', 'ca', 'ws',
+]);
+
+const VERISIGN_API   = 'https://sugapi.verisign-grs.com/ns-api/2.0/bulk-check';
+const BULKSEARCH_API = 'https://api.bulksearch.domains/exists';
+
+const RDAP_SERVERS = {
+  com: 'https://rdap.verisign.com/com/v1',
+  net: 'https://rdap.verisign.com/net/v1',
+  org: 'https://rdap.publicinterestregistry.org/rdap',
+  io:  'https://rdap.nic.io',
+  co:  'https://rdap.nic.co',
+  ai:  'https://rdap.nic.ai',
+  app: 'https://rdap.nic.google',
+  dev: 'https://rdap.nic.google',
+  info:'https://rdap.afilias.net/rdap/info',
+  biz: 'https://rdap.nic.biz',
+  us:  'https://rdap.nic.us',
+  me:  'https://rdap.nic.me',
+  xyz: 'https://rdap.nic.xyz',
+  tech:'https://rdap.nic.tech',
+  uk:  'https://rdap.nominet.uk',
+  de:  'https://rdap.denic.de',
+};
+const RDAP_BOOTSTRAP = 'https://rdap.org/domain';
+const DOH_URL        = 'https://cloudflare-dns.com/dns-query';
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin',  '*');
@@ -18,27 +65,28 @@ function setCors(res) {
 }
 
 function socialUrl(platform, u) {
-  const map={facebook:`https://facebook.com/${u}`,twitter:`https://twitter.com/${u}`,youtube:`https://youtube.com/@${u}`,pinterest:`https://pinterest.com/${u}`,vimeo:`https://vimeo.com/${u}`,etsy:`https://etsy.com/shop/${u}`,github:`https://github.com/${u}`,flickr:`https://flickr.com/people/${u}`,reddit:`https://reddit.com/user/${u}`,wordpress:`https://${u}.wordpress.com`,soundcloud:`https://soundcloud.com/${u}`,'500px':`https://500px.com/${u}`,behance:`https://behance.net/${u}`,tumblr:`https://${u}.tumblr.com`,myspace:`https://myspace.com/${u}`,meetup:`https://meetup.com/${u}`,dribbble:`https://dribbble.com/${u}`,aboutme:`https://about.me/${u}`,lastfm:`https://last.fm/user/${u}`,cashapp:`https://cash.app/$${u}`,venmo:`https://venmo.com/${u}`,kinja:`https://${u}.kinja.com`,mix:`https://mix.com/${u}`,deviantart:`https://${u}.deviantart.com`,livejournal:`https://${u}.livejournal.com`,ifttt:`https://ifttt.com/p/${u}`,disqus:`https://disqus.com/by/${u}`,twitch:`https://twitch.tv/${u}`,ello:`https://ello.co/${u}`,blogger:`https://${u}.blogspot.com`,snapchat:`https://snapchat.com/add/${u}`};
-  return map[platform]||null;
+  const map = {
+    facebook:`https://facebook.com/${u}`,twitter:`https://twitter.com/${u}`,
+    youtube:`https://youtube.com/@${u}`,pinterest:`https://pinterest.com/${u}`,
+    vimeo:`https://vimeo.com/${u}`,etsy:`https://etsy.com/shop/${u}`,
+    github:`https://github.com/${u}`,flickr:`https://flickr.com/people/${u}`,
+    reddit:`https://reddit.com/user/${u}`,wordpress:`https://${u}.wordpress.com`,
+    soundcloud:`https://soundcloud.com/${u}`,'500px':`https://500px.com/${u}`,
+    behance:`https://behance.net/${u}`,tumblr:`https://${u}.tumblr.com`,
+    myspace:`https://myspace.com/${u}`,meetup:`https://meetup.com/${u}`,
+    dribbble:`https://dribbble.com/${u}`,aboutme:`https://about.me/${u}`,
+    lastfm:`https://last.fm/user/${u}`,cashapp:`https://cash.app/$${u}`,
+    venmo:`https://venmo.com/${u}`,kinja:`https://${u}.kinja.com`,
+    mix:`https://mix.com/${u}`,deviantart:`https://${u}.deviantart.com`,
+    livejournal:`https://${u}.livejournal.com`,ifttt:`https://ifttt.com/p/${u}`,
+    disqus:`https://disqus.com/by/${u}`,twitch:`https://twitch.tv/${u}`,
+    ello:`https://ello.co/${u}`,blogger:`https://${u}.blogspot.com`,
+    snapchat:`https://snapchat.com/add/${u}`,
+  };
+  return map[platform] || null;
 }
 
-function cap(s) { return s.charAt(0).toUpperCase()+s.slice(1); }
-
-const VERISIGN_API = 'https://sugapi.verisign-grs.com/ns-api/2.0/bulk-check';
-const VERISIGN_TLDS = ['com', 'net', 'org', 'vip'];
-
-const RDAP_SERVERS = {
-  com:'https://rdap.verisign.com/com/v1',     net:'https://rdap.verisign.com/net/v1',
-  org:'https://rdap.publicinterestregistry.org/rdap', io:'https://rdap.nic.io',
-  co:'https://rdap.nic.co',                   ai:'https://rdap.nic.ai',
-  app:'https://rdap.nic.google',              dev:'https://rdap.nic.google',
-  info:'https://rdap.afilias.net/rdap/info',  biz:'https://rdap.nic.biz',
-  us:'https://rdap.nic.us',                   me:'https://rdap.nic.me',
-  xyz:'https://rdap.nic.xyz',                 tech:'https://rdap.nic.tech',
-  uk:'https://rdap.nominet.uk',               de:'https://rdap.denic.de',
-};
-const RDAP_BOOTSTRAP = 'https://rdap.org/domain';
-const DOH_URL = 'https://cloudflare-dns.com/dns-query';
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 async function safeFetch(url, options = {}, { timeout = 8000, retries = 1 } = {}) {
   let lastErr;
@@ -57,49 +105,9 @@ async function safeFetch(url, options = {}, { timeout = 8000, retries = 1 } = {}
   throw lastErr || new Error(`Failed to fetch ${url}`);
 }
 
-async function rdapAvailabilityCheck(domain, tld) {
-  const server = RDAP_SERVERS[tld] || RDAP_BOOTSTRAP;
-  const url = `${server}/domain/${domain.toUpperCase()}`;
-  try {
-    const r = await safeFetch(url, {
-      headers: { Accept: 'application/rdap+json,application/json,*/*', 'User-Agent': 'DomainKit/2.0' }
-    }, { timeout: 4000, retries: 1 });
-    
-    if (r.status === 404) return 'available';
-    if (r.ok) {
-      const j = await r.json();
-      if (j && j.handle) return 'taken';
-    }
-  } catch (_) {}
-
-  // Fallback to DNS records check (NS type) via Cloudflare DoH
-  try {
-    const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=NS`, {
-      headers: { Accept: 'application/dns-json' }
-    }, { timeout: 3000, retries: 1 });
-    if (r.ok) {
-      const j = await r.json();
-      if (j.Status === 0 && (j.Answer && j.Answer.length > 0)) {
-        return 'taken';
-      }
-    }
-  } catch (_) {}
-
-  // Fallback to DNS records check (A type) via Cloudflare DoH
-  try {
-    const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=A`, {
-      headers: { Accept: 'application/dns-json' }
-    }, { timeout: 3000, retries: 1 });
-    if (r.ok) {
-      const j = await r.json();
-      if (j.Status === 0 && (j.Answer && j.Answer.length > 0)) {
-        return 'taken';
-      }
-    }
-  } catch (_) {}
-
-  return 'unknown';
-}
+// ═══════════════════════════════════════════════════════════════
+// ENGINE 1 — VERISIGN
+// ═══════════════════════════════════════════════════════════════
 
 async function verisignBulk(names, tlds) {
   const params = new URLSearchParams({ names: names.join(','), tlds: tlds.join(','), 'include-registered': 'true' });
@@ -116,62 +124,151 @@ async function verisignBulk(names, tlds) {
   return res.json();
 }
 
+// ═══════════════════════════════════════════════════════════════
+// ENGINE 2 — RDAP + DNS
+// ═══════════════════════════════════════════════════════════════
+
+async function rdapAvailabilityCheck(domain, tld) {
+  const server = RDAP_SERVERS[tld] || RDAP_BOOTSTRAP;
+  const url = `${server}/domain/${domain.toUpperCase()}`;
+  try {
+    const r = await safeFetch(url, {
+      headers: { Accept: 'application/rdap+json,application/json,*/*', 'User-Agent': 'DomainKit/2.0' }
+    }, { timeout: 4000, retries: 1 });
+
+    if (r.status === 404) return 'available';
+    if (r.ok) {
+      const j = await r.json();
+      if (j && j.handle) return 'taken';
+    }
+  } catch (_) {}
+
+  try {
+    const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=NS`, {
+      headers: { Accept: 'application/dns-json' }
+    }, { timeout: 3000, retries: 1 });
+    if (r.ok) {
+      const j = await r.json();
+      if (j.Status === 0 && j.Answer && j.Answer.length > 0) return 'taken';
+    }
+  } catch (_) {}
+
+  try {
+    const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=A`, {
+      headers: { Accept: 'application/dns-json' }
+    }, { timeout: 3000, retries: 1 });
+    if (r.ok) {
+      const j = await r.json();
+      if (j.Status === 0 && j.Answer && j.Answer.length > 0) return 'taken';
+    }
+  } catch (_) {}
+
+  return 'unknown';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ENGINE 3 — BULKSEARCH FALLBACK
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Checks a list of full domain names via BulkSearch API.
+ * Returns: { "example.tv": true/false }   (true = domain exists/taken)
+ */
+async function bulkSearchCheck(domains) {
+  const body = `domains=${encodeURIComponent(JSON.stringify(domains))}`;
+  const res = await safeFetch(BULKSEARCH_API, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      'Accept': 'application/json, */*',
+      'Origin': 'https://bulksearch.domains',
+      'Referer': 'https://bulksearch.domains/',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36',
+    },
+    body,
+  }, { timeout: 12000, retries: 2 });
+  if (!res.ok) throw new Error(`BulkSearch ${res.status}`);
+  return res.json();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DOMAIN AVAILABILITY CHECKER (routes to correct engine)
+// ═══════════════════════════════════════════════════════════════
+
 async function checkDomainsAvailability(q, tlds) {
-  const verisignQueryTlds = tlds.filter(t => VERISIGN_TLDS.includes(t));
-  const directRdapTlds = tlds.filter(t => !VERISIGN_TLDS.includes(t));
-
   const results = {};
-  const failedVerisignTlds = new Set(verisignQueryTlds);
 
-  // 1. Check Verisign-supported TLDs
-  if (verisignQueryTlds.length > 0) {
+  // Partition TLDs by engine
+  const verisignTlds   = tlds.filter(t => VERISIGN_TLDS.has(t));
+  const rdapOnlyTlds   = tlds.filter(t => !VERISIGN_TLDS.has(t) && PRIMARY_API_TLDS.has(t));
+  const bulksearchTlds = tlds.filter(t => !PRIMARY_API_TLDS.has(t));
+
+  const failedVerisignTlds = new Set(verisignTlds);
+
+  // 1. Verisign
+  if (verisignTlds.length > 0) {
     try {
-      const data = await verisignBulk([q], verisignQueryTlds);
+      const data = await verisignBulk([q], verisignTlds);
       if (data && Array.isArray(data.results)) {
         for (const item of data.results) {
           const tld = item.name.split('.').pop().toLowerCase();
           failedVerisignTlds.delete(tld);
           const isAvail = item.availability === 'available';
-          results[tld] = {
-            available: isAvail,
-            status: isAvail ? 'available' : 'taken'
-          };
+          results[tld] = { available: isAvail, status: isAvail ? 'available' : 'taken', engine: 'verisign' };
         }
       }
-    } catch (err) {
-      // Keep failedVerisignTlds to trigger fallback
-    }
+    } catch (_) { /* keep failedVerisignTlds set to trigger RDAP fallback */ }
   }
 
-  // 2. Fallback to RDAP for unsupported TLDs and Verisign failures
-  const rdapCheckTlds = [...new Set([...directRdapTlds, ...failedVerisignTlds])];
-  if (rdapCheckTlds.length > 0) {
-    const promises = rdapCheckTlds.map(async tld => {
+  // 2. RDAP for known TLDs + failed Verisign
+  const rdapTlds = [...new Set([...rdapOnlyTlds, ...failedVerisignTlds])];
+  if (rdapTlds.length > 0) {
+    await Promise.allSettled(rdapTlds.map(async tld => {
       const domain = `${q}.${tld}`;
       const status = await rdapAvailabilityCheck(domain, tld);
-      if (status === 'available') {
-        results[tld] = { available: true, status: 'available' };
-      } else if (status === 'taken') {
-        results[tld] = { available: false, status: 'taken' };
-      } else {
-        results[tld] = { available: null, status: 'unknown' };
-      }
-    });
-    await Promise.allSettled(promises);
+      if (status === 'available')  results[tld] = { available: true,  status: 'available', engine: 'rdap' };
+      else if (status === 'taken') results[tld] = { available: false, status: 'taken',     engine: 'rdap' };
+      else                         results[tld] = { available: null,  status: 'unknown',   engine: 'rdap' };
+    }));
   }
 
-  // 3. Ensure all requested TLDs have a result
-  for (const tld of tlds) {
-    if (!results[tld]) {
-      results[tld] = { available: null, status: 'unknown' };
+  // 3. BulkSearch for exotic/unsupported TLDs
+  if (bulksearchTlds.length > 0) {
+    const domains = bulksearchTlds.map(t => `${q}.${t}`);
+    try {
+      const data = await bulkSearchCheck(domains);
+      for (const tld of bulksearchTlds) {
+        const domain = `${q}.${tld}`;
+        const taken = data[domain] ?? data[domain.toLowerCase()];
+        if (taken === true)       results[tld] = { available: false, status: 'taken',     engine: 'bulksearch' };
+        else if (taken === false) results[tld] = { available: true,  status: 'available', engine: 'bulksearch' };
+        else                      results[tld] = { available: null,  status: 'unknown',   engine: 'bulksearch' };
+      }
+    } catch (_) {
+      // BulkSearch failed — mark as unknown (never show a failed state)
+      for (const tld of bulksearchTlds) {
+        results[tld] = { available: null, status: 'unknown', engine: 'bulksearch' };
+      }
     }
+  }
+
+  // 4. Ensure all TLDs have a result
+  for (const tld of tlds) {
+    if (!results[tld]) results[tld] = { available: null, status: 'unknown', engine: 'none' };
   }
 
   return results;
 }
 
+// ═══════════════════════════════════════════════════════════════
+// SOCIAL CHECK (namecheckerr)
+// ═══════════════════════════════════════════════════════════════
+
 async function callUpstream(q, keys) {
-  const p=new URLSearchParams(); p.append('q',q); keys.forEach(k=>p.append('s[]',k)); p.append('key',NC_KEY);
+  const p = new URLSearchParams();
+  p.append('q', q);
+  keys.forEach(k => p.append('s[]', k));
+  p.append('key', NC_KEY);
   const r = await safeFetch(NC_API, {
     method: 'POST',
     headers: {
@@ -182,7 +279,7 @@ async function callUpstream(q, keys) {
       'X-Requested-With': 'XMLHttpRequest',
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36'
     },
-    body: p.toString()
+    body: p.toString(),
   }, { timeout: 12000, retries: 1 });
 
   if (!r.ok) throw new Error(`NC ${r.status}`);
@@ -190,60 +287,67 @@ async function callUpstream(q, keys) {
 }
 
 function normalise(raw, q) {
-  const available=[],unavailable=[],all=[];
-  for (const [slug,data] of Object.entries(raw)) {
-    const isDomain=DOMAIN_TLDS.includes(slug), isSocial=SOCIAL_PLATFORMS.includes(slug);
-    let isAvail=null, profileUrl=null;
-    if (typeof data==='boolean') isAvail=data;
-    else if (data&&typeof data==='object') { isAvail=data.available??data.status??null; profileUrl=data.url||null; }
-    if (isSocial) profileUrl=profileUrl||socialUrl(slug,q);
-    const e={
-      slug, type:isDomain&&!isSocial?'domain':'social',
-      name:isDomain&&!isSocial?`.${slug}`:cap(slug),
-      full:isDomain&&!isSocial?`${q}.${slug}`:`${slug}.com/${q}`,
-      available:isAvail, status:isAvail===true?'available':isAvail===false?'taken':'unknown',
-      profile_url:profileUrl,
-      register_url:isDomain&&!isSocial&&isAvail===true?`https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(`${q}.${slug}`)}`  :null,
+  const available = [], unavailable = [], all = [];
+  for (const [slug, data] of Object.entries(raw)) {
+    const isDomain  = DOMAIN_TLDS.includes(slug);
+    const isSocial  = SOCIAL_PLATFORMS.includes(slug);
+    let isAvail = null, profileUrl = null;
+    if (typeof data === 'boolean') isAvail = data;
+    else if (data && typeof data === 'object') { isAvail = data.available ?? data.status ?? null; profileUrl = data.url || null; }
+    if (isSocial) profileUrl = profileUrl || socialUrl(slug, q);
+    const e = {
+      slug, type: isDomain && !isSocial ? 'domain' : 'social',
+      name: isDomain && !isSocial ? `.${slug}` : cap(slug),
+      full: isDomain && !isSocial ? `${q}.${slug}` : `${slug}.com/${q}`,
+      available: isAvail,
+      status: isAvail === true ? 'available' : isAvail === false ? 'taken' : 'unknown',
+      profile_url: profileUrl,
+      register_url: isDomain && !isSocial && isAvail === true
+        ? `https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(`${q}.${slug}`)}`
+        : null,
     };
     all.push(e);
-    if (isAvail===true) available.push(e); else if (isAvail===false) unavailable.push(e);
+    if (isAvail === true) available.push(e); else if (isAvail === false) unavailable.push(e);
   }
-  return {available,unavailable,unknown:all.filter(x=>x.available===null),all};
+  return { available, unavailable, unknown: all.filter(x => x.available === null), all };
 }
+
+// ═══════════════════════════════════════════════════════════════
+// HANDLER
+// ═══════════════════════════════════════════════════════════════
 
 export default async function handler(req, res) {
   setCors(res);
-  if (req.method==='OPTIONS') return res.status(204).end();
-  
+  if (req.method === 'OPTIONS') return res.status(204).end();
+
   let q, type, customTlds, debug = false;
-  if (req.method==='GET') {
+  if (req.method === 'GET') {
     q = req.query.q || '';
     type = req.query.type || 'all';
     customTlds = req.query.tlds || '';
     debug = req.query.debug === '1' || req.query.debug === 'true';
-  } else if (req.method==='POST') {
+  } else if (req.method === 'POST') {
     const b = req.body || {};
     q = b.q || '';
     type = b.type || 'all';
     customTlds = b.tlds || '';
     debug = b.debug === '1' || b.debug === 'true';
   } else {
-    return res.status(405).json({success:false,error:'Method not allowed'});
+    return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
-  
-  q = q.trim().toLowerCase().replace(/[^a-z0-9\-]/g,'');
+
+  q = q.trim().toLowerCase().replace(/[^a-z0-9\-]/g, '');
   if (!q || q.length < 2) {
     return res.status(400).json({
       success: false,
       error: 'Provide a brand name ≥2 chars.',
-      usage: 'GET /api/check?q=mybrand&type=all'
+      usage: 'GET /api/check?q=mybrand&type=all',
     });
   }
-  
-  const tlds = customTlds ? customTlds.split(',').map(t=>t.trim().replace(/^\./,'')) : DOMAIN_TLDS;
+
+  const tlds = customTlds ? customTlds.split(',').map(t => t.trim().replace(/^\./, '')) : DOMAIN_TLDS;
   const socials = SOCIAL_PLATFORMS;
   const t0 = Date.now();
-  
   const promises = [];
   const timings = {};
 
@@ -263,6 +367,7 @@ export default async function handler(req, res) {
         })
     );
   }
+
   if (type === 'all' || type === 'social') {
     const tStart = Date.now();
     promises.push(
@@ -282,7 +387,7 @@ export default async function handler(req, res) {
 
   const settled = await Promise.allSettled(promises);
   let raw = {}, errs = [];
-  
+
   for (const r of settled) {
     if (r.status === 'fulfilled') {
       const { _t, ...d } = r.value;
@@ -299,7 +404,7 @@ export default async function handler(req, res) {
   }
 
   const { available, unavailable, unknown, all } = normalise(raw, q);
-  
+
   const payload = {
     success: true,
     query: q,
@@ -314,23 +419,28 @@ export default async function handler(req, res) {
       domains: {
         total: all.filter(x => x.type === 'domain').length,
         available: available.filter(x => x.type === 'domain').length,
-        unavailable: unavailable.filter(x => x.type === 'domain').length
+        unavailable: unavailable.filter(x => x.type === 'domain').length,
       },
       social: {
         total: all.filter(x => x.type === 'social').length,
         available: available.filter(x => x.type === 'social').length,
-        unavailable: unavailable.filter(x => x.type === 'social').length
-      }
+        unavailable: unavailable.filter(x => x.type === 'social').length,
+      },
     },
     results: { available, unavailable, unknown, all },
     modules: { brand: errs.length ? 'unavailable' : 'ok' },
-    errors: errs.length ? errs : undefined
+    errors: errs.length ? errs : undefined,
   };
 
   if (debug) {
     payload._debug = {
       elapsed_ms: Date.now() - t0,
-      modules: timings
+      modules: timings,
+      engines: {
+        verisign_tlds: [...VERISIGN_TLDS],
+        primary_api_tlds: [...PRIMARY_API_TLDS],
+        bulksearch_api: BULKSEARCH_API,
+      },
     };
   }
 

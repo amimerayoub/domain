@@ -37,6 +37,7 @@ const RDAP_SERVERS = {
 const RDAP_BOOTSTRAP    = 'https://rdap.org/domain';
 const DOH_URL           = 'https://cloudflare-dns.com/dns-query';
 const VERISIGN_BULK     = 'https://sugapi.verisign-grs.com/ns-api/2.0/bulk-check';
+const BULKSEARCH_API    = 'https://api.bulksearch.domains/exists';
 const NC_API            = 'https://namecheckerr.com/api/check-name';
 const NC_KEY            = 'arr12';
 const RANKIFYER_EMBED   = 'https://rankifyer.com/free-seo-tools/embed';
@@ -44,8 +45,12 @@ const RANKIFYER_TOOL_ID = 'high-quality-backlinks';
 const RANKIFYER_R       = '423b01';
 const HACKERTARGET_API  = 'https://api.hackertarget.com/hostsearch/?q=';
 
-const TLD_VARIANTS  = ['com','net','org','io','co','ai'];
-const VERISIGN_TLDS = ['com','net','org','vip'];
+const TLD_VARIANTS  = ['com','net','org','io','co','ai','app','dev','xyz','me','tech','vip'];
+const VERISIGN_TLDS = new Set(['com','net','org','vip']);
+const PRIMARY_API_TLDS = new Set([
+  'com','net','org','io','co','ai','app','dev','xyz','me','tech','vip',
+  'live','shop','store','online','site','cloud','info','biz','us','uk','de',
+]);
 const SOCIAL_KEYS   = ['facebook','twitter','instagram','youtube','github','linkedin','tiktok','reddit','pinterest','snapchat','twitch'];
 const DNS_REC_TYPES = ['A','AAAA','MX','TXT','CNAME','NS','SOA'];
 
@@ -283,17 +288,39 @@ async function fetchDns(domain) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// MODULE 3 — TLD AVAILABILITY (Verisign Bulk)
+// MODULE 3 — TLD AVAILABILITY (Dual-Check: Verisign + RDAP + BulkSearch)
 // ═══════════════════════════════════════════════════════════════
 
+/**
+ * BulkSearch fallback for exotic/unsupported TLDs.
+ * Returns: { "example.tv": true/false }  (true = exists/taken)
+ */
+async function bulkSearchCheck(domains) {
+  const body = `domains=${encodeURIComponent(JSON.stringify(domains))}`;
+  const res = await safeFetch(BULKSEARCH_API, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      'Accept': 'application/json, */*',
+      'Origin': 'https://bulksearch.domains',
+      'Referer': 'https://bulksearch.domains/',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36',
+    },
+    body,
+  }, { timeout: 12000, retries: 2 });
+  if (!res.ok) throw new Error(`BulkSearch ${res.status}`);
+  return res.json();
+}
+
 async function fetchTlds(baseName) {
-  const verisignQueryTlds = TLD_VARIANTS.filter(tld => VERISIGN_TLDS.includes(tld));
-  const directRdapTlds = TLD_VARIANTS.filter(tld => !VERISIGN_TLDS.includes(tld));
+  const verisignQueryTlds = TLD_VARIANTS.filter(tld => VERISIGN_TLDS.has(tld));
+  const rdapOnlyTlds      = TLD_VARIANTS.filter(tld => !VERISIGN_TLDS.has(tld) && PRIMARY_API_TLDS.has(tld));
+  const bulksearchTlds    = TLD_VARIANTS.filter(tld => !PRIMARY_API_TLDS.has(tld));
 
   const out = {};
   const failedVerisignTlds = new Set(verisignQueryTlds);
 
-  // 1. Fetch Verisign TLDs
+  // 1. Verisign bulk check
   if (verisignQueryTlds.length > 0) {
     try {
       const params = new URLSearchParams({
@@ -318,55 +345,54 @@ async function fetchTlds(baseName) {
             status: avail ? 'available' : 'taken',
             available: avail,
             domain: item.name.toLowerCase(),
+            engine: 'verisign',
             register_url: avail ? `https://www.namecheap.com/domains/registration/results/?domain=${item.name.toLowerCase()}` : null,
           };
         }
       }
-    } catch (err) {
-      // Keep failedVerisignTlds populated to trigger fallback
+    } catch (_) {
+      // failedVerisignTlds remains set — RDAP will retry
     }
   }
 
-  // 2. Fetch RDAP TLDs (both direct and failed Verisign fallbacks)
-  const rdapQueryTlds = [...new Set([...directRdapTlds, ...failedVerisignTlds])];
-  const fallbackPromises = rdapQueryTlds.map(async tld => {
+  // 2. RDAP/DNS for known TLDs + failed Verisign
+  const rdapQueryTlds = [...new Set([...rdapOnlyTlds, ...failedVerisignTlds])];
+  await Promise.allSettled(rdapQueryTlds.map(async tld => {
     const domain = `${baseName}.${tld}`;
     const status = await rdapAvailabilityCheck(domain, tld);
     if (status === 'available') {
-      out[tld] = {
-        status: 'available',
-        available: true,
-        domain,
-        register_url: `https://www.namecheap.com/domains/registration/results/?domain=${domain}`
-      };
+      out[tld] = { status: 'available', available: true, domain, engine: 'rdap', register_url: `https://www.namecheap.com/domains/registration/results/?domain=${domain}` };
     } else if (status === 'taken') {
-      out[tld] = {
-        status: 'taken',
-        available: false,
-        domain,
-        register_url: null
-      };
+      out[tld] = { status: 'taken', available: false, domain, engine: 'rdap', register_url: null };
     } else {
-      out[tld] = {
-        status: 'unknown',
-        available: null,
-        domain,
-        register_url: null
-      };
+      out[tld] = { status: 'unknown', available: null, domain, engine: 'rdap', register_url: null };
     }
-  });
-  
-  await Promise.allSettled(fallbackPromises);
-  
-  // Fill any missing TLDs with 'unknown'
+  }));
+
+  // 3. BulkSearch for exotic/unsupported TLDs
+  if (bulksearchTlds.length > 0) {
+    const domains = bulksearchTlds.map(t => `${baseName}.${t}`);
+    try {
+      const data = await bulkSearchCheck(domains);
+      for (const tld of bulksearchTlds) {
+        const domain = `${baseName}.${tld}`;
+        const taken = data[domain] ?? data[domain.toLowerCase()];
+        if (taken === true)       out[tld] = { status: 'taken',     available: false, domain, engine: 'bulksearch', register_url: null };
+        else if (taken === false) out[tld] = { status: 'available', available: true,  domain, engine: 'bulksearch', register_url: `https://www.namecheap.com/domains/registration/results/?domain=${domain}` };
+        else                      out[tld] = { status: 'unknown',   available: null,  domain, engine: 'bulksearch', register_url: null };
+      }
+    } catch (_) {
+      for (const tld of bulksearchTlds) {
+        const domain = `${baseName}.${tld}`;
+        out[tld] = { status: 'unknown', available: null, domain, engine: 'bulksearch', register_url: null };
+      }
+    }
+  }
+
+  // 4. Fill any missing TLDs with 'unknown'
   for (const tld of TLD_VARIANTS) {
     if (!out[tld]) {
-      out[tld] = {
-        status: 'unknown',
-        available: null,
-        domain: `${baseName}.${tld}`,
-        register_url: null,
-      };
+      out[tld] = { status: 'unknown', available: null, domain: `${baseName}.${tld}`, engine: 'none', register_url: null };
     }
   }
 
