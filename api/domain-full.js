@@ -45,6 +45,7 @@ const RANKIFYER_R       = '423b01';
 const HACKERTARGET_API  = 'https://api.hackertarget.com/hostsearch/?q=';
 
 const TLD_VARIANTS  = ['com','net','org','io','co','ai'];
+const VERISIGN_TLDS = ['com','net'];
 const SOCIAL_KEYS   = ['facebook','twitter','instagram','youtube','github','linkedin','tiktok','reddit','pinterest','snapchat','twitch'];
 const DNS_REC_TYPES = ['A','AAAA','MX','TXT','CNAME','NS','SOA'];
 
@@ -95,10 +96,79 @@ function decodeEntities(s) {
           .replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/&quot;/gi,'"');
 }
 
-function safe(label, promise) {
+function safe(label, promise, timings) {
+  const tStart = Date.now();
   return promise
-    .then(data  => ({ ok:true,  label, data }))
-    .catch(err  => ({ ok:false, label, error: err?.message || String(err) }));
+    .then(data  => {
+      if (timings) timings[label] = { ok: true, elapsed_ms: Date.now() - tStart };
+      return { ok:true,  label, data };
+    })
+    .catch(err  => {
+      const errMsg = err?.message || String(err);
+      if (timings) timings[label] = { ok: false, elapsed_ms: Date.now() - tStart, error: errMsg };
+      return { ok:false, label, error: errMsg };
+    });
+}
+
+async function safeFetch(url, options = {}, { timeout = 8000, retries = 1 } = {}) {
+  let lastErr;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const r = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(id);
+      return r;
+    } catch (err) {
+      clearTimeout(id);
+      lastErr = err;
+    }
+  }
+  throw lastErr || new Error(`Failed to fetch ${url}`);
+}
+
+async function rdapAvailabilityCheck(domain, tld) {
+  const server = RDAP_SERVERS[tld] || RDAP_BOOTSTRAP;
+  const url = `${server}/domain/${domain.toUpperCase()}`;
+  try {
+    const r = await safeFetch(url, {
+      headers: { Accept: 'application/rdap+json,application/json,*/*', 'User-Agent': 'DomainKit/2.0' }
+    }, { timeout: 4000, retries: 1 });
+    
+    if (r.status === 404) return 'available';
+    if (r.ok) {
+      const j = await r.json();
+      if (j && j.handle) return 'taken';
+    }
+  } catch (_) {}
+
+  // Fallback to DNS records check (NS type) via Cloudflare DoH
+  try {
+    const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=NS`, {
+      headers: { Accept: 'application/dns-json' }
+    }, { timeout: 3000, retries: 1 });
+    if (r.ok) {
+      const j = await r.json();
+      if (j.Status === 0 && (j.Answer && j.Answer.length > 0)) {
+        return 'taken';
+      }
+    }
+  } catch (_) {}
+
+  // Fallback to DNS records check (A type) via Cloudflare DoH
+  try {
+    const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=A`, {
+      headers: { Accept: 'application/dns-json' }
+    }, { timeout: 3000, retries: 1 });
+    if (r.ok) {
+      const j = await r.json();
+      if (j.Status === 0 && (j.Answer && j.Answer.length > 0)) {
+        return 'taken';
+      }
+    }
+  } catch (_) {}
+
+  return 'unknown';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -113,10 +183,9 @@ async function fetchWhois(domain) {
 
   for (const url of urls) {
     try {
-      const r = await fetch(url, {
-        headers:{ Accept:'application/rdap+json,application/json,*/*', 'User-Agent':'DomainKit/2.0' },
-        signal: AbortSignal.timeout(8000),
-      });
+      const r = await safeFetch(url, {
+        headers:{ Accept:'application/rdap+json,application/json,*/*', 'User-Agent':'DomainKit/2.0' }
+      }, { timeout: 8000, retries: 1 });
       if (r.status===404) return { registered:false };
       if (!r.ok) continue;
       const j = await r.json();
@@ -168,10 +237,9 @@ async function fetchWhois(domain) {
 async function fetchDns(domain) {
   const results = await Promise.all(DNS_REC_TYPES.map(async type => {
     try {
-      const r = await fetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=${type}`,{
-        headers:{ Accept:'application/dns-json' },
-        signal: AbortSignal.timeout(5000),
-      });
+      const r = await safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=${type}`,{
+        headers:{ Accept:'application/dns-json' }
+      }, { timeout: 5000, retries: 1 });
       if (!r.ok) return { type, records:[] };
       const j = await r.json();
       if (j.Status!==0) return { type, records:[] };
@@ -219,32 +287,78 @@ async function fetchDns(domain) {
 // ═══════════════════════════════════════════════════════════════
 
 async function fetchTlds(baseName) {
-  const params = new URLSearchParams({
-    names: baseName,
-    tlds:  TLD_VARIANTS.join(','),
-    'include-registered': 'true',
-  });
-  const r = await fetch(`${VERISIGN_BULK}?${params}`, {
-    headers:{
-      Accept:'application/json', Origin:'https://dnhub.io', Referer:'https://dnhub.io/',
-      'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36',
-    },
-    signal: AbortSignal.timeout(8000),
-  });
-  if (!r.ok) throw new Error(`Verisign ${r.status}`);
-  const j = await r.json();
+  const verisignQueryTlds = TLD_VARIANTS.filter(tld => VERISIGN_TLDS.includes(tld));
+  const fallbackQueryTlds = TLD_VARIANTS.filter(tld => !VERISIGN_TLDS.includes(tld));
 
   const out = {};
-  for (const item of (j.results||[])) {
-    const tld  = item.name.split('.').pop().toLowerCase();
-    const avail= item.availability==='available';
-    out[tld] = {
-      status:       avail ? 'available' : 'taken',
-      available:    avail,
-      domain:       item.name.toLowerCase(),
-      register_url: avail ? `https://www.namecheap.com/domains/registration/results/?domain=${item.name.toLowerCase()}` : null,
-    };
+
+  // 1. Fetch Verisign TLDs
+  if (verisignQueryTlds.length > 0) {
+    try {
+      const params = new URLSearchParams({
+        names: baseName,
+        tlds:  verisignQueryTlds.join(','),
+        'include-registered': 'true',
+      });
+      const r = await safeFetch(`${VERISIGN_BULK}?${params}`, {
+        headers: {
+          Accept: 'application/json', Origin: 'https://dnhub.io', Referer: 'https://dnhub.io/',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36',
+        }
+      }, { timeout: 8000, retries: 1 });
+
+      if (r.ok) {
+        const j = await r.json();
+        for (const item of (j.results || [])) {
+          const tld = item.name.split('.').pop().toLowerCase();
+          const avail = item.availability === 'available';
+          out[tld] = {
+            status: avail ? 'available' : 'taken',
+            available: avail,
+            domain: item.name.toLowerCase(),
+            register_url: avail ? `https://www.namecheap.com/domains/registration/results/?domain=${item.name.toLowerCase()}` : null,
+          };
+        }
+      }
+    } catch (err) {
+      for (const tld of verisignQueryTlds) {
+        out[tld] = {
+          status: 'unknown',
+          available: false,
+          domain: `${baseName}.${tld}`,
+          register_url: null,
+        };
+      }
+    }
   }
+
+  // 2. Fetch Fallback TLDs in parallel
+  const fallbackPromises = fallbackQueryTlds.map(async tld => {
+    const domain = `${baseName}.${tld}`;
+    const status = await rdapAvailabilityCheck(domain, tld);
+    const avail = status === 'available';
+    out[tld] = {
+      status,
+      available: avail,
+      domain,
+      register_url: avail ? `https://www.namecheap.com/domains/registration/results/?domain=${domain}` : null,
+    };
+  });
+  
+  await Promise.allSettled(fallbackPromises);
+  
+  // Fill any missing TLDs with 'unknown'
+  for (const tld of TLD_VARIANTS) {
+    if (!out[tld]) {
+      out[tld] = {
+        status: 'unknown',
+        available: false,
+        domain: `${baseName}.${tld}`,
+        register_url: null,
+      };
+    }
+  }
+
   return out;
 }
 
@@ -253,39 +367,47 @@ async function fetchTlds(baseName) {
 // ═══════════════════════════════════════════════════════════════
 
 async function fetchBrandCheck(baseName) {
-  const p = new URLSearchParams();
-  p.append('q', baseName);
-  SOCIAL_KEYS.forEach(k => p.append('s[]', k));
-  p.append('key', NC_KEY);
+  try {
+    const p = new URLSearchParams();
+    p.append('q', baseName);
+    SOCIAL_KEYS.forEach(k => p.append('s[]', k));
+    p.append('key', NC_KEY);
 
-  const r = await fetch(NC_API, {
-    method: 'POST',
-    headers:{
-      'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8',
-      Accept:'*/*', Origin:'https://namecheckerr.com', Referer:'https://namecheckerr.com/',
-      'X-Requested-With':'XMLHttpRequest',
-      'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36',
-    },
-    body: p.toString(),
-    signal: AbortSignal.timeout(15000),
-  });
-  if (!r.ok) throw new Error(`NameCheckerr ${r.status}`);
-  const raw = await r.json();
+    const r = await safeFetch(NC_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        Accept: '*/*',
+        Origin: 'https://namecheckerr.com',
+        Referer: 'https://namecheckerr.com/',
+        'X-Requested-With': 'XMLHttpRequest',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36',
+      },
+      body: p.toString(),
+    }, { timeout: 15000, retries: 1 });
 
-  const available=[], taken=[];
-  for (const [platform, data] of Object.entries(raw)) {
-    if (!SOCIAL_KEYS.includes(platform)) continue;
-    const isAvail = typeof data==='boolean' ? data : (data?.available??null);
-    const entry = {
-      platform,
-      available: isAvail,
-      status:    isAvail===true?'available':isAvail===false?'taken':'unknown',
-      url:       buildSocialUrl(platform, baseName),
-    };
-    if (isAvail===true) available.push(entry);
-    else if (isAvail===false) taken.push(entry);
+    if (!r.ok) {
+      throw new Error(`NameCheckerr returned status ${r.status}`);
+    }
+
+    const raw = await r.json();
+    const available = [], taken = [];
+    for (const [platform, data] of Object.entries(raw)) {
+      if (!SOCIAL_KEYS.includes(platform)) continue;
+      const isAvail = typeof data === 'boolean' ? data : (data?.available ?? null);
+      const entry = {
+        platform,
+        available: isAvail,
+        status: isAvail === true ? 'available' : isAvail === false ? 'taken' : 'unknown',
+        url: buildSocialUrl(platform, baseName),
+      };
+      if (isAvail === true) available.push(entry);
+      else if (isAvail === false) taken.push(entry);
+    }
+    return { available, taken, checked: SOCIAL_KEYS.length };
+  } catch (err) {
+    return { available: [], taken: [], checked: 0, provider: 'unavailable', error: err.message };
   }
-  return { available, taken, checked: SOCIAL_KEYS.length };
 }
 
 function buildSocialUrl(p, u) {
@@ -321,10 +443,9 @@ async function fetchBacklinks(domain) {
     'Sec-Fetch-Dest':'iframe','Sec-Fetch-Mode':'navigate','Sec-Fetch-Site':'same-origin',
   };
 
-  const r = await fetch(`${RANKIFYER_EMBED}?id=${RANKIFYER_TOOL_ID}&h=0&r=${RANKIFYER_R}&cookies=0`, {
-    method:'POST', headers, body:formParams.toString(),
-    signal: AbortSignal.timeout(20000),
-  });
+  const r = await safeFetch(`${RANKIFYER_EMBED}?id=${RANKIFYER_TOOL_ID}&h=0&r=${RANKIFYER_R}&cookies=0`, {
+    method:'POST', headers, body:formParams.toString()
+  }, { timeout: 20000, retries: 1 });
   if (!r.ok) throw new Error(`Rankifyer ${r.status}`);
   const html = await r.text();
   if (!html.includes('class="stats"')) return { total:0, backlinks:[] };
@@ -376,15 +497,13 @@ async function fetchBacklinks(domain) {
 async function fetchDnsHistory(domain) {
   const [htR, liveNsR] = await Promise.allSettled([
     // HackerTarget NS lookup history
-    fetch(`${HACKERTARGET_API}${domain}`, {
-      headers:{ 'User-Agent':'DomainKit/2.0', Accept:'text/plain' },
-      signal: AbortSignal.timeout(8000),
-    }).then(r=>r.ok?r.text():null),
+    safeFetch(`${HACKERTARGET_API}${domain}`, {
+      headers:{ 'User-Agent':'DomainKit/2.0', Accept:'text/plain' }
+    }, { timeout: 8000, retries: 1 }).then(r=>r.ok?r.text():null),
     // Live NS via Cloudflare DoH
-    fetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=NS`, {
-      headers:{ Accept:'application/dns-json' },
-      signal: AbortSignal.timeout(5000),
-    }).then(r=>r.ok?r.json():null),
+    safeFetch(`${DOH_URL}?name=${encodeURIComponent(domain)}&type=NS`, {
+      headers:{ Accept:'application/dns-json' }
+    }, { timeout: 5000, retries: 1 }).then(r=>r.ok?r.json():null),
   ]).then(r=>r.map(x=>x.status==='fulfilled'?x.value:null));
 
   const liveNs = (liveNsR?.Answer||[]).map(a=>a.data?.replace(/\.$/,'')).filter(Boolean);
@@ -414,11 +533,10 @@ async function fetchReachability(domain) {
   const t0 = Date.now();
   for (const proto of ['https','http']) {
     try {
-      const r = await fetch(`${proto}://${domain}`, {
+      const r = await safeFetch(`${proto}://${domain}`, {
         method:'HEAD', redirect:'follow',
-        headers:{ 'User-Agent':'DomainKit/2.0' },
-        signal: AbortSignal.timeout(6000),
-      });
+        headers:{ 'User-Agent':'DomainKit/2.0' }
+      }, { timeout: 6000, retries: 1 });
       return {
         reachable:    true,
         https:        proto==='https',
@@ -439,7 +557,7 @@ async function fetchReachability(domain) {
 // ASSEMBLE FINAL RESPONSE
 // ═══════════════════════════════════════════════════════════════
 
-function buildResponse(domain, results, elapsed) {
+function buildResponse(domain, results, elapsed, debug, timings) {
   const get = label => results.find(r=>r.label===label);
 
   const whois       = get('whois');
@@ -533,6 +651,8 @@ function buildResponse(domain, results, elapsed) {
     available:   brand.data.available,
     taken:       brand.data.taken,
     checked:     brand.data.checked,
+    ...(brand.data.provider ? { provider: brand.data.provider } : {}),
+    ...(brand.data.error ? { error: brand.data.error } : {}),
   } : null;
 
   // ── top backlinks ───────────────────────────────────────────
@@ -596,6 +716,12 @@ function buildResponse(domain, results, elapsed) {
     },
 
     ...(Object.keys(errors).length ? { errors } : {}),
+    ...(debug ? {
+      _debug: {
+        elapsed_ms: elapsed,
+        modules: timings
+      }
+    } : {})
   };
 }
 
@@ -607,14 +733,16 @@ export default async function handler(req, res) {
   setCors(res);
   if (req.method==='OPTIONS') return res.status(204).end();
 
-  let rawDomain, stKey;
+  let rawDomain, stKey, debug = false;
   if (req.method==='GET') {
     rawDomain = req.query.domain || req.query.d || req.query.site || '';
     stKey     = req.query.st_key || req.headers['x-securitytrails-key'] || '';
+    debug     = req.query.debug === '1' || req.query.debug === 'true';
   } else if (req.method==='POST') {
     const b   = req.body||{};
     rawDomain = b.domain || b.d || b.site || '';
     stKey     = b.st_key || req.headers['x-securitytrails-key'] || '';
+    debug     = b.debug === '1' || b.debug === 'true';
   } else {
     return res.status(405).json({ success:false, error:'Method not allowed.' });
   }
@@ -635,20 +763,21 @@ export default async function handler(req, res) {
   const baseName = parts.slice(0,-1).join('.');
 
   const t0 = Date.now();
+  const timings = {};
 
   // ── Run ALL modules in parallel — failures are isolated ─────
   const results = await Promise.all([
-    safe('whois',       fetchWhois(domain)),
-    safe('dns',         fetchDns(domain)),
-    safe('tlds',        fetchTlds(baseName)),
-    safe('brand',       fetchBrandCheck(baseName)),
-    safe('backlinks',   fetchBacklinks(domain)),
-    safe('dnsHistory',  fetchDnsHistory(domain)),
-    safe('reachability',fetchReachability(domain)),
+    safe('whois',       fetchWhois(domain), timings),
+    safe('dns',         fetchDns(domain), timings),
+    safe('tlds',        fetchTlds(baseName), timings),
+    safe('brand',       fetchBrandCheck(baseName), timings),
+    safe('backlinks',   fetchBacklinks(domain), timings),
+    safe('dnsHistory',  fetchDnsHistory(domain), timings),
+    safe('reachability',fetchReachability(domain), timings),
   ]);
 
   const elapsed = Date.now() - t0;
-  const payload = buildResponse(domain, results, elapsed);
+  const payload = buildResponse(domain, results, elapsed, debug, timings);
 
   return res.status(200).json(payload);
 }
