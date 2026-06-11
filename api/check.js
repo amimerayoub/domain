@@ -215,7 +215,7 @@ async function verisignBulk(names, tlds) {
       'Referer': 'https://dnhub.io/',
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36',
     }
-  }, { timeout: 8000, retries: 1 });
+  }, { timeout: 2500, retries: 0 });
   if (!res.ok) throw new Error(`Verisign ${res.status}`);
   return res.json();
 }

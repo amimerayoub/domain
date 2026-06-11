@@ -217,6 +217,9 @@ async function verisignBulk(names, tlds, includeRegistered = true) {
       'Accept-Language': 'en-GB,en;q=0.5',
       'Origin': 'https://dnhub.io',
       'Referer': 'https://dnhub.io/',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/147.0.0.0 Safari/537.36',
+      'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'cross-site', 'Sec-GPC': '1',
+    }
   }, { timeout: 2500, retries: 0 });
   if (!res.ok) throw new Error(`Verisign ${res.status}`);
   return res.json();
